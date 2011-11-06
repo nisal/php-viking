@@ -45,7 +45,7 @@
 		</div>
 
 		<hr class="clear" />
-						     <p class="centered"><? viking_4_showUserLoggedIn(); ?> <a href="http://andreasviklund.com/templates/">More free website templates</a> | <a href="http://andreasviklund.com/wordpress-themes/">Themes for WordPress</a> | <a href="http://andreasviklund.com/templates/variant-Duo/">Variant Duo template page</a></p>
+						     <p class="centered"><? viking_4_showFunctions(); viking_4_showUserLoggedIn(); ?> <a href="http://andreasviklund.com/templates/">More free website templates</a> | <a href="http://andreasviklund.com/wordpress-themes/">Themes for WordPress</a> | <a href="http://andreasviklund.com/templates/variant-Duo/">Variant Duo template page</a></p>
 	</div>
 	<p class="footer">Copyright &copy; 2011 <a href="index.php">Adcajo</a><br />
 		Template design by <a href="http://andreasviklund.com/">Andreas Viklund</a></p>
