@@ -6,7 +6,7 @@
 	<meta name="description" content="Your description goes here" />
 	<meta name="keywords" content="your,keywords,goes,here" />
 	<meta name="author" content="Your Name" />
-	<link rel="stylesheet" type="text/css" href="variant-duo.css" title="Variant Duo" media="screen,projection" />
+	<link rel="stylesheet" type="text/css" href="index.css" title="Variant Duo" media="screen,projection" />
 	<title>Adcajo System Engineering</title>
 </head>
 
