@@ -18,7 +18,21 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
   {
     $post_action = $_POST['a6_post_action'];
     $sid         = $_POST['a6_sid'];
-  
+ 
+    if($post_action == 'a6_post_create_list')
+      {
+        $sel_db     = $_POST['a6_db'];
+        $a6pr[$sys_id]['a6_db'] = $sel_db;
+        if($sel_db)
+          {
+            createDb($sel_db,6);
+            //$sel_object = 1;
+            $a6pr[$sys_id]['a6_object']=1;
+          }
+        else
+          $g_error = 10;
+      }   
+
   }
 //====================================================
 // HTMLfunctions
@@ -53,7 +67,7 @@ function viking_6_createList_Form($sys_id)
       echo("<form name=\"form_6_createList\" action=\"$path\" method=\"post\"> ");
       echo("<input type=\"hidden\" name=\"a6_post_action\" value=\"a6_post_create_list\">");
       echo("<input type=\"hidden\" name=\"a6_sid\" value=\"$sys_id\">");
-      echo("<input type=\"text\" name=\"list_name\" value=\"\">");
+      echo("<input type=\"text\" name=\"a6_db\" value=\"\">");
       echo("<input type =\"submit\" name=\"form_submit\" value=\"".CREATE_LIST."\">");
       echo("</form>");
     }

@@ -110,11 +110,11 @@ function addDbList($db_name,$app)
 function deleteDbList($db_name)
 //=======================================
 {
-  echo("</td></tr>");
   global $g_db_dir;
   $file = $g_db_dir.'db.list';
   $in = fopen($file, "r") or die("can't open file r: $file");
-  $out = fopen("temp.work","w") or die("can't open file w: $file");
+  $work = $g_db_dir.'temp.work';
+  $out = fopen($work,"w") or die("can't open file w: $work");
   while (!feof($in)) 
     {
       $row = fgets($in);
@@ -128,7 +128,7 @@ function deleteDbList($db_name)
     }
   fclose($in);
   fclose($out);
-  copy("temp.work",$file);
+  copy($work,$file);
 }
 //=======================================
 function getXmlFileName($db_name)
@@ -151,6 +151,7 @@ function getIdsFileName($db_name)
 function createDb($db_name,$app)
 //========================
 {
+  $db_name = str_replace(" ", "-", $db_name);
   echo("createDb $db_name app=$app<br>");
   global $g_db_dir;
   $file_tmp =$g_db_dir.'ids.template';
@@ -383,7 +384,7 @@ function copyNode($db_name,$object_id,$new_father_id,$attr_name,$attr_value)
 function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)
 //========================
 {
-  //echo("function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)");
+  echo("function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)");
   $file = getXmlFileName($db_name);
   $dom = new DOMDocument();
   $dom->load($file);
@@ -397,11 +398,11 @@ function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)
       $id = $object->getAttribute('id'); 
       $type = $object->getAttribute($attr_name); 
       //echo("a1 $id == $father_id && $type == $attr_value <br>");
-      //if($id == $father_id && $type == $attr_value)
+      if($id == $father_id && $type == $attr_value)
       if($id == $father_id)
 	{  
 	  //echo("a2 $id == $father_id && $type == $attr_value <br>");   
-	  //$h_father = $object;
+	  $h_father = $object;
 	  if($object->hasChildNodes())
 	    {
 	      $childs = $object->childNodes;
@@ -409,7 +410,7 @@ function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)
 		{
 		  $id   = $child->getAttribute('id'); 
 		  $type = $child->getAttribute($attr_name);
-                  //$lid  = $child->getAttribute('lid'); 
+                  $lid  = $child->getAttribute('lid'); 
 		  //echo("a3 $type == $attr_value<br>");
 		  if($id == $object_id && $type == $attr_value)
 		    {     
@@ -567,7 +568,7 @@ function getNodeAttr($db_name,$object_id,$attribute_name)
 function getNodeIdbyAttr($db_name,$attribute_name,$attribute_value)
 //========================
 {
-
+  $nn = 0;
   $res = 'void';
   if(!$db_name) return($res);
   $file = getXmlFileName($db_name);
@@ -581,11 +582,15 @@ function getNodeIdbyAttr($db_name,$attribute_name,$attribute_value)
     {
       $type = $object->getAttribute('type'); 
       $temp = $object->getAttribute($attribute_name);
+echo("($temp) == ($attribute_value) && $type <br> ");
       if($temp == $attribute_value && $type == 'node')
 	{
+          $nn++;
+echo("***hit $nn<br>");
 	  $res = $object->getAttribute('id');	  
 	}
     }
+  if($nn > 1) $res='multiple';
   return($res);
 }
 
@@ -698,7 +703,7 @@ function getObjectIdbyName($db,$object_name)
 }
 
 //========================
-function showObject($db_name,$object_id)
+function showObject($app,$db_name,$object_id)
 //========================
 {
   global $par;
@@ -735,7 +740,7 @@ function showObject($db_name,$object_id)
                   if($temp)
 		    {
 		      $sid = $par[$attr_name];
-                      displayLinkOut($db_name,$object_id,$attr_name,$attr_id,$temp,$sid);
+                      displayLinkOut($app,$db_name,$object_id,$attr_name,$attr_id,$temp,$sid);
 		    }
                 }
 
@@ -746,7 +751,7 @@ function showObject($db_name,$object_id)
                   if($temp)
 		    {
                       $sid = $par[$attr_name];
-                      displayLinkIn($db_name,$object_id,$attr_name,$attr_id,$temp,$sid);
+                      displayLinkIn($app,$db_name,$object_id,$attr_name,$attr_id,$temp,$sid);
 		    }
                 }
 
