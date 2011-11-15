@@ -40,22 +40,26 @@ $par['p6'] = $_GET['p6'];
 
 
 //=======================================
-function displayLinkIn($structFromName,$objectFromId,$structToName,$objectToId,$objectToName,$structToSid)
+function displayLinkIn($app,$structFromName,$objectFromId,$structToName,$objectToId,$objectToName,$structToSid)
 //=======================================
 {
   global $par;
-  echo("<br><a href=index.php?a=b&sid=$structToSid&a3_object_id=$objectToId> in </a>");
+
+  $app_sid = $app.'_sid';
+  echo("<br><a href=index.php?a=b&$app_sid=$structToSid&a3_object_id=$objectToId> in </a>");
   echo("<z2>$objectToName ($structToName)</z2>");
   if($par['user'])echo("<a href=index.php?p1=delete_link_in&p2=$structFromName&p3=$objectFromId&p4=$structToName&p5=$objectToId> D </a>");
 
 }
 
 //=======================================
-function displayLinkOut($structFromName,$objectFromId,$structToName,$objectToId,$objectToName,$structToSid)
+function displayLinkOut($app,$structFromName,$objectFromId,$structToName,$objectToId,$objectToName,$structToSid)
 //=======================================
 {
   global $par;
-  echo("<br><a href=index.php?a=b&sid=$structToSid&a3_object_id=$objectToId> out </a>");
+
+  $app_sid = $app.'_sid';
+  echo("<br><a href=index.php?a=b&$app_sid=$structToSid&a3_object_id=$objectToId> out </a>");
   echo("<z2>$objectToName ($structToName)</z2>");
   if($par['user'])echo("<a href=index.php?p1=delete_link_out&p2=$structFromName&p3=$objectFromId&p4=$structToName&p5=$objectToId> D </a>");
 

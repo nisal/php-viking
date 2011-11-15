@@ -191,6 +191,41 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 	  }
       } 
 
+    if($post_action == 'post_add_multi_objects')
+      {
+
+        $object_names = $_POST['a3_object_names'];
+ 
+        $object_names = str_replace(",,",", ,",$object_names);
+        $object_names = str_replace(";;","; ;",$object_names);
+        $object_names = str_replace("::",": :",$object_names);
+        $object_names = str_replace("\r","",$object_names);
+        $tok = strtok($object_names, ",;:");
+
+        while ($tok !== false) 
+        {
+          $father_name = $tok;
+echo("Father: $tok<br>");
+          $f_id = getObjectIdbyName($sel_db,$father_name);
+          if($f_id != 'void' && $f_id != 'multi') $father_id = $f_id;
+
+          $tok = strtok(",;:");
+echo("Name: $tok $father_id $f_id<br>");
+          $object_name = $tok;
+          if($sel_db && $father_id && $object_name)
+          {
+            $object_id = getNextNodeId($sel_db);
+            createObject($sel_db,$father_id,$object_name,$object_id);
+          }
+          $tok = strtok(",;:");
+          // Add text
+echo("Text: $tok<br>");
+          setObjectText($sel_db,$object_id,$tok);
+          $tok = strtok(",;:");
+        }
+      }
+
+
     if($post_action == 'post_rename_object')
       {
 	
@@ -218,8 +253,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
     
     if($post_action == 'post_create_db')
       {
-	
 	$sel_db     = $_POST['a3_db'];
+        $sel_db = str_replace(" ","-",$sel_db);
 	$a3pr[$sys_id]['a3_db'] = $sel_db;
 	if($sel_db)
 	  {
@@ -677,8 +712,21 @@ function viking_3_addObject_Form($sys_id)
       echo("$sel_name <input type=\"text\" name=\"a3_object_name\" value=\"\">");
       echo("<input type =\"submit\" name=\"form_submit\" value=\"".CREATE_OBJECT."\">");
       echo("</form>");
+      viking_3_addMultiObjects_Link($sys_id);
+    }
+
+  if($app_open == "open_3_addMultiObjects"  && $sel_db && $user)
+    {
+      echo("<form name=\"form_add_node\" action=\"$path\" method=\"post\"> ");
+      echo("<input type=\"hidden\" name=\"a3_post_action\" value=\"post_add_multi_objects\">");
+      echo("<input type=\"hidden\" name=\"a3_sid\" value=\"$sys_id\">");
+      //echo("$sel_name <input type=\"text\" name=\"a3_object_names\" value=\"\">");
+      echo("<textarea name=\"a3_object_names\" cols=30 rows=10></textarea>");  
+      echo("<input type =\"submit\" name=\"form_submit\" value=\"".CREATE_OBJECTS."\">");
+      echo("</form>");
     }
 }
+
 function viking_3_addObject_Link($sys_id)
 {  
   global $par,$a3pr;
@@ -695,6 +743,24 @@ function viking_3_addObject_Link($sys_id)
   else  if($sel_db && $user )
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_addObject> ".CREATE."</a>");
 }
+
+function viking_3_addMultiObjects_Link($sys_id)
+{
+  global $par,$a3pr;
+  $sid        = $par['a3_sid'];
+  $path       = $par['path'];
+  $user       = $par['user'];
+  $app_open   = $par['p1'];
+  $sel_db     = $a3pr[$sys_id]['a3_db'];
+
+  if($app_open == "open_3_addMultiObjects" && $sys_id == $sid)
+    {
+     // echo(" ".CREATE_MULTI);
+    }
+  else  if($sel_db && $user )
+    echo("<a href=$path&a3_sid=$sys_id&p1=open_3_addMultiObjects> ".CREATE_MULTI."</a>");
+}
+
 
 function viking_3_renameObject_Form($sys_id)
 {  
@@ -1025,7 +1091,7 @@ function viking_3_showObject($sys_id)
 
   if($sel_db == 'void' || !$sel_object)return;
 
-  showObject($sel_db,$sel_object);
+  showObject('a3',$sel_db,$sel_object);
 
   viking_3_setText_Link($sys_id);
   viking_3_setImage_Link($sys_id);

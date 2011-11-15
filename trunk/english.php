@@ -7,7 +7,9 @@ define("LINK_CANCEL","LinkCancel");
 // C
 define("CREATE","Create");
 define("CREATE_LIST","Create List");
+define("CREATE_MULTI","Create Multi");
 define("CREATE_OBJECT","Create Object");
+define("CREATE_OBJECTS","Create Objects");
 define("CREATE_TREE","Create Tree");
 // D
 define("DELETE","Delete");

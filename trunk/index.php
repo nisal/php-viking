@@ -7,20 +7,19 @@
 	<meta name="keywords" content="your,keywords,goes,here" />
 	<meta name="author" content="Your Name" />
 	<link rel="stylesheet" type="text/css" href="index.css" title="Variant Duo" media="screen,projection" />
-	<title>Adcajo System Engineering</title>
+	<title>php-viking</title>
 </head>
 
 <body>
 <div id="wrap">
-	<h1><a href="index.php">Adcajo System Engineering Tool</a></h1>
-<p class="slogan"><? viking_4_login_Form(); viking_3_createDb_Form(1); viking_3_deleteDb_Form(1); viking_6_createList_Form(1);?>   </p>
+	<h1><a href="index.php">PHP-VIKING 0.1</a></h1>
+<p class="slogan"><? viking_4_login_Form(); viking_3_createDb_Form(1); viking_3_deleteDb_Form(1);?>   </p>
 		
 	<div id="menu">
 		<p class="menulinks">
 		<strong class="hide">Main menu:</strong>
 		<? viking_3_createDb_Link(1); ?>
 		<? viking_3_deleteDb_Link(1); ?>
-		<? viking_6_createList_Link(1);  ?>
                 <? viking_4_login_logout();  ?>
 
 	</p>
@@ -45,9 +44,9 @@
 		</div>
 
 		<hr class="clear" />
-						     <p class="centered"><? viking_4_showFunctions(); viking_4_showUserLoggedIn(); ?> <a href="http://andreasviklund.com/templates/">More free website templates</a> | <a href="http://andreasviklund.com/wordpress-themes/">Themes for WordPress</a> | <a href="http://andreasviklund.com/templates/variant-Duo/">Variant Duo template page</a></p>
+						     <p class="centered">User: <? viking_4_showUserLoggedIn(); ?> </p>
 	</div>
-	<p class="footer">Copyright &copy; 2011 <a href="index.php">Adcajo</a><br />
+	<p class="footer">Copyright &copy; 2011 <a href="index.php">ADCAJO</a><br />
 		Template design by <a href="http://andreasviklund.com/">Andreas Viklund</a></p>
 
 </div>
