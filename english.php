@@ -21,6 +21,7 @@ define("DELETE_TREE","Delete Tree");
 // G
 // H
 // I
+define("IMPORT_TREE","Import Tree");
 // J
 // K
 // L

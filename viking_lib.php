@@ -384,7 +384,7 @@ function copyNode($db_name,$object_id,$new_father_id,$attr_name,$attr_value)
 function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)
 //========================
 {
-  echo("function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)");
+  //echo("function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)");
   $file = getXmlFileName($db_name);
   $dom = new DOMDocument();
   $dom->load($file);
@@ -397,8 +397,8 @@ function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)
     {
       $id = $object->getAttribute('id'); 
       $type = $object->getAttribute($attr_name); 
-      //echo("a1 $id == $father_id && $type == $attr_value <br>");
-      if($id == $father_id && $type == $attr_value)
+      //echo("$db_name,a1 ($id) == ($father_id) && ($type) == ($attr_value) <br>");
+      //if($id == $father_id && $type == $attr_value)
       if($id == $father_id)
 	{  
 	  //echo("a2 $id == $father_id && $type == $attr_value <br>");   
@@ -414,7 +414,7 @@ function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)
 		  //echo("a3 $type == $attr_value<br>");
 		  if($id == $object_id && $type == $attr_value)
 		    {     
-		      //echo("xxxdelete node: struct=$db_name, father=$father_id,object=$object_id,attr=$attr_name,attr_value=$attr_value");
+		     // echo("xxxdelete node: struct=$db_name, father=$father_id,object=$object_id,attr=$attr_name,attr_value=$attr_value");
 		      $object->removeChild($child);
 		    }
 		}
@@ -582,8 +582,13 @@ function getNodeIdbyAttr($db_name,$attribute_name,$attribute_value)
     {
       $type = $object->getAttribute('type'); 
       $temp = $object->getAttribute($attribute_name);
-echo("($temp) == ($attribute_value) && $type <br> ");
-      if($temp == $attribute_value && $type == 'node')
+      $string1 = implode(str_split($temp));
+      $string2 = implode(str_split($attribute_value));
+$xx1=md5($string1);
+$xx2=md5($string2);
+echo("($xx1) ($xx2)<br>");
+echo("($temp) == ($attribute_value) && ($type) <br> ");
+      if($temp == $attribute_value && $type == "node")
 	{
           $nn++;
 echo("***hit $nn<br>");

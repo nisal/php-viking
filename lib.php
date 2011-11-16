@@ -90,6 +90,19 @@ function getExtension($str)
   return $ext;
 }
 
+function safeText($text)
+{
+   $text = str_replace("#", "No.", $text); 
+   $text = str_replace("$", "Dollar", $text); 
+   $text = str_replace("%", "Percent", $text); 
+   $text = str_replace("^", "", $text); 
+   $text = str_replace("&", "and", $text); 
+   $text = str_replace("*", "", $text); 
+   $text = str_replace("?", "", $text); 
+   return($text);
+}
+
+
 //=======================================
 function uploadImage($db,$id)
 //=======================================
@@ -106,9 +119,10 @@ function uploadImage($db,$id)
       if ($image)
         {
           $filename = stripslashes($_FILES['image']['name']);
+          $filename = safeText($filename);
           $extension = getExtension($filename);
           $extension = strtolower($extension);
-          if (($extension != "jpg") && ($extension != "jpeg") && ($extension != "png") && ($extension != "gif"))
+          if (($extension != "jpg") && ($extension != "jpeg") && ($extension != "png") && ($extension != "gif") && ($extension != "txt"))
             {
               echo '<h1>Unknown extension!</h1>';
               $errors=1;
@@ -139,6 +153,61 @@ function uploadImage($db,$id)
       chmod($newname,0666);
       return($newname);
       //echo "<h1>File Uploaded Successfully!</h1>";
+    }
+  return($newname);
+}
+//=======================================
+function uploadFile()
+//=======================================
+{
+
+  define ("MAX_SIZE","300");
+  $errors=0;
+  $newname = '';
+
+echo("hej1<br>");
+  if(isset($_POST['submit_file']))
+    {
+echo("hej3<br>");
+      $import=$_FILES['import_file']['name'];
+      if ($import)
+        {
+echo("hej2: $import<br>");
+          $file_name = stripslashes($_FILES['import_file']['name']);
+          $file_name = safeText($file_name);
+          $extension = getExtension($file_name);
+          $extension = strtolower($extension);
+          if (($extension != "txt") && ($extension != "sim"))
+            {
+              echo "<h1>Unknown Import file Extension: $extension</h1>";
+              $errors=1;
+            }
+          else
+            {
+              $size=filesize($_FILES['import_file']['tmp_name']);
+              if ($size > MAX_SIZE*1024)
+                {
+                  echo "<h1>You have exceeded the size limit! $size</h1>";
+                  $errors=1;
+                }
+              //$image_name=time().'.'.$extension;
+              //$file_name = $db.'-'.$id.'.'.$extension;
+              $newname="php-viking/import/".$file_name;
+              $copied = move_uploaded_file($_FILES['import_file']['tmp_name'], $newname);
+              if (!$copied)
+                {
+                  echo "<h1>Import Copy unsuccessfull! $size</h1>";
+                  $errors=1;
+                }
+            }
+        }
+    }
+
+  if(isset($_POST['submit_file']) && !$errors)
+    {
+      chmod($newname,0666);
+      return($newname);
+      echo "<h1>File Uploaded Successfully! $size</h1>";
     }
   return($newname);
 }
