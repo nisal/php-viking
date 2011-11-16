@@ -191,6 +191,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 	  }
       } 
 
+    if($post_action == 'post_import_tree') 
+      {
+         $filename = uploadFile();
+         echo("Import file: $filename <br>");
+         importTreeFromFile($sys_id,$filename);
+      }
+
     if($post_action == 'post_add_multi_objects')
       {
 
@@ -353,6 +360,44 @@ $_SESSION['a3_link_to_object']  =$par['a3_link_to_object'];
 //  Internal functions
 //====================================================
 
+//========================
+function importTreeFromFile($sys_id,$filename)
+//========================
+{
+  global $par,$a3pr;
+
+ $sel_db      = $a3pr[$sys_id]['a3_db'];
+ 
+ $handle = @fopen($filename, "r");
+ if ($handle) {
+    while (($buffer = fgets($handle, 4096)) !== false) 
+    {
+        $string = implode(str_split($buffer));
+        echo("Buffer: ($buffer) string:($string)<br>");
+        if(!strstr($buffer,"#"))
+        {  
+        list($father_name,$object_name,$object_text) = explode(",",$buffer);
+echo("Father: ($father_name)<br>");
+          $f_id = getObjectIdbyName($sel_db,$father_name);
+          if($f_id != 'void' && $f_id != 'multi') $father_id = $f_id;
+
+echo("Name: ($object_name) ($father_id) ($f_id)<br>");
+          if($sel_db && $father_id && $object_name)
+          {
+            $object_id = getNextNodeId($sel_db);
+            createObject($sel_db,$father_id,$object_name,$object_id);
+          }
+echo("Text: ($object_text)<br>");
+          setObjectText($sel_db,$object_id,$object_text);
+        }
+    }
+
+    if (!feof($handle)) {
+        echo("Error: unexpected fgets() fail<br>");
+    }
+    fclose($handle);
+}
+}
 
 //========================
 function showXmlTree($sys_id)// TODO move to library
@@ -715,14 +760,15 @@ function viking_3_addObject_Form($sys_id)
       viking_3_addMultiObjects_Link($sys_id);
     }
 
-  if($app_open == "open_3_addMultiObjects"  && $sel_db && $user)
+  if($app_open == "open_3_importTree"  && $sel_db && $user)
     {
-      echo("<form name=\"form_add_node\" action=\"$path\" method=\"post\"> ");
-      echo("<input type=\"hidden\" name=\"a3_post_action\" value=\"post_add_multi_objects\">");
+      echo("<form name=\"form_import_tree\" action=\"$path\" method=\"post\"  enctype=\"multipart/form-data\"> ");
+      echo("<input type=\"hidden\" name=\"a3_post_action\" value=\"post_import_tree\">");
       echo("<input type=\"hidden\" name=\"a3_sid\" value=\"$sys_id\">");
       //echo("$sel_name <input type=\"text\" name=\"a3_object_names\" value=\"\">");
-      echo("<textarea name=\"a3_object_names\" cols=30 rows=10></textarea>");  
-      echo("<input type =\"submit\" name=\"form_submit\" value=\"".CREATE_OBJECTS."\">");
+      //echo("<textarea name=\"a3_object_names\" cols=30 rows=10></textarea>");  
+     echo("<input type=\"file\" name=\"import_file\" value=\"\">"); 
+     echo("<input type =\"submit\" name=\"submit_file\" value=\"".IMPORT_TREE."\">");
       echo("</form>");
     }
 }
@@ -758,7 +804,7 @@ function viking_3_addMultiObjects_Link($sys_id)
      // echo(" ".CREATE_MULTI);
     }
   else  if($sel_db && $user )
-    echo("<a href=$path&a3_sid=$sys_id&p1=open_3_addMultiObjects> ".CREATE_MULTI."</a>");
+    echo("<a href=$path&a3_sid=$sys_id&p1=open_3_importTree> ".IMPORT_TREE."</a>");
 }
 
 
