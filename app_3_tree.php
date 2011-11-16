@@ -372,24 +372,32 @@ function importTreeFromFile($sys_id,$filename)
  if ($handle) {
     while (($buffer = fgets($handle, 4096)) !== false) 
     {
-        $string = implode(str_split($buffer));
-        echo("Buffer: ($buffer) string:($string)<br>");
+       // $string = implode(str_split($buffer));
+       // echo("Buffer: ($buffer) string:($string)<br>");
         if(!strstr($buffer,"#"))
         {  
         list($father_name,$object_name,$object_text) = explode(",",$buffer);
-echo("Father: ($father_name)<br>");
+          //echo("**Father: ($father_name)<br>");
           $f_id = getObjectIdbyName($sel_db,$father_name);
-          if($f_id != 'void' && $f_id != 'multi') $father_id = $f_id;
-
-echo("Name: ($object_name) ($father_id) ($f_id)<br>");
-          if($sel_db && $father_id && $object_name)
+          if($f_id != 'void' && $f_id != 'multiple')
           {
-            $object_id = getNextNodeId($sel_db);
-            createObject($sel_db,$father_id,$object_name,$object_id);
+              $father_id = $f_id;
+             // echo("Name: ($object_name) ($father_id) ($f_id)<br>");
+              $nameExists = getObjectIdbyName($sel_db,$object_name);
+              if($sel_db && $father_id && $object_name && $nameExists=='void')
+              {
+                 $object_id = getNextNodeId($sel_db);
+                 createObject($sel_db,$father_id,$object_name,$object_id);
+            
+               //  echo("Text: ($object_text)<br>");
+                 if($object_text)setObjectText($sel_db,$object_id,$object_text);
+              }
+              else
+               echo("Warning: Object Name already exists: $object_name<-$father_name<br>");
           }
-echo("Text: ($object_text)<br>");
-          setObjectText($sel_db,$object_id,$object_text);
-        }
+          else
+           echo("Warning: No father or multiple fathers: $object_name<-$father_name<br>");
+       }  
     }
 
     if (!feof($handle)) {
@@ -474,7 +482,7 @@ function showXmlTree($sys_id)// TODO move to library
       $attr_type = $element->attributes->getNamedItem("type")->nodeValue;
       if($attr_id == 1 && $attr_type == 'node')
 	{
-	  echo("<a href=\"$g_path&a3_sid=$sys_id&a3_object_id=$attr_id&a3_object_name=$attr_name\">$attr_name 1 </a>");
+	  echo("<a href=\"$g_path&a3_sid=$sys_id&a3_object_id=$attr_id&a3_object_name=$attr_name\">$attr_name</a>");
 	  if($link_from_object == 1 && $link_from_sid == $sys_id)
 	    echo(" F");
 	  echo("<a href=\"$g_path&a3_sid=$sys_id&p1=show_all\"> $show_all</a>");
@@ -533,7 +541,8 @@ function traverse($sys_id,$path,$node,$level,$id,$ix,$expand,$expand2,$father)
 	      $index = "";
 	      for($ii=1;$ii<=$level;$ii++)$index=$index.$ix[$ii].".";
 	     
-	      echo("$index <a href=\"$path&a3_sid=$sys_id&a3_object_id=$attr_id&index=$index&p2=$father\">$attr_name $attr_id</a>");
+	      echo("$index <a href=\"$path&a3_sid=$sys_id&a3_object_id=$attr_id&index=$index&p2=$father\">$attr_name</a>"); 
+              if($user)echo(" ($attr_id)");
 	      if($user && $sel == $attr_id)
 		{
 		  if(!$from)echo("<a href=\"$path&a3_sid=$sys_id&a3_object_id=$attr_id&index=$index&p1=select&p2=$father\"> ?</a>");
