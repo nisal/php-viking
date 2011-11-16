@@ -165,14 +165,11 @@ function uploadFile()
   $errors=0;
   $newname = '';
 
-echo("hej1<br>");
   if(isset($_POST['submit_file']))
     {
-echo("hej3<br>");
       $import=$_FILES['import_file']['name'];
       if ($import)
         {
-echo("hej2: $import<br>");
           $file_name = stripslashes($_FILES['import_file']['name']);
           $file_name = safeText($file_name);
           $extension = getExtension($file_name);
@@ -207,7 +204,7 @@ echo("hej2: $import<br>");
     {
       chmod($newname,0666);
       return($newname);
-      echo "<h1>File Uploaded Successfully! $size</h1>";
+     // echo "<h1>File Uploaded Successfully! $size</h1>";
     }
   return($newname);
 }

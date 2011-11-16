@@ -584,14 +584,11 @@ function getNodeIdbyAttr($db_name,$attribute_name,$attribute_value)
       $temp = $object->getAttribute($attribute_name);
       $string1 = implode(str_split($temp));
       $string2 = implode(str_split($attribute_value));
-$xx1=md5($string1);
-$xx2=md5($string2);
-echo("($xx1) ($xx2)<br>");
-echo("($temp) == ($attribute_value) && ($type) <br> ");
+//echo("($temp) == ($attribute_value) && ($type) <br> ");
       if($temp == $attribute_value && $type == "node")
 	{
           $nn++;
-echo("***hit $nn<br>");
+//echo("***hit $nn<br>");
 	  $res = $object->getAttribute('id');	  
 	}
     }
