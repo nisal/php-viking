@@ -332,6 +332,16 @@ echo("Text: $tok<br>");
 	      setObjectImage($sel_db,$sel_object,$image_name);
 	  }
       } 
+
+    if($post_action == 'post_set_file')
+      {
+	if($sel_db && $sel_object)
+	  {
+	    $file_name = uploadFile($sel_db,$sel_object);
+	    if($file_name)
+	      setObjectFile($sel_db,$sel_object,$file_name);
+	  }
+      } 
    
   }
 // End of POST ==================================
@@ -360,9 +370,9 @@ $_SESSION['a3_link_to_object']  =$par['a3_link_to_object'];
 //  Internal functions
 //====================================================
 
-//========================
+//========================================
 function importTreeFromFile($sys_id,$filename)
-//========================
+//========================================
 {
   global $par,$a3pr;
 
@@ -407,9 +417,9 @@ function importTreeFromFile($sys_id,$filename)
 }
 }
 
-//========================
+//========================================
 function showXmlTree($sys_id)// TODO move to library
-//========================
+//========================================
 {
   global $par,$a3pr;
   global $expand;
@@ -505,9 +515,11 @@ function showXmlTree($sys_id)// TODO move to library
     }
 }
 
-//========================// TODO move to library
+
+
+//========================================
 function traverse($sys_id,$path,$node,$level,$id,$ix,$expand,$expand2,$father)
-//========================
+//========================================
 {
   global $par,$a3pr;
 
@@ -578,8 +590,9 @@ function traverse($sys_id,$path,$node,$level,$id,$ix,$expand,$expand2,$father)
       $level--;
     }
 }  
-
+//========================================
 function addLink($from_struct,$from_object,$to_struct,$to_object)
+//========================================
 {
   // <object name="Heater control" id="3" type="linkFrom">T24 45</object>
   global $error;
@@ -612,7 +625,9 @@ function addLink($from_struct,$from_object,$to_struct,$to_object)
 //  HTML functions
 //====================================================
 
+//========================================
 function viking_3_selectDb($sys_id)// TODO move to library
+//========================================
 {
   global $par,$a3pr;
   //global $g_app;
@@ -650,8 +665,9 @@ function viking_3_selectDb($sys_id)// TODO move to library
   echo("</form>");
 }
 
-
+//========================================
 function viking_3_createDb_Form($sys_id)
+//========================================
 {  
   global $par,$a3pr;
 
@@ -672,7 +688,9 @@ function viking_3_createDb_Form($sys_id)
       echo("</form>");
     }
 }
+//========================================
 function viking_3_createDb_Link($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -687,8 +705,9 @@ function viking_3_createDb_Link($sys_id)
   else if($user == 'admin')
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_createDb>".CREATE."</a>");
 }
-
+//========================================
 function viking_3_deleteDb_Form($sys_id) // TODO move to library
+//========================================
 {  
 
   global $par,$a3pr;
@@ -730,7 +749,9 @@ function viking_3_deleteDb_Form($sys_id) // TODO move to library
       echo("</form>");
     }
 }
+//========================================
 function viking_3_deleteDb_Link($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -745,8 +766,9 @@ function viking_3_deleteDb_Link($sys_id)
   else if($user == 'admin')
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_deleteDb> ".DELETE."</a>");
 }
-
+//========================================
 function viking_3_addObject_Form($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -781,8 +803,9 @@ function viking_3_addObject_Form($sys_id)
       echo("</form>");
     }
 }
-
+//========================================
 function viking_3_addObject_Link($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -798,8 +821,9 @@ function viking_3_addObject_Link($sys_id)
   else  if($sel_db && $user )
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_addObject> ".CREATE."</a>");
 }
-
+//========================================
 function viking_3_addMultiObjects_Link($sys_id)
+//========================================
 {
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -816,8 +840,9 @@ function viking_3_addMultiObjects_Link($sys_id)
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_importTree> ".IMPORT_TREE."</a>");
 }
 
-
+//========================================
 function viking_3_renameObject_Form($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -838,7 +863,9 @@ function viking_3_renameObject_Form($sys_id)
       echo("</form>");
     }
 }
+//========================================
 function viking_3_renameObject_Link($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -855,7 +882,9 @@ function viking_3_renameObject_Link($sys_id)
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_renameObject> ".RENAME."</a>");
 }
 
+//========================================
 function viking_3_deleteObject_Form($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -877,7 +906,9 @@ function viking_3_deleteObject_Form($sys_id)
       echo("</form>");
     }
 }
+//========================================
 function viking_3_deleteObject_Link($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -895,8 +926,9 @@ function viking_3_deleteObject_Link($sys_id)
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_deleteObject&p2=$father> ".DELETE."</a>");
 }
 
-
+//========================================
 function viking_3_setText_Form($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -922,7 +954,9 @@ function viking_3_setText_Form($sys_id)
     }
 }
 
+//========================================
 function viking_3_setText_Link($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -940,7 +974,9 @@ function viking_3_setText_Link($sys_id)
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_setText> ".SET_TEXT."</a>");
 }
 
+//========================================
 function viking_3_addLinkFrom_Form($sys_id)
+//========================================
 {
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -965,8 +1001,9 @@ function viking_3_addLinkFrom_Form($sys_id)
 }
 
 
-
+//========================================
 function viking_3_addLinkFrom_Link($sys_id)
+//========================================
 {
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -984,7 +1021,9 @@ function viking_3_addLinkFrom_Link($sys_id)
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_addLinkFrom> ".LINK_FROM."</a>");
 }
 
+//========================================
 function viking_3_addLinkTo_Form($sys_id)
+//========================================
 {
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -1007,8 +1046,9 @@ function viking_3_addLinkTo_Form($sys_id)
     }
 }
 
-
+//========================================
 function viking_3_addLinkTo_Link($sys_id)
+//========================================
 {
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -1031,7 +1071,9 @@ function viking_3_addLinkTo_Link($sys_id)
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_addLinkTo> ".LINK_TO."</a>");
 }
 
+//========================================
 function viking_3_addLinkCancel_Form($sys_id)
+//========================================
 {
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -1054,8 +1096,9 @@ function viking_3_addLinkCancel_Form($sys_id)
     }
 }
 
-
+//========================================
 function viking_3_addLinkCancel_Link($sys_id)
+//========================================
 {
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -1073,8 +1116,9 @@ function viking_3_addLinkCancel_Link($sys_id)
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_addLinkCancel> ".LINK_CANCEL."</a>");
 }
 
-
+//========================================
 function viking_3_setImage_Form($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -1101,8 +1145,9 @@ function viking_3_setImage_Form($sys_id)
       echo("</form>");
     }
 }
-
+//========================================
 function viking_3_setImage_Link($sys_id)
+//========================================
 {  
   global $par,$a3pr;
   $sid        = $par['a3_sid'];
@@ -1120,21 +1165,75 @@ function viking_3_setImage_Link($sys_id)
     echo("<a href=$path&a3_sid=$sys_id&p1=open_3_setImage> ".SET_IMAGE."</a>");
 }
 
+//========================================
+function viking_3_setFile_Form($sys_id)
+//========================================
+{  
+  global $par,$a3pr;
+  $sid        = $par['a3_sid'];
+  if($sid != $sys_id) return;
+  $path       = $par['path'];
+  $user       = $par['user'];
+  $sel_name   = $a3pr[$sys_id]['a3_name'];
+  $app_open   = $par['p1'];
+  $sel_db     = $a3pr[$sys_id]['a3_db'];
+  $sel_object = $a3pr[$sys_id]['a3_object'];
 
+  $file_name = getObjectFile($sel_db,$sel_object);
+
+
+
+  if($app_open == 'open_3_setFile' && $sel_db && $user)
+    {
+      echo("<form name=\"form_set_image\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
+      echo("<input type=\"hidden\" name=\"a3_post_action\" value=\"post_set_file\">");
+      echo("<input type=\"hidden\" name=\"a3_sid\" value=\"$sys_id\">");
+      echo("<input type=\"file\" name=\"import_file\">");
+      echo("<input type =\"submit\" name=\"submit_file\" value=\"".UPLOAD."\">");
+      echo("</form>");
+    }
+}
+
+//========================================
+function viking_3_setFile_Link($sys_id)
+//========================================
+{  
+  global $par,$a3pr;
+  $sid        = $par['a3_sid'];
+  $path       = $par['path'];
+  $user       = $par['user'];
+  $app_open   = $par['p1'];
+  $sel_db     = $a3pr[$sys_id]['a3_db'];
+  $sel_object = $a3pr[$sys_id]['a3_object'];
+
+  if($app_open == "open_3_setFile" && $sys_id == $sid)
+    {
+      echo(" ".SET_FILE);
+    }
+  else  if($sel_db && $user)
+    echo("<a href=$path&a3_sid=$sys_id&p1=open_3_setFile> ".SET_FILE."</a>");
+}
+
+//========================================
 function viking_3_showDb($sys_id)
+//========================================
 { 
   showXmlTree($sys_id);
   echo("<hr>");
 }
 
+//========================================
 function viking_3_showDbName($sys_id)
+//========================================
 { 
   global $par,$a3pr;
   $sel_db  = $a3pr[$sys_id]['a3_db'];
   echo("$sel_db");
 }
 
+//========================================
 function viking_3_showObject($sys_id)
+//========================================
 { 
   global $par,$a3pr;
   $sel_db     = $a3pr[$sys_id]['a3_db'];
@@ -1149,6 +1248,7 @@ function viking_3_showObject($sys_id)
   showObject('a3',$sel_db,$sel_object);
 
   viking_3_setText_Link($sys_id);
+  viking_3_setFile_Link($sys_id);
   viking_3_setImage_Link($sys_id);
   viking_3_renameObject_Link($sys_id);
   viking_3_addObject_Link($sys_id);
@@ -1158,6 +1258,7 @@ function viking_3_showObject($sys_id)
   if($link_from_object && $link_from_sid == $sys_id)viking_3_addLinkCancel_Link($sys_id);
 
   viking_3_setText_Form($sys_id);
+  viking_3_setFile_Form($sys_id);
   viking_3_setImage_Form($sys_id);
   viking_3_renameObject_Form($sys_id);
   viking_3_addObject_Form($sys_id);
@@ -1167,14 +1268,18 @@ function viking_3_showObject($sys_id)
   viking_3_addLinkCancel_Form($sys_id);
 }
 
+//========================================
 function viking_3_showObjectName($sys_id)
+//========================================
 { 
   global $par,$a3pr;
   $name  = $a3pr[$sys_id]['a3_name'];
   echo(" $name");
 }
 
+//========================================
 function viking_3_showFunctions($sys_id)
+//========================================
 {
   //echo("<h2>Structure</h2>");
   echo("<table border=1>");

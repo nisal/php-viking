@@ -190,6 +190,14 @@ function createDb($db_name,$app)
   $temp->setAttribute('id','1');
   $temp->setAttribute('type','image');	  
   //$temp->setAttribute('lid','void'); 
+
+  // Create the subnode: file
+  $subchild = $dom->createElement("object","");
+  $temp = $root->appendChild($subchild);	  
+  $temp->setAttribute('name',$db_name);
+  $temp->setAttribute('id','1');
+  $temp->setAttribute('type','file');	  
+  //$temp->setAttribute('lid','void'); 
   
   // save tree to file
   $dom->save($file_db);
@@ -410,7 +418,6 @@ function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)
 		{
 		  $id   = $child->getAttribute('id'); 
 		  $type = $child->getAttribute($attr_name);
-                  $lid  = $child->getAttribute('lid'); 
 		  //echo("a3 $type == $attr_value<br>");
 		  if($id == $object_id && $type == $attr_value)
 		    {     
@@ -439,8 +446,8 @@ function setNodeValue($db_name,$object_id,$attr_name,$attr_value,$new_value)
   foreach($objects as $object)
     {
       $id = $object->getAttribute('id'); 
-      //$lid = $object->getAttribute('lid');
       $type = $object->getAttribute($attr_name); 
+      echo("$id == $object_id && $type == $attr_value<br>");
       if($id == $object_id && $type == $attr_value)
 	{     
 	  $object->nodeValue = $new_value;
@@ -650,6 +657,15 @@ function getObjectImage($db,$object_id)
 }
 
 //========================
+function getObjectFile($db,$object_id)
+//========================
+{
+  $res = "void";
+  $res = getNodeValue($db,$object_id,'type','file');
+  return($res);
+}
+
+//========================
 function getObjectImageName($db,$object_id)
 //========================
 {
@@ -672,6 +688,15 @@ function setObjectImage($db,$object_id,$value)
 {
   setNodeValue($db,$object_id,'type','image',$value);
 }
+
+//========================
+function setObjectFile($db,$object_id,$value)
+//========================
+{
+  echo("$db,$object_id,'type','file',$value");
+  setNodeValue($db,$object_id,'type','file',$value);
+}
+
 
 //========================
 function listAllObjects($db)
@@ -709,6 +734,8 @@ function showObject($app,$db_name,$object_id)
 //========================
 {
   global $par;
+  $path        = $par['path'];
+  $open_file   = $par['p1'];
   //echo("showObject: $db_name,$object_id<br>");
   //if($object_id == 1)echo("$db_name<br>");
   $file = getXmlFileName($db_name);
@@ -771,6 +798,22 @@ function showObject($app,$db_name,$object_id)
 		  $image_name = $temp;
 		  if($temp)displayObjectImage($image_name);
 		}
+	      if($attr_type == 'file')
+	      	{
+		  $temp = getNodeValue($db_name,$attr_id,'type','file');
+		  $file_name = $temp;
+
+		  if($temp)
+		    {
+		      if($open_file == "open_file")
+			{
+			  echo("<a href=$path&a3_sid=$sys_id&p1=close_file>".FILE_CLOSE."</a><br>");
+			  displayObjectFile($file_name);
+			}
+		      else
+			echo("<a href=$path&a3_sid=$sys_id&p1=open_file>".FILE_OPEN."</a><br>");
+		    }
+		}
 	    }  
 	} 
     }
@@ -821,6 +864,13 @@ function createObject($db_name,$father_id,$object_name,$object_id)
 	  $temp->setAttribute('name',$object_name);
 	  $temp->setAttribute('id',$object_id);
 	  $temp->setAttribute('type','image');	  
+
+	  // Create the subnode: file
+	  $subchild = $dom->createElement("object","");
+	  $temp = $child->appendChild($subchild);	  
+	  $temp->setAttribute('name',$object_name);
+	  $temp->setAttribute('id',$object_id);
+	  $temp->setAttribute('type','file');	  
 	}
     }
   

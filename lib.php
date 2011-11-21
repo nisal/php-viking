@@ -76,8 +76,24 @@ function displayObjectText($objectText)
 function displayObjectImage($imageName)
 //=======================================
 {
-  echo("<img src=\"$imageName\" height=\"200\" alt=\"no image available\"/>");
+  echo("<br><img src=\"$imageName\" height=\"200\" alt=\"no image available\"/><br>");
 }
+
+//=======================================
+function displayObjectFile($fileName)
+//=======================================
+{
+  // echo("$fileName<br>");
+  
+  $in = fopen($fileName, "r") or die("can't open file r: $fileName");
+  while (!feof($in)) 
+    {
+      $row = fgets($in);
+      echo("$row<br>");
+    }
+  fclose($in);
+}
+
 
 //=======================================
 function getExtension($str)
@@ -174,7 +190,7 @@ function uploadFile()
           $file_name = safeText($file_name);
           $extension = getExtension($file_name);
           $extension = strtolower($extension);
-          if (($extension != "txt") && ($extension != "sim"))
+          if (($extension != "txt") && ($extension != "pde") && ($extension != "c"))
             {
               echo "<h1>Unknown Import file Extension: $extension</h1>";
               $errors=1;
