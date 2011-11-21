@@ -18,6 +18,8 @@ define("DELETE_OBJECT","Delete Object");
 define("DELETE_TREE","Delete Tree");
 // E
 // F
+define("FILE_CLOSE","Close File");
+define("FILE_OPEN","Open File");
 // G
 // H
 // I
@@ -43,6 +45,7 @@ define("RENAME_TREE","Rename Tree");
 define("SELECT","Select");
 define("SELECT_TREE","Select Tree");
 define("SELECT_LIST","Select List");
+define("SET_FILE","File");
 define("SET_IMAGE","Image");
 define("SET_TEXT","Text");
 // T

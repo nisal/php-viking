@@ -12,7 +12,7 @@
 
 <body>
 <div id="wrap">
-	<h1><a href="index.php">PHP-VIKING 0.1</a></h1>
+	<h1><a href="index.php">PHP-VIKING 0.2</a></h1>
 <p class="slogan"><? viking_4_login_Form(); viking_3_createDb_Form(1); viking_3_deleteDb_Form(1);?>   </p>
 		
 	<div id="menu">
