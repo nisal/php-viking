@@ -30,6 +30,8 @@ $par['user']  = $_SESSION['user'];
 $g_self = $_SERVER['PHP_SELF'];
 $par['path'] = $g_self.'?a=b';
 
+$path = $par['path'];
+
 
 $par['p1'] = $_GET['p1'];
 $par['p2'] = $_GET['p2'];
