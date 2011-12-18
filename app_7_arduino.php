@@ -48,6 +48,17 @@ $wBoard = 500; // 500
 canvasPos();
 
 // read SESSION parameters ===============================
+if (!isset($_SESSION['a7_cur_sim_len']))$_SESSION['a7_cur_sim_len'] = "undefine"; 
+if (!isset($_SESSION['a7_cur_sketch']))$_SESSION['a7_cur_sketch'] = "undefine"; 
+if (!isset($_SESSION['a7_cur_step']))$_SESSION['a7_cur_step'] = "undefine"; 
+if (!isset($_SESSION['a7_cur_loop']))$_SESSION['a7_cur_loop'] = "undefine"; 
+if (!isset($_SESSION['a7_cur_log']))$_SESSION['a7_cur_log'] = "undefine"; 
+if (!isset($_SESSION['a7_cur_menu']))$_SESSION['a7_cur_menu'] = "undefine"; 
+if (!isset($_SESSION['a7_cur_file']))$_SESSION['a7_cur_file'] = "undefine"; 
+if (!isset($_SESSION['a7_cur_sketch_name']))$_SESSION['a7_cur_sketch_name'] = "undefine"; 
+
+
+
 $par['a7_cur_sim_len'] = $_SESSION['a7_cur_sim_len'];
 init($par['a7_cur_sim_len']);
 
@@ -75,8 +86,6 @@ $par['a7_sid'] = $_GET['a7_sid'];
 
 $action  = $_GET['ac'];
 $alt     = $_GET['x'];
-
-echo("ACTION: $action  ($alt)<br>");
 
 if($action == 'load')
   {
@@ -151,8 +160,8 @@ if($action == 'log')
 
 
 // POST =============================================
-if ($_SERVER['REQUEST_METHOD'] == "POST")
-  {
+
+if (!isset($_POST['action']))$_POST['action'] = "undefine"; 
 
     $action = $_POST['action'];
     
@@ -168,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 	$tempFile = $_POST['file_name'];
 	$data = $_POST['file_data'];
 	$what = $_POST['submit_edit'];
-
+	$curSimLen = $par['a7_cur_sim_len'];
 	$fp = fopen($tempFile, 'w')or die("Could not open file ($tempFile) (write)!");;
 	fwrite($fp,$data) or die("Could not write to file ($tempFile) !");
 	fclose($fp);
@@ -207,7 +216,9 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
     if($action == 'set_configuration' )
       {
         $curSimLen = $_POST['sim_len'];
+	$par['a7_cur_sim_len'] =  $curSimLen;
         $curSketch = $_POST['sketch'];
+	$par['a7_cur_sketch'] =  $curSketch;
         copySketch($curSketch);
         compileSketch();
         execSketch($curSimLen,0);
@@ -228,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 
 
  
-  }
+//  }
 
 $curStep = $par['a7_cur_step'];
 readStatus();
@@ -273,7 +284,7 @@ function canvasPos()
 
   //$input  = array_keys($_GET);
   //$coords = explode(',', $input[0]);
-  $bb = $coords[0]; $aa=$coords[1];
+  //$bb = $coords[0]; $aa=$coords[1];
 
   // Digital Pin Positions
   $yy = 220;
@@ -589,7 +600,7 @@ function readSimulation($file)
       while (!feof($in))
 	{
 	  $row = fgets($in);
-	  $row = trim($row);
+	  //$row = trim($row);
 	  //$row = safeText($row);
 	  //echo("$row<br>");
 	  if($row[0]=='+')
@@ -753,7 +764,7 @@ function readSketchInfo()
 	}
       echo("</select>");
       fclose($in);
-      $par['a7_cur_sketch']  = $name;
+      $par['a7_cur_sketch_name']  = $name;
     }
   else
     echo("Fail to open $file <br>");
@@ -909,7 +920,7 @@ function viking_7_current($sys_id)
   $user       = $par['user'];
 
   $sketch = $par['a7_cur_sketch'];
-  $sketch = $par['a7_cur_step'];
+  $step   = $par['a7_cur_step'];
   $length = $par['a7_cur_sim_len'];
 
   echo("Sketch: $sketch <br>Current Step: $step ($length)");
@@ -1009,26 +1020,31 @@ function viking_7_error($sys_id)
 
 function viking_7_editFile($sys_id)
 {
-  global $par;
-  $path   = $par['path'];
-  $sid        = $par['a7_sid'];
-  //if($sid != $sys_id) return;
-  $user       = $par['user'];
-  // open file
-  $tempFile = $servuino.$curFile;
-  $fh = fopen($tempFile, "r") or die("Could not open file ($tempFile)!");
-  // read file contents
-  $data = fread($fh, filesize($tempFile)) or die("Could not read file ($tempFile)!");
-  // close file
-  fclose($fh);
-  echo("<form name=\"f_edit_file\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
-  echo("<input type=\"hidden\" name=\"action\" value=\"edit_file\">\n");
-  echo("<input type=\"hidden\" name=\"file_name\" value=\"$tempFile\">\n");
-  echo("<table><tr><td>");
-  if($curFile == 'sketch.pde')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_LOAD."\">\n");
-  if($curFile == 'data.scen')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
-  echo("</td></tr><tr><td><textarea name=\"file_data\" cols=64 rows=34>$data</textarea></td></tr></table>");  
-  echo("</form><br>");
+  global $par,$servuino;
+  global $curEditFlag;
+  if($curEditFlag == 1)
+    {
+      $curFile = $par['a7_cur_file'];
+      $path   = $par['path'];
+      $sid        = $par['a7_sid'];
+      //if($sid != $sys_id) return;
+      $user       = $par['user'];
+      // open file
+      $tempFile = $servuino.$curFile;
+      $fh = fopen($tempFile, "r") or die("Could not open file ($tempFile)!");
+      // read file contents
+      $data = fread($fh, filesize($tempFile)) or die("Could not read file ($tempFile)!");
+      // close file
+      fclose($fh);
+      echo("<form name=\"f_edit_file\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
+      echo("<input type=\"hidden\" name=\"action\" value=\"edit_file\">\n");
+      echo("<input type=\"hidden\" name=\"file_name\" value=\"$tempFile\">\n");
+      echo("<table><tr><td>");
+      if($curFile == 'sketch.pde')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_LOAD."\">\n");
+      if($curFile == 'data.scen')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
+      echo("</td></tr><tr><td><textarea name=\"file_data\" cols=64 rows=34>$data</textarea></td></tr></table>");  
+      echo("</form><br>");
+    }
 }
 
 function viking_7_data($sys_id)
@@ -1089,7 +1105,7 @@ function viking_7_library($sys_id)
   echo("<input type=\"hidden\" name=\"action\" value=\"set_configuration\">\n");
   echo("Simulation Length <input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td>\n");
   system("ls upload > list.txt;");
-  system("pwd;ls upload;");
+  //system("pwd;ls upload;");
   echo("<td>");
   formSelectFile("Sketch Library","sketch","list.txt",$curSketch);
   echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_LOAD."\"></td>\n");
