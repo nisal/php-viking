@@ -75,6 +75,8 @@ readSketchInfo();
 readSimulation('data.custom');
 readSerial('data.serial');
 
+$curSimLen = $par['a7_cur_sim_len'] ;
+$curSketch = $par['a7_cur_sketch'] ;
 
 // GET ==============================================
 $sys_id = $_GET['a7_sid'];
@@ -161,7 +163,7 @@ if($action == 'log')
 
 // POST =============================================
 
-if (!isset($_POST['action']))$_POST['action'] = "undefine"; 
+if (!isset($_POST['action']))$_POST['action'] = "undefined"; 
 
     $action = $_POST['action'];
     
@@ -220,15 +222,15 @@ if (!isset($_POST['action']))$_POST['action'] = "undefine";
         $curSketch = $_POST['sketch'];
 	$par['a7_cur_sketch'] =  $curSketch;
         copySketch($curSketch);
-        compileSketch();
-        execSketch($curSimLen,0);
-        $par['a7_cur_step'] = 0;
-	init($curSimLen);
-	readSketchInfo();
-	readSimulation('data.custom');
-	readStatus();
-	readSerial('data.serial');
-	$par['a7_ready'] = "Sketch loaded!";
+          compileSketch();
+          execSketch($curSimLen,0);
+          $par['a7_cur_step'] = 0;
+	  init($curSimLen);
+	  readSketchInfo();
+	  readSimulation('data.custom');
+	  readStatus();
+	  readSerial('data.serial');
+	  $par['a7_ready'] = "Sketch loaded!";
       }
 
     if($action == 'run_target' )
@@ -351,9 +353,16 @@ function copySketch($sketch)
   global $upload;
 
   $sketch = $upload.$sketch;
-  if (!copy($sketch,"servuino/sketch.pde")) {
-    echo "failed to copy ($sketch)...<br>";
+
+  $res = checkSketch($sketch);
+  if($res == 0)
+  {
+    if (!copy($sketch,"servuino/sketch.pde")) {
+      vikingError("failed to copy ($sketch)");
+    }
   }
+  else
+   vikingError("Sketch did not passes check: $sketch");
 }
 
 //==========================================
@@ -362,7 +371,8 @@ function compileSketch()
 {
   global $par;
   $user = $par['user'];
-  system("cd servuino;g++ -o servuino servuino.c > g++.error 2>&1;");
+  echo("pwd;cd servuino;g++ -o servuino servuino.c > g++.error 2>&1;<br>");
+  system("pwd;cd servuino;g++ -o servuino servuino.c > g++.error 2>&1;");
 }
 
 //==========================================
@@ -371,7 +381,9 @@ function execSketch($steps,$source)
 {
   global $par;
   $user = $par['user'];
-  system("cd servuino;./servuino $steps $source >exec.error 2>&1;");
+  if($step < 1)vikingWarning("Simulation length < 0");
+  echo("pwd;cd servuino;./servuino $steps $source >exec.error 2>&1;<br>");
+  system("pwd;cd servuino;./servuino $steps $source >exec.error 2>&1;");
 }
 
 //==========================================
@@ -389,7 +401,7 @@ function decodeStatus($code)
   $xpar[0] = $tok;
   if($tok != $curStep)
     {
-      echo("Sync Error Step: $step - $currentStep<br>");
+      vikingError("Sync Error Step: $step - $currentStep");
       return;
     }
   $ix = 0;
@@ -397,11 +409,11 @@ function decodeStatus($code)
     $ix++;
     //echo "Word=$tok<br />";
     $tok = strtok(",");
-    $par[$ix] = $tok;
+    $xpar[$ix] = $tok;
   }
 
   // Mode Digital Pin
-  $temp = $par[1];
+  $temp = $xpar[1];
   $bb = strlen($temp);
   for($ii=0;$ii<strlen($temp);$ii++)
     {
@@ -615,7 +627,7 @@ function readSimulation($file)
       fclose($in);
     }
   else
-    echo("Fail to open $file<br>");
+    vikingError("Fail to open $file");
   return($step);
 }
 
@@ -648,7 +660,7 @@ function readSerial($file)
       fclose($in);
     }
   else
-    echo("Fail to open $file<br>");
+    vikingError("Fail to open $file");
   return($step);
 }
 
@@ -678,7 +690,7 @@ function readStatus()
       fclose($in);
     }
   else
-    echo("Fail to open data.status<br>");
+    vikingError("Fail to open data.status");
   return($step);
 }
 
@@ -706,7 +718,7 @@ function readAnyFile($serv,$file)
       fclose($in);
     }
   else
-    echo("Fail to open $file<br>");
+    vikingError("Fail to open $file");
   return($step);
 }
 
@@ -735,7 +747,7 @@ function formSelectFile($name,$fname,$file,$sel)
       fclose($in);
     }
   else
-    echo("Fail to open $file <br>");
+    vikingError("Fail to open $file");
 }
 
 //==========================================
@@ -762,12 +774,11 @@ function readSketchInfo()
 		}
 	    }
 	}
-      echo("</select>");
       fclose($in);
       $par['a7_cur_sketch_name']  = $name;
     }
   else
-    echo("Fail to open $file <br>");
+    vikingError("Fail to open $file");
 }
 
 //==========================================
@@ -821,7 +832,7 @@ function showFile($title,$file)
       fclose($in);
     }
   else
-    echo("Fail to open $file<br>");
+    vikingError("Fail to open $file");
   return;
 }
 
@@ -879,6 +890,42 @@ function uploadFile2()
   return($newname);
 }
 
+function checkSketch($sketch)
+{
+   
+  global $par;
+  $res = 0;
+  $user       = $par['user'];
+
+  $sketch = $upload.$sketch;
+  $in = fopen($sketch,"r");
+  if($in)
+    {
+      while (!feof($in))
+        {
+          $row = fgets($in);
+          //$row = trim($row);
+          if(strstr($row,"SKETCH_NAME"))
+            {
+              //echo("$row");
+              if($pp = strstr($row,":"))
+                {
+                  sscanf($pp,"%s%s",$junk,$name);
+                  //echo("[$curSketchName]");
+                }
+            }
+        }
+      fclose($in);
+      if(!$name)vikingWarning("No name in sketch: $sketch");
+    }
+  else
+   {
+    vikingError("checkSketch: Fail to open $file");
+    $res = 1;
+   }
+  return($res);
+
+}
 //====================================================
 //  HTML functions
 //====================================================
@@ -890,25 +937,36 @@ function viking_7_menu($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
+  $curSimLen = $par['a7_cur_sim_len'];
 
-  echo("         <a href=$path&ac=step&x=1>");
-  echo("         <img border=\"0\" src=\"reset.gif\" alt=\"Reset\" width=\"50\" height=\"32\"></a>\n");
+  echo("         <ul><li><a href=$path&ac=step&x=1>reset</a></li>");
+  //echo("         <img border=\"0\" src=\"reset.gif\" alt=\"Reset\" width=\"50\" height=\"32\"></a>\n");
   $temp = $curStep - 1;
-  echo("         <a href=$path&ac=step&x=$temp>");
-  echo("         <img border=\"0\" src=\"backward.gif\" alt=\"Backward\" width=\"50\" height=\"32\"></a>\n");
+  if($temp < 1)$temp = 1;
+  echo("         <li><a href=$path&ac=step&x=$temp>step-</a></li>");
+  //echo("         <img border=\"0\" src=\"backward.gif\" alt=\"Backward\" width=\"50\" height=\"32\"></a>\n");
   $temp = $curStep + 1;
-  echo("         <a href=$path&ac=step&x=$temp>");
-  echo("         <img border=\"0\" src=\"forward.gif\" alt=\"Forward\" width=\"50\" height=\"32\"></a>\n");
-  echo("      <a href=$path&ac=menu&x=logA>\n");
-  echo("         <img border=\"0\" src=\"logA.gif\" alt=\"LogA\" width=\"50\" height=\"32\"></a>\n");
-  echo("      <a href=$path&ac=menu&x=logB>\n");
-  echo("         <img border=\"0\" src=\"logB.gif\" alt=\"LogB\" width=\"50\" height=\"32\"></a>\n");
-  echo("      <a href=$path&ac=menu&x=config>");
-  echo("         <img border=\"0\" src=\"library.gif\" alt=\"Library\" width=\"50\" height=\"32\"></a>\n");
-  echo("      <a href=$path&ac=menu&x=file>");
-  echo("         <img border=\"0\" src=\"data.gif\" alt=\"Data\" width=\"50\" height=\"32\"></a>\n");
-  echo("      <a href=$path&ac=menu&x=help>");
-  echo("         <img border=\"0\" src=\"help.gif\" alt=\"Help\" width=\"50\" height=\"32\"></a>\n");
+  if($temp > $curSimLen)$temp = $curSimLen;
+echo("         <li><a href=$path&ac=step&x=$temp>step+</a></li>");
+
+  $temp = $curStep + 1;
+echo("         <li><a href=$path&ac=step&x=$temp>loop-</a></li>");
+  $temp = $curStep + 1;
+echo("         <li><a href=$path&ac=step&x=$temp>loop+</a></li>");
+
+  $temp = $curSimLen;
+echo("         <li><a href=$path&ac=step&x=$temp>end</a></li></ul>");
+  //echo("         <img border=\"0\" src=\"forward.gif\" alt=\"Forward\" width=\"50\" height=\"32\"></a>\n");
+ // echo("      <a href=$path&ac=menu&x=logA>\n");
+ // echo("         <img border=\"0\" src=\"logA.gif\" alt=\"LogA\" width=\"50\" height=\"32\"></a>\n");
+ // echo("      <a href=$path&ac=menu&x=logB>\n");
+ // echo("         <img border=\"0\" src=\"logB.gif\" alt=\"LogB\" width=\"50\" height=\"32\"></a>\n");
+ // echo("      <a href=$path&ac=menu&x=config>");
+ // echo("         <img border=\"0\" src=\"library.gif\" alt=\"Library\" width=\"50\" height=\"32\"></a>\n");
+ // echo("      <a href=$path&ac=menu&x=file>");
+ // echo("         <img border=\"0\" src=\"data.gif\" alt=\"Data\" width=\"50\" height=\"32\"></a>\n");
+ // echo("      <a href=$path&ac=menu&x=help>");
+ // echo("         <img border=\"0\" src=\"help.gif\" alt=\"Help\" width=\"50\" height=\"32\"></a>\n");
 }
 
 function viking_7_current($sys_id)
@@ -923,7 +981,7 @@ function viking_7_current($sys_id)
   $step   = $par['a7_cur_step'];
   $length = $par['a7_cur_sim_len'];
 
-  echo("Sketch: $sketch <br>Current Step: $step ($length)");
+  echo("$sketch <br>$step ($length)");
 }
 
 function viking_7_canvas($sys_id)
@@ -944,7 +1002,7 @@ function viking_7_anyFile($sys_id)
   $curFile = $par['a7_cur_file'];
   //if($sid != $sys_id) return;
   $user       = $par['user'];
-  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000; padding : 4px; width : 98%; height:514px; overflow : auto; \">\n");
+  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000; padding : 4px; width :100%; height:700px; overflow : auto; \">\n");
   $len = readAnyFile(1,$curFile);
   showAnyFile($len);
   echo("</div>\n");
@@ -959,9 +1017,9 @@ function viking_7_winSerial($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
-  echo("<div id=\"serWin\"t style=\"font-family: Courier,monospace;float:left; border : solid 2px #FF0000; background :#BDBDBD; color:#FF0000; padding : 4px; width : 97%; height:250px; overflow : auto; \">\n");
+  //echo("<div id=\"serWin\"t style=\"font-family: Courier,monospace;float:left; border : solid 2px #FF0000; background :#BDBDBD; color:#FF0000; padding : 4px; width : 98%; height:190; overflow : auto; \">\n");
   showSerial($curStep);
-  echo("</div>\n"); 
+  //echo("</div>\n"); 
 }
 
 function viking_7_winLog($sys_id)
@@ -972,9 +1030,9 @@ function viking_7_winLog($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
-  echo("<div id=\"simList\" style=\"float:left; border : solid 1px #000000; background : #FFFFFF; color : #000000; padding : 4px; width : 98%; height:250px; overflow : auto; \">\n");
+  echo("<div id=\"logList\" style=\"float:right; border : solid 1px #000000; background : #FFFFFF; color : #000000; padding : 4px; width :100%; height:700px; overflow : auto; \">\n");
   showStep($curStep);
-  echo("</div>\n");
+  echo("</div>");
 }
 
 function viking_7_winSim($sys_id)
@@ -985,9 +1043,9 @@ function viking_7_winSim($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
-  echo("<div id=\"serLis\"t style=\"float:right; border : solid 1px #000000; background : #FFFFFF; color : #000000; padding : 4px; width : 98%; height:250px; overflow : auto; \">\n");
+  //echo("<div id=\"simLis\"t style=\"float:right; border : solid 1px #000000; background : #FFFFFF; color : #000000; padding : 4px; width : 98%; height:250px; overflow : auto; \">\n");
   showSimulation($curStep);
-  echo("</div>\n"); 
+  //echo("</div>\n"); 
 }
 
 function viking_7_help($sys_id)
@@ -1022,7 +1080,9 @@ function viking_7_editFile($sys_id)
 {
   global $par,$servuino;
   global $curEditFlag;
-  if($curEditFlag == 1)
+
+  $user = $par['user'];
+  if($curEditFlag == 1 && $user)
     {
       $curFile = $par['a7_cur_file'];
       $path   = $par['path'];
@@ -1042,7 +1102,7 @@ function viking_7_editFile($sys_id)
       echo("<table><tr><td>");
       if($curFile == 'sketch.pde')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_LOAD."\">\n");
       if($curFile == 'data.scen')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
-      echo("</td></tr><tr><td><textarea name=\"file_data\" cols=64 rows=34>$data</textarea></td></tr></table>");  
+      echo("</td></tr><tr></tr>$curFile<tr><td><textarea name=\"file_data\" cols=45 rows=48>$data</textarea></td></tr></table>");  
       echo("</form><br>");
     }
 }
@@ -1060,16 +1120,19 @@ function viking_7_data($sys_id)
   echo("<form name=\"f_sel_win\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
   echo("<input type=\"hidden\" name=\"action\" value=\"select_file\">\n");
   echo("<select name=\"file\">");
-  $selected = "";$temp = 'data.custom';if($curFile == $temp)$selected = 'selected';
-  echo("<option value=\"$temp\"   $selected>Custom Log</option>");
-  $selected = "";$temp = 'data.arduino';if($curFile == $temp)$selected = 'selected';
-  echo("<option value=\"$temp\"  $selected>Arduino Log</option>");
-  $selected = "";$temp = 'data.status';if($curFile == $temp)$selected = 'selected';
-  echo("<option value=\"$temp\"   $selected>Status Log</option>");
-  $selected = "";$temp = 'data.serial';if($curFile == $temp)$selected = 'selected';
-  echo("<option value=\"$temp\"   $selected>Serial Log</option>");
-  $selected = "";$temp = 'data.code';if($curFile == $temp)$selected = 'selected';
-  echo("<option value=\"$temp\"   $selected>Code Log</option>");
+  if($user == 'admin')
+  {
+    $selected = "";$temp = 'data.custom';if($curFile == $temp)$selected = 'selected';
+    echo("<option value=\"$temp\"   $selected>Custom Log</option>");
+    $selected = "";$temp = 'data.arduino';if($curFile == $temp)$selected = 'selected';
+    echo("<option value=\"$temp\"  $selected>Arduino Log</option>");
+    $selected = "";$temp = 'data.status';if($curFile == $temp)$selected = 'selected';
+    echo("<option value=\"$temp\"   $selected>Status Log</option>");
+    $selected = "";$temp = 'data.serial';if($curFile == $temp)$selected = 'selected';
+    echo("<option value=\"$temp\"   $selected>Serial Log</option>");
+    $selected = "";$temp = 'data.code';if($curFile == $temp)$selected = 'selected';
+    echo("<option value=\"$temp\"   $selected>Code Log</option>");
+  }
   $selected = "";$temp = 'data.error';if($curFile == $temp)$selected = 'selected';
   echo("<option value=\"$temp\"   $selected>Error Log</option>");
   $selected = "";$temp = 'sketch.pde';if($curFile == $temp)$selected = 'selected';
@@ -1078,8 +1141,11 @@ function viking_7_data($sys_id)
   echo("<option value=\"$temp\"   $selected>Scenario</option>");
   echo("</select>");
   echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_SELECT."\">\n");
-  if($curFile == 'sketch.pde')echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
-  if($curFile == 'data.scen')echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
+  if($user)
+  {
+    if($curFile == 'sketch.pde')echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
+    if($curFile == 'data.scen')echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
+  }
   echo("</form></td>");
   echo("</table>");
 }
@@ -1094,6 +1160,8 @@ function viking_7_library($sys_id)
   $curSketch = $par['a7_cur_sketch'];
   $curSimLen = $par['a7_cur_sim_len'];
 
+  if($user)
+  {
   echo("<hr><form name=\"upload_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
   echo("<input type=\"hidden\" name=\"action\" value=\"upload_sketch\">\n");
   echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
@@ -1124,6 +1192,7 @@ function viking_7_library($sys_id)
   echo("<td><input type =\"submit\" name=\"submit_scenario\" value=\"".T_LOAD."\"></td>\n");
   echo("</tr></form>");
   echo("</table><hr>");
+ }
 }
 
 function viking_7_script($sys_id)
@@ -1143,7 +1212,7 @@ function viking_7_script($sys_id)
   $curStep = $par['a7_cur_step'];
 
   echo("<script type= \"text/javascript\">");
-
+  
   echo("function draw(){");
   echo("var canvas = document.getElementById('boardUno');");
   echo("if (canvas.getContext){var ctx = canvas.getContext('2d');var imageObj = new Image();imageObj.src = \"arduino_uno.jpg\";ctx.drawImage(imageObj, 0, 0,500,300);");

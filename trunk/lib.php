@@ -22,6 +22,10 @@ $warning = '';
 $error   = '';
 
 $par = array();
+$vikingError = array();
+$vikingWarning = array();
+$errIx = 0;
+$warIx = 0;
 
 
 $par['admin'] = $_SESSION['admin'];
@@ -39,6 +43,28 @@ $par['p3'] = $_GET['p3'];
 $par['p4'] = $_GET['p4'];
 $par['p5'] = $_GET['p5'];
 $par['p6'] = $_GET['p6'];
+
+//=======================================
+function vikingError($msg)
+//=======================================
+{
+  global $vikingError,$errIx;
+  $errIx++;
+  $vikingError[0] = $errIx;
+  $vikingError[$errIx] = $msg;
+  return;
+}
+
+//=======================================
+function vikingWarning($msg)
+//=======================================
+{
+  global $vikingWarning,$warIx;
+  $warIx++;
+  $vikingWarning[0] = $warIx;
+  $vikingWarning[$warIx] = $msg;
+  return;
+}
 
 
 //=======================================
@@ -225,6 +251,34 @@ function uploadFile()
      // echo "<h1>File Uploaded Successfully! $size</h1>";
     }
   return($newname);
+}
+
+//=====================================================
+// HTML
+//=====================================================
+
+function viking_lib_showError()
+{
+  global $vikingError;
+ 
+  echo("vikingError<br>"); 
+  for ($ii=1; $ii<=$vikingError[0];$ii++)
+  {
+    $temp = $vikingError[$ii];
+    echo("$ii Error: $temp <br>");
+  }
+}
+
+function viking_lib_showWarning()
+{
+  global $vikingWarning;
+
+  echo("vikingWarning<br>");
+  for ($ii=1; $ii<=$vikingWarning[0];$ii++)
+  {
+    $temp = $vikingWarning[$ii];
+    echo("$ii Warning: $temp <br>");
+  }
 }
 
 ?>

@@ -165,8 +165,9 @@ function viking_4_addUser_Form()
   $sel_name   = $par['a4_name'];
   $app_open   = $par['p1'];
   $sel_db     = $par['a4_db'];
+  $user       = $par['user'];
 
-  if($app_open == "open_4_addUser"  && $sel_db)
+  if($app_open == "open_4_addUser"  && $sel_db && $user == 'admin')
     {
       echo("<form name=\"form_add_user\" action=\"$path\" method=\"post\"> ");
       echo("<input type=\"hidden\" name=\"a4_post_action\" value=\"post_add_user\">");
@@ -183,12 +184,13 @@ function viking_4_addUser_Link()
   $path       = $par['path'];
   $app_open   = $par['p1'];
   $sel_db     = $par['a4_db'];
+  $user       = $par['user'];
 
   if($app_open == "open_4_addUser")
     {
       echo(T_4_ADD_USER);
     }
-  else  if($sel_db)
+  else  if($sel_db && $user == 'admin')
     echo("<a href=$path&p1=open_4_addUser>".T_4_ADD_USER."</a>");
 }
 
