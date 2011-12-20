@@ -281,4 +281,40 @@ function viking_lib_showWarning()
   }
 }
 
+//========================================
+function viking_lib_editInfoText_Link()
+//========================================
+{
+  global $par;
+  $path       = $par['path'];
+  $user       = $par['user'];
+  $app_open   = $par['p1'];
+
+  if($app_open == "open_lib_editTextInfo")
+    {
+      echo("Edit text");
+    }
+  else  if($user == 'admin' )
+    echo("<a href=$path&p1=open_lib_editTextInfo>Edit text</a>");
+}
+
+//========================================
+function viking_lib_editInfoText_Form()
+//========================================
+{
+  global $par,$a3pr;
+  $path       = $par['path'];
+  $user       = $par['user'];
+  $app_open   = $par['p1'];
+
+  if($app_open == "open_lib_editTextInfo"  &&  $user == 'admin')
+    {
+      echo("<form name=\"form_edit_text_info\" action=\"$path\" method=\"post\"> ");
+      echo("<input type=\"hidden\" name=\"a3_post_action\" value=\"post_edit_text_info\">");
+      echo("<textarea name=\"lib_text_info\" cols=10 rows=6>$data</textarea>");
+      echo("<input type =\"submit\" name=\"form_submit\" value=\"".T_SAVE."\">");
+      echo("</form>");
+    }
+}
+
 ?>
