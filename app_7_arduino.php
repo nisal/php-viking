@@ -36,6 +36,9 @@ $status     = array();
 $serial     = array();
 $serialL    = array();
 
+$stepLoop = array();
+$loopStep = array();
+
 $pinValueA  = array();
 $pinValueD  = array();
 $pinStatusA = array();
@@ -48,20 +51,21 @@ $wBoard = 500; // 500
 canvasPos();
 
 // read SESSION parameters ===============================
-if (!isset($_SESSION['a7_cur_sim_len']))$_SESSION['a7_cur_sim_len'] = "undefine"; 
-if (!isset($_SESSION['a7_cur_sketch']))$_SESSION['a7_cur_sketch'] = "undefine"; 
-if (!isset($_SESSION['a7_cur_step']))$_SESSION['a7_cur_step'] = "undefine"; 
-if (!isset($_SESSION['a7_cur_loop']))$_SESSION['a7_cur_loop'] = "undefine"; 
-if (!isset($_SESSION['a7_cur_log']))$_SESSION['a7_cur_log'] = "undefine"; 
-if (!isset($_SESSION['a7_cur_menu']))$_SESSION['a7_cur_menu'] = "undefine"; 
-if (!isset($_SESSION['a7_cur_file']))$_SESSION['a7_cur_file'] = "undefine"; 
-if (!isset($_SESSION['a7_cur_sketch_name']))$_SESSION['a7_cur_sketch_name'] = "undefine"; 
+if (!isset($_SESSION['a7_cur_sim_len']))$_SESSION['a7_cur_sim_len'] = "undefined"; 
+if (!isset($_SESSION['a7_cur_loop_len']))$_SESSION['a7_cur_loop_len'] = "undefined";
+if (!isset($_SESSION['a7_cur_sketch']))$_SESSION['a7_cur_sketch'] = "undefined"; 
+if (!isset($_SESSION['a7_cur_step']))$_SESSION['a7_cur_step'] = "undefined"; 
+if (!isset($_SESSION['a7_cur_loop']))$_SESSION['a7_cur_loop'] = "undefined"; 
+if (!isset($_SESSION['a7_cur_log']))$_SESSION['a7_cur_log'] = "undefined"; 
+if (!isset($_SESSION['a7_cur_menu']))$_SESSION['a7_cur_menu'] = "undefined"; 
+if (!isset($_SESSION['a7_cur_file']))$_SESSION['a7_cur_file'] = "undefined"; 
+if (!isset($_SESSION['a7_cur_sketch_name']))$_SESSION['a7_cur_sketch_name'] = "undefined"; 
 
 
 
 $par['a7_cur_sim_len'] = $_SESSION['a7_cur_sim_len'];
 init($par['a7_cur_sim_len']);
-
+$par['a7_cur_loop_len'] = $_SESSION['a7_cur_loop_len'];
 $par['a7_cur_sketch']  = $_SESSION['a7_cur_sketch'];
 $par['a7_cur_step']    = $_SESSION['a7_cur_step'];
 $par['a7_cur_loop']    = $_SESSION['a7_cur_loop'];
@@ -76,8 +80,9 @@ readSimulation('data.custom');
 readSerial('data.serial');
 
 $curSimLen = $par['a7_cur_sim_len'] ;
+$curLoopLen = $par['a7_cur_loop_len'] ;
 $curSketch = $par['a7_cur_sketch'] ;
-
+$curLoop   = $par['a7_cur_loop'] ;
 // GET ==============================================
 $sys_id = $_GET['a7_sid'];
 $par['a7_sid'] = $_GET['a7_sid'];
@@ -133,7 +138,17 @@ if($action == 'run' && $curSimLen > 0)
 if($action == 'step')
   {
     $par['a7_cur_step'] = $_GET['x'];
+    $curStep = $_GET['x'];
+    $par['a7_cur_loop'] = $stepLoop[$curStep];
   }
+
+if($action == 'loop')
+  {
+    $par['a7_cur_loop'] = $_GET['x'];
+    $loop = $_GET['x'];
+    $par['a7_cur_step'] = $loopStep[$loop];
+  }
+
 
 if($action == 'edit_file')
   {
@@ -259,6 +274,7 @@ decodeStatus($status[$curStep]);
 // $par['a7_cur_sketch_name'] = $curSketchName;
 
 $_SESSION['a7_cur_sim_len'] = $par['a7_cur_sim_len'];
+$_SESSION['a7_cur_loop_len'] = $par['a7_cur_loop_len'];
 $_SESSION['a7_cur_sketch']  = $par['a7_cur_sketch'];
 $_SESSION['a7_cur_step']    = $par['a7_cur_step'];
 $_SESSION['a7_cur_loop']    = $par['a7_cur_loop'];
@@ -288,7 +304,7 @@ function canvasPos()
   //$coords = explode(',', $input[0]);
   //$bb = $coords[0]; $aa=$coords[1];
 
-  // Digital Pin Positions
+  // Digital Pin Positions
   $yy = 220;
   for($ii=0; $ii<14; $ii++)
     {
@@ -371,7 +387,6 @@ function compileSketch()
 {
   global $par;
   $user = $par['user'];
-  echo("pwd;cd servuino;g++ -o servuino servuino.c > g++.error 2>&1;<br>");
   system("pwd;cd servuino;g++ -o servuino servuino.c > g++.error 2>&1;");
 }
 
@@ -382,7 +397,6 @@ function execSketch($steps,$source)
   global $par;
   $user = $par['user'];
   if($step < 1)vikingWarning("Simulation length < 0");
-  echo("pwd;cd servuino;./servuino $steps $source >exec.error 2>&1;<br>");
   system("pwd;cd servuino;./servuino $steps $source >exec.error 2>&1;");
 }
 
@@ -602,10 +616,11 @@ function readSimulation($file)
 {
   global $par;
   $user       = $par['user'];
-  global $simulation,$servuino;
+  global $simulation,$servuino,$loopStep,$stepLoop;
 
   $file = $servuino.$file;
   $step = 0;
+  $loop = 0;
   $in = fopen($file,"r");
   if($in)
     {
@@ -621,9 +636,16 @@ function readSimulation($file)
               $row[0] = ' ';
 	      $simulation[$step] = $row;
 	      //echo("$row<br>");
+              if(strstr($row,"Loop "))
+              {
+                 $loop++;
+                 $loopStep[$loop] = $step;
+              }
+              $stepLoop[$step] = $loop;
 	    }
 	}
       $par['a7_cur_sim_len'] = $step;
+      $par['a7_cur_loop_len'] = $loop;
       fclose($in);
     }
   else
@@ -937,36 +959,25 @@ function viking_7_menu($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
+  $curLoop = $par['a7_cur_loop'];
   $curSimLen = $par['a7_cur_sim_len'];
+  $curLoopLen = $par['a7_cur_loop_len'];
 
   echo("         <ul><li><a href=$path&ac=step&x=1>reset</a></li>");
-  //echo("         <img border=\"0\" src=\"reset.gif\" alt=\"Reset\" width=\"50\" height=\"32\"></a>\n");
   $temp = $curStep - 1;
   if($temp < 1)$temp = 1;
   echo("         <li><a href=$path&ac=step&x=$temp>step-</a></li>");
-  //echo("         <img border=\"0\" src=\"backward.gif\" alt=\"Backward\" width=\"50\" height=\"32\"></a>\n");
   $temp = $curStep + 1;
   if($temp > $curSimLen)$temp = $curSimLen;
-echo("         <li><a href=$path&ac=step&x=$temp>step+</a></li>");
-
-  $temp = $curStep + 1;
-echo("         <li><a href=$path&ac=step&x=$temp>loop-</a></li>");
-  $temp = $curStep + 1;
-echo("         <li><a href=$path&ac=step&x=$temp>loop+</a></li>");
-
+  echo("         <li><a href=$path&ac=step&x=$temp>step+</a></li>");
+  $temp = $curLoop - 1;
+  if($temp < 1)$temp = 1;
+  echo("         <li><a href=$path&ac=loop&x=$temp>loop-</a></li>");
+  $temp = $curLoop + 1;
+  if($temp > $curLoopLen)$temp = $curLoopLen;
+  echo("         <li><a href=$path&ac=loop&x=$temp>loop+</a></li>");
   $temp = $curSimLen;
-echo("         <li><a href=$path&ac=step&x=$temp>end</a></li></ul>");
-  //echo("         <img border=\"0\" src=\"forward.gif\" alt=\"Forward\" width=\"50\" height=\"32\"></a>\n");
- // echo("      <a href=$path&ac=menu&x=logA>\n");
- // echo("         <img border=\"0\" src=\"logA.gif\" alt=\"LogA\" width=\"50\" height=\"32\"></a>\n");
- // echo("      <a href=$path&ac=menu&x=logB>\n");
- // echo("         <img border=\"0\" src=\"logB.gif\" alt=\"LogB\" width=\"50\" height=\"32\"></a>\n");
- // echo("      <a href=$path&ac=menu&x=config>");
- // echo("         <img border=\"0\" src=\"library.gif\" alt=\"Library\" width=\"50\" height=\"32\"></a>\n");
- // echo("      <a href=$path&ac=menu&x=file>");
- // echo("         <img border=\"0\" src=\"data.gif\" alt=\"Data\" width=\"50\" height=\"32\"></a>\n");
- // echo("      <a href=$path&ac=menu&x=help>");
- // echo("         <img border=\"0\" src=\"help.gif\" alt=\"Help\" width=\"50\" height=\"32\"></a>\n");
+  echo("         <li><a href=$path&ac=step&x=$temp>end</a></li></ul>");
 }
 
 function viking_7_current($sys_id)
@@ -977,11 +988,13 @@ function viking_7_current($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
 
-  $sketch = $par['a7_cur_sketch'];
+  $sketch = $par['a7_cur_sketch_name'];
   $step   = $par['a7_cur_step'];
-  $length = $par['a7_cur_sim_len'];
+  $loop   = $par['a7_cur_loop'];
+  $stepLength = $par['a7_cur_sim_len'];
+  $loopLength = $par['a7_cur_loop_len'];
 
-  echo("$sketch <br>$step ($length)");
+  echo("$sketch <br>$loop,$step ($loopLength,$stepLength)");
 }
 
 function viking_7_canvas($sys_id)
