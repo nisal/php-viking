@@ -653,7 +653,7 @@ function readSerial($file)
 	  $left  = strpos($row,"[");
 	  $right = strpos($row,"]");
 	  if($right && $left){$left++;$value = substr($row,$left,$right-$left);}
-	  $value = safeText($value);
+	  $value = safeText2($value);
 	  //echo("$step $line $value<br>");
 	  $serial[$step] = $value;
 	}
@@ -711,7 +711,7 @@ function readAnyFile($serv,$file)
 	{
 	  $row = fgets($in);
 	  $row = trim($row);
-	  $row = safeText($row);
+	  $row = safeText2($row);
 	  $step++;
 	  $content[$step] = $row;
 	}
@@ -853,7 +853,7 @@ function uploadFile2()
       if ($import)
         {
           $file_name = stripslashes($_FILES['import_file']['name']);
-          $file_name = safeText($file_name);
+          //$file_name = safeText($file_name);
           $extension = getExtension($file_name);
           $extension = strtolower($extension);
           if (($extension != "txt") && ($extension != "pde") && ($extension != "c"))
@@ -1017,9 +1017,9 @@ function viking_7_winSerial($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
-  //echo("<div id=\"serWin\"t style=\"font-family: Courier,monospace;float:left; border : solid 2px #FF0000; background :#BDBDBD; color:#FF0000; padding : 4px; width : 98%; height:190; overflow : auto; \">\n");
+  echo("<div id=\"serWin\"t style=\"font-family: Courier,monospace;float:left; border : solid 2px #FF0000; background :#BDBDBD; color:#FF0000; padding : 4px; width : 98%; height:300; overflow : auto; \">\n");
   showSerial($curStep);
-  //echo("</div>\n"); 
+  echo("</div>\n"); 
 }
 
 function viking_7_winLog($sys_id)
@@ -1201,7 +1201,7 @@ function viking_7_script($sys_id)
   global $digX,$digY,$anaX,$anaY,$resetX,$resetY;
   global $TXledX,$TXledY,$onOffX,$onOffY,$led13X,$led13Y;
   global $sketchNameX,$sketchNameY;
-  global $pinModeD,$pinStatusD,$pinStatusA;
+  global $pinModeD,$pinStatusD,$pinStatusA,$serial;
 
   $path   = $par['path'];
   $sid        = $par['a7_sid'];
