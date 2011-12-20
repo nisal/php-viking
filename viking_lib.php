@@ -380,7 +380,7 @@ function copyNode($db_name,$object_id,$new_father_id,$attr_name,$attr_value)
   
   if($h_new_father && $h_node)
     {
-      echo("copy node: $db_name,$object_id,$new_father_id,$attr_name,$attr_value");
+     // echo("copy node: $db_name,$object_id,$new_father_id,$attr_name,$attr_value");
       $h_new_father->appendChild($h_node->cloneNode(true));
     }
   else
@@ -447,7 +447,7 @@ function setNodeValue($db_name,$object_id,$attr_name,$attr_value,$new_value)
     {
       $id = $object->getAttribute('id'); 
       $type = $object->getAttribute($attr_name); 
-      echo("$id == $object_id && $type == $attr_value<br>");
+      //echo("$id == $object_id && $type == $attr_value<br>");
       if($id == $object_id && $type == $attr_value)
 	{     
 	  $object->nodeValue = $new_value;
@@ -693,7 +693,7 @@ function setObjectImage($db,$object_id,$value)
 function setObjectFile($db,$object_id,$value)
 //========================
 {
-  echo("$db,$object_id,'type','file',$value");
+  //echo("$db,$object_id,'type','file',$value");
   setNodeValue($db,$object_id,'type','file',$value);
 }
 
