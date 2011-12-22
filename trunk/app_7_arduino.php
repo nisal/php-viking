@@ -781,7 +781,7 @@ function readAnyFile($serv,$file)
   $user       = $par['user'];
   global $content,$servuino;
 
-  if($file == 'undefined')$file = 'servuino/sketch.pde';
+  if($file == 'undefined')$file = 'sketch.pde';
 
   if($serv == 1)$file = $servuino.$file;
   $step = 0;
