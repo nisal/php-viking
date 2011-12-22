@@ -28,7 +28,8 @@ $errIx = 0;
 $warIx = 0;
 
 
-$par['admin'] = $_SESSION['admin'];
+
+//$par['admin'] = $_SESSION['admin'];
 $par['user']  = $_SESSION['user'];
 
 $g_self = $_SERVER['PHP_SELF'];

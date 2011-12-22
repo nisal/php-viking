@@ -580,9 +580,10 @@ function showSimulation($target)
 //==========================================
 {
   global $par;
+  global $simulation;
+
   $path  = $par['path'];
   $user  = $par['user'];
-  global $simulation;
   
   $curStep   = $par['a7_cur_step'];
   $curSimLen = $par['a7_cur_sim_len'];
@@ -601,9 +602,9 @@ function showAnyFile($target)
 //==========================================
 {
   global $par;
-  $user       = $par['user'];
   global $content;
 
+  $user = $par['user'];
   for($ii=1;$ii<=$target;$ii++)
     {
       echo("$content[$ii]<br>");
@@ -1009,16 +1010,44 @@ function viking_7_canvas($sys_id)
 
 function viking_7_anyFile($sys_id)
 {
-  global $par;
+  global $par,$servuino;
+  global $curEditFlag;
+
+  $user = $par['user'];
   $path   = $par['path'];
   $sid        = $par['a7_sid'];
   $curFile = $par['a7_cur_file'];
-  //if($sid != $sys_id) return;
-  $user       = $par['user'];
-  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000; padding : 4px; width :100%; height:700px; overflow : auto; \">\n");
+
+  if($curEditFlag == 0)
+    {
+  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 4px; width :100%; height:500px; overflow : auto; \">\n");
   $len = readAnyFile(1,$curFile);
   showAnyFile($len);
   echo("</div>\n");
+    }
+  else if($curEditFlag == 1 && $user)
+    {
+      // $curFile = $par['a7_cur_file'];
+      //$path   = $par['path'];
+      //$sid        = $par['a7_sid'];
+      //if($sid != $sys_id) return;
+      //$user       = $par['user'];
+      // open file
+      $tempFile = $servuino.$curFile;
+      $fh = fopen($tempFile, "r") or die("Could not open file ($tempFile)!");
+      // read file contents
+      $data = fread($fh, filesize($tempFile)) or die("Could not read file ($tempFile)!");
+      // close file
+      fclose($fh);
+      echo("<form name=\"f_edit_file\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
+      echo("<input type=\"hidden\" name=\"action\" value=\"edit_file\">\n");
+      echo("<input type=\"hidden\" name=\"file_name\" value=\"$tempFile\">\n");
+      echo("<table><tr><td>");
+      if($curFile == 'sketch.pde')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_LOAD."\">\n");
+      if($curFile == 'data.scen')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
+      echo("</td></tr><tr><td><textarea name=\"file_data\" cols=50 rows=35>$data</textarea></td></tr></table>");  
+      echo("</form><br>");
+    }
 }
 
 
@@ -1030,7 +1059,7 @@ function viking_7_winSerial($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
-  echo("<div id=\"serWin\"t style=\"font-family: Courier,monospace;float:left; border : solid 2px #FF0000; background :#BDBDBD; color:#FF0000; padding : 4px; width : 98%; height:300; overflow : auto; \">\n");
+  echo("<div id=\"serWin\"t style=\"font-family: Courier,monospace;float:left; border : solid 2px #FF0000; background :#BDBDBD; color:#FF0000; text-align:left; padding : 4px; width :100%; height:500px; overflow : auto; \">\n");
   showSerial($curStep);
   echo("</div>\n"); 
 }
@@ -1043,7 +1072,7 @@ function viking_7_winLog($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
-  echo("<div id=\"logList\" style=\"float:right; border : solid 1px #000000; background : #FFFFFF; color : #000000; padding : 4px; width :100%; height:700px; overflow : auto; \">\n");
+  echo("<div id=\"logList\" style=\"margin-right:5px;float:left; border : solid 1px #000000; background : #FFFFFF; color : #000000; text-align:left; padding : 4px; width :100%; height:500px; overflow : auto; \">\n");
   showStep($curStep);
   echo("</div>");
 }
@@ -1056,7 +1085,7 @@ function viking_7_winSim($sys_id)
   //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
-  //echo("<div id=\"simLis\"t style=\"float:right; border : solid 1px #000000; background : #FFFFFF; color : #000000; padding : 4px; width : 98%; height:250px; overflow : auto; \">\n");
+  //echo("<div id=\"simLis\"t style=\"float:right; border : solid 1px #000000; background : #FFFFFF; color : #000000; text-align:left; padding : 4px; width : 98%; height:250px; overflow : auto; \">\n");
   showSimulation($curStep);
   //echo("</div>\n"); 
 }
@@ -1088,37 +1117,6 @@ function viking_7_error($sys_id)
   showAnyFile($file);
 }
 
-
-function viking_7_editFile($sys_id)
-{
-  global $par,$servuino;
-  global $curEditFlag;
-
-  $user = $par['user'];
-  if($curEditFlag == 1 && $user)
-    {
-      $curFile = $par['a7_cur_file'];
-      $path   = $par['path'];
-      $sid        = $par['a7_sid'];
-      //if($sid != $sys_id) return;
-      $user       = $par['user'];
-      // open file
-      $tempFile = $servuino.$curFile;
-      $fh = fopen($tempFile, "r") or die("Could not open file ($tempFile)!");
-      // read file contents
-      $data = fread($fh, filesize($tempFile)) or die("Could not read file ($tempFile)!");
-      // close file
-      fclose($fh);
-      echo("<form name=\"f_edit_file\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
-      echo("<input type=\"hidden\" name=\"action\" value=\"edit_file\">\n");
-      echo("<input type=\"hidden\" name=\"file_name\" value=\"$tempFile\">\n");
-      echo("<table><tr><td>");
-      if($curFile == 'sketch.pde')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_LOAD."\">\n");
-      if($curFile == 'data.scen')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
-      echo("</td></tr><tr></tr>$curFile<tr><td><textarea name=\"file_data\" cols=45 rows=48>$data</textarea></td></tr></table>");  
-      echo("</form><br>");
-    }
-}
 
 function viking_7_data($sys_id)
 {
