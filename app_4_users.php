@@ -147,11 +147,15 @@ $_SESSION['user'] = $par['user'];
 function viking_4_showUserLoggedIn()
 {  
   global $par;
+  $path  = $par['path'];
   $user  = $par['user'];
   
   if($user)
     {
-      echo("$user");
+      if($user=='admin')
+	echo("<a href=$path&pv=pv>$user</a>");
+      else
+	echo("$user");
     }
   else
     echo("-");

@@ -4,7 +4,8 @@
 
 // function viking_7_function1()
 //======================================
-define('T_UPLOAD_SKETCH','Upload Sketch to Library');
+define('T_UPLOAD_SKETCH','Upload sketch to account');
+define('T_DELETE','Delete');
 define('T_CONFIG','Configuration');
 define('T_SELECT','Select');
 define('T_LOOP_F','Next Loop');
@@ -15,6 +16,7 @@ define('T_EDIT','Edit');
 define('T_SAVE','Save');
 define('T_LOAD','Load');
 define('T_RUN', 'Run');
+define('T_SET', 'Set');
 define('T_APPLY', 'Send Application');
 
 define('BLACK',  '0');
@@ -232,22 +234,33 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
 	$fil = uploadFile2();
       }
 
-    if($action == 'set_configuration' )
+    if($action == 'set_load_delete' )
       {
-        $curSimLen = $_POST['sim_len'];
-	$par['a7_cur_sim_len'] =  $curSimLen;
-        $curSketch = $_POST['sketch'];
-	$par['a7_cur_sketch'] =  $curSketch;
-        copySketch($curSketch);
-          compileSketch();
-          execSketch($curSimLen,0);
-          $par['a7_cur_step'] = 0;
-	  init($curSimLen);
-	  readSketchInfo();
-	  readSimulation('data.custom');
-	  readStatus();
-	  readSerial('data.serial');
-	  $par['a7_ready'] = "Sketch loaded!";
+	$curSketch = $_POST['sketch'];
+	$what = $_POST['submit_load_del'];
+	if($what == T_LOAD)
+	  {
+	    $curSimLen = $_POST['sim_len'];
+	    $par['a7_cur_sim_len'] =  $curSimLen;
+	    $par['a7_cur_sketch']  =  $curSketch;
+	    copySketch($curSketch);
+	    compileSketch();
+	    execSketch($curSimLen,0);
+	    $par['a7_cur_step'] = 0;
+	    init($curSimLen);
+	    readSketchInfo();
+	    readSimulation('data.custom');
+	    readStatus();
+	    readSerial('data.serial');
+	    $par['a7_ready'] = "Sketch loaded!";
+	  }
+	if($what == T_DELETE)
+	  {
+	    $sketch = $upload.$curSketch;
+	    //echo("delete $sketch<br>");
+	    unlink($sketch);
+	  }
+
       }
 
     if($action == 'run_target' )
@@ -768,6 +781,8 @@ function readAnyFile($serv,$file)
   $user       = $par['user'];
   global $content,$servuino;
 
+  if($file == 'undefined')$file = 'servuino/sketch.pde';
+
   if($serv == 1)$file = $servuino.$file;
   $step = 0;
   $in = fopen($file,"r");
@@ -1040,7 +1055,7 @@ function viking_7_current($sys_id)
   $stepLength = $par['a7_cur_sim_len'];
   $loopLength = $par['a7_cur_loop_len'];
 
-  echo("$sketch <br>$loop,$step ($loopLength,$stepLength)");
+  echo("$sketch loop=$loop($loopLength) step=$step($stepLength)");
 }
 
 function viking_7_canvas($sys_id)
@@ -1215,32 +1230,35 @@ function viking_7_library($sys_id)
   $user       = $par['user'];
   $curSketch = $par['a7_cur_sketch'];
   $curSimLen = $par['a7_cur_sim_len'];
-
+  
   echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
   if($user)
-  {
-  echo("<hr><form name=\"upload_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
-  echo("<input type=\"hidden\" name=\"action\" value=\"upload_sketch\">\n");
-  echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
-  echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_UPLOAD_SKETCH."\">\n");
-  echo("</form><br<br>");
-  echo("<hr>");
-  echo("<table border=\"0\"><tr><td>");
+    {
+      echo("<hr><br><form name=\"f_upload_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
+      echo("<input type=\"hidden\" name=\"action\" value=\"upload_sketch\">");
+      echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
+      echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_UPLOAD_SKETCH."\">");
+      echo("</form><br<br>");
+      echo("<br><hr><br>");
 
-  echo("<form name=\"configuration\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
-  echo("<input type=\"hidden\" name=\"action\" value=\"set_configuration\">\n");
-  echo("Simulation Length <input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td>\n");
-  system("ls upload > list.txt;");
-  //system("pwd;ls upload;");
-  echo("<td>");
-  formSelectFile("Sketch Library","sketch","list.txt",$curSketch);
-  echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_LOAD."\"></td>\n");
-  echo("</form></tr>");
-  if($ready)echo("<tr><td>$ready</td></tr>");
- }
- else
-   echo("You need to be logged in to access this page<br>Apply for a free account!");
+      echo("<table border=\"0\"><tr>");      
+      echo("<form name=\"f_load_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
+      echo("<input type=\"hidden\" name=\"action\" value=\"set_load_delete\">\n");
+      echo("<td>Simulation Length</td><td><input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td>");
+      system("ls upload > list.txt;");
+      //system("pwd;ls upload;");
+      echo("<td>");
+      formSelectFile("Sketch Library","sketch","list.txt",$curSketch);
+      echo("</tr></table><br>");
 
+      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
+      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_DELETE."\">");
+      echo("</form><hr>");
+      if($ready)echo("<br>$ready<br>");
+    }
+  else
+    echo("You need to be logged in to access this page<br>Apply for a free account!");
+  
   echo("</div>");
 }
 
@@ -1287,7 +1305,7 @@ function viking_7_pinValues($sys_id)
 	echo("<td><input type=\"text\" name=\"pinD_$ii\" value=\"$pinValueD[$ii]\" size=\"1\"></td>");
       }
     echo("</tr></table>");
-    echo("<input type =\"submit\" name=\"submit_scenario\" value=\"".T_LOAD."\">");
+    echo("<input type =\"submit\" name=\"submit_scenario\" value=\"".T_SET."\">");
     echo("</form>");
   }
   else
