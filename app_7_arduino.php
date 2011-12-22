@@ -15,6 +15,7 @@ define('T_EDIT','Edit');
 define('T_SAVE','Save');
 define('T_LOAD','Load');
 define('T_RUN', 'Run');
+define('T_APPLY', 'Send Application');
 
 define('BLACK',  '0');
 define('YELLOW', '1');
@@ -45,6 +46,7 @@ $pinStatusA = array();
 $pinStatusD = array();
 $pinModeD   = array();
 
+$application = 0;
 
 $hBoard = 300; // 300
 $wBoard = 500; // 500
@@ -254,9 +256,13 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
         runTarget($targetStep);
       }
 
+    if($action == 'apply_account' )
+      {
+        $username = $_POST['username'];
+        $email    = $_POST['email'];
+        createApplication($username,$email);
+      }
 
- 
-//  }
 
 $curStep = $par['a7_cur_step'];
 readStatus();
@@ -273,14 +279,14 @@ decodeStatus($status[$curStep]);
 // $par['a7_cur_file']    = $curFile; 
 // $par['a7_cur_sketch_name'] = $curSketchName;
 
-$_SESSION['a7_cur_sim_len'] = $par['a7_cur_sim_len'];
-$_SESSION['a7_cur_loop_len'] = $par['a7_cur_loop_len'];
-$_SESSION['a7_cur_sketch']  = $par['a7_cur_sketch'];
-$_SESSION['a7_cur_step']    = $par['a7_cur_step'];
-$_SESSION['a7_cur_loop']    = $par['a7_cur_loop'];
-$_SESSION['a7_cur_log']     = $par['a7_cur_log'];
-$_SESSION['a7_cur_menu']    = $par['a7_cur_menu'];
-$_SESSION['a7_cur_file']    = $par['a7_cur_file'];
+$_SESSION['a7_cur_sim_len']     = $par['a7_cur_sim_len'];
+$_SESSION['a7_cur_loop_len']    = $par['a7_cur_loop_len'];
+$_SESSION['a7_cur_sketch']      = $par['a7_cur_sketch'];
+$_SESSION['a7_cur_step']        = $par['a7_cur_step'];
+$_SESSION['a7_cur_loop']        = $par['a7_cur_loop'];
+$_SESSION['a7_cur_log']         = $par['a7_cur_log'];
+$_SESSION['a7_cur_menu']        = $par['a7_cur_menu'];
+$_SESSION['a7_cur_file']        = $par['a7_cur_file'];
 $_SESSION['a7_cur_sketch_name'] = $par['a7_cur_sketch_name'];
 
 
@@ -292,13 +298,44 @@ $_SESSION['a7_cur_sketch_name'] = $par['a7_cur_sketch_name'];
 // Calulate positions in image
 //====================================================================
 
+//==========================================
+function createApplication($username,$email)
+//==========================================
+{
+  global $application;
+
+  if($email && $username)
+    {
+      $file = "applications.txt";
+      $fileSize = filesize($file);
+      if($fileSize < 900000)
+	{
+	  $out = fopen($file,"a");
+	  if($out)
+	    {
+	      $temp = $fileSize." ".$username."   ".$email."\n";
+	      //echo("$temp<br>");
+	      fwrite($out,$temp);
+	      $application = 1;
+	    }
+	  fclose($out);
+	}
+      else
+	vikingError("Application rejected due to overload");  
+    }
+  else
+    vikingError("Application rejected");  
+}
+
+//==========================================
 function canvasPos()
+//==========================================
 {
   global $par,$pinModeD,$pinStatusD,$pinStatusA;
   global $digX,$digY,$anaX,$anaY,$resetX,$resetY;
   global $TXledX,$TXledY,$onOffX,$onOffY,$led13X,$led13Y;
   global $sketchNameX,$sketchNameY;
-  $user       = $par['user'];
+  $user = $par['user'];
 
   //$input  = array_keys($_GET);
   //$coords = explode(',', $input[0]);
@@ -451,9 +488,15 @@ function decodeStatus($code)
       $result = $value & $temp;
       //print("$result, $value, '&', $temp<br>");
       if($result != 0) 
-	$pinStatusD[$ii] = YELLOW;
+	{
+	  $pinValueD[$ii] = 1;
+	  $pinStatusD[$ii] = YELLOW;
+	}
       else
-	$pinStatusD[$ii] = BLACK;
+	{
+	  $pinValueD[$ii]  = 0;	  
+	  $pinStatusD[$ii] = BLACK;
+	}
       $ii++;	   
     }
 
@@ -480,7 +523,7 @@ function decodeStatus($code)
 	  $pinValuesD[$xpar[$ix]] = $xpar[$ix+1];
 	  $aw = $xpar[$ix]; 
           $qq = $xpar[$ix+1];
-	  if($pinValueA[$xpar[$ix]]> 0)$pinStatusD[$ix] = RED;
+	  if($pinValueD[$xpar[$ix]]> 0)$pinStatusD[$ix] = RED;
 	  //echo("$tempD Digital $ii $aw $qq<br>");
 	}
     }
@@ -881,7 +924,7 @@ function uploadFile2()
           $extension = strtolower($extension);
           if (($extension != "txt") && ($extension != "pde") && ($extension != "c"))
             {
-              echo "<h1>Unknown Import file Extension: $extension</h1>";
+              vikingError("Unknown Import file Extension: $extension");
               $errors=1;
             }
           else
@@ -889,7 +932,7 @@ function uploadFile2()
               $size=filesize($_FILES['import_file']['tmp_name']);
               if ($size > MAX_SIZE*1024)
                 {
-                  echo "<h1>You have exceeded the size limit! $size</h1>";
+                  vikingError("You have exceeded the size limit! $size");
                   $errors=1;
                 }
               //$image_name=time().'.'.$extension;
@@ -898,7 +941,7 @@ function uploadFile2()
               $copied = move_uploaded_file($_FILES['import_file']['tmp_name'], $newname);
               if (!$copied)
                 {
-                  echo "<h1>Import Copy unsuccessfull! $size</h1>";
+                  vikingError("Import Copy unsuccessfull! $size");;
                   $errors=1;
                 }
             }
@@ -913,7 +956,9 @@ function uploadFile2()
   return($newname);
 }
 
+//==========================================
 function checkSketch($sketch)
+//==========================================
 {
    
   global $par;
@@ -1020,7 +1065,7 @@ function viking_7_anyFile($sys_id)
 
   if($curEditFlag == 0)
     {
-  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 4px; width :100%; height:500px; overflow : auto; \">\n");
+  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 4px; width :90%; height:500px; overflow : auto; margin-left:20px; margin-bottom:20px; \">\n");
   $len = readAnyFile(1,$curFile);
   showAnyFile($len);
   echo("</div>\n");
@@ -1108,7 +1153,7 @@ function viking_7_error($sys_id)
   $sid        = $par['a7_sid'];
   //if($sid != $sys_id) return;
   $user       = $par['user'];
-  echo("[Webuino Version 2011-12-17] Any errors will be shown here<br>");
+  if($user)echo("[Webuino Version 2011-12-22] Any errors (compile,exec and servuino) will be shown here<br>");
   $file = $servuino.'g++.error';
   showAnyFile($file);
   $file = $servuino.'exec.error';
@@ -1171,6 +1216,7 @@ function viking_7_library($sys_id)
   $curSketch = $par['a7_cur_sketch'];
   $curSimLen = $par['a7_cur_sim_len'];
 
+  echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
   if($user)
   {
   echo("<hr><form name=\"upload_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
@@ -1180,6 +1226,7 @@ function viking_7_library($sys_id)
   echo("</form><br<br>");
   echo("<hr>");
   echo("<table border=\"0\"><tr><td>");
+
   echo("<form name=\"configuration\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
   echo("<input type=\"hidden\" name=\"action\" value=\"set_configuration\">\n");
   echo("Simulation Length <input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td>\n");
@@ -1190,21 +1237,138 @@ function viking_7_library($sys_id)
   echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_LOAD."\"></td>\n");
   echo("</form></tr>");
   if($ready)echo("<tr><td>$ready</td></tr>");
-  echo("</table><hr>");
-
-  echo("Analog Pin Settings at step: $curStep<br>");
-  echo("<table><tr>");
-  echo("<form name=\"f_set_scenario\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
-  echo("<input type=\"hidden\" name=\"action\" value=\"set_scenario\">\n");
-  for($ii=0;$ii<6;$ii++)
-    {
-      echo("<td>Pin $ii<input type=\"text\" name=\"pin_$ii\" value=\"$pinValueA[$ii]\" size=\"3\"></td>");
-    }
-  echo("<td><input type =\"submit\" name=\"submit_scenario\" value=\"".T_LOAD."\"></td>\n");
-  echo("</tr></form>");
-  echo("</table><hr>");
  }
+ else
+   echo("You need to be logged in to access this page<br>Apply for a free account!");
+
+  echo("</div>");
 }
+
+
+function viking_7_pinValues($sys_id)
+{
+  global $par,$pinValueA,$pinValueD;
+  $path   = $par['path'];
+  $sid        = $par['a7_sid'];
+  //if($sid != $sys_id) return;
+  $user       = $par['user'];
+  $curSketch  = $par['a7_cur_sketch'];
+  $curSimLen  = $par['a7_cur_sim_len'];
+  $curStep    = $par['a7_cur_step'];
+
+  echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
+  if($user)
+  {
+    //echo("Analog Pin Settings at step: $curStep<br>");
+    echo("<br>Analog Pins at step $curStep");
+    echo("<table border=1><tr>");
+    echo("<form name=\"f_set_scenario\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
+    echo("<input type=\"hidden\" name=\"action\" value=\"set_scenario\">\n");
+    for($ii=0;$ii<6;$ii++)
+      {
+	echo("<td>$ii</td>");
+      } 
+    echo("</tr><tr>");
+    for($ii=0;$ii<6;$ii++)
+      {
+	echo("<td><input type=\"text\" name=\"pinA_$ii\" value=\"$pinValueA[$ii]\" size=\"2\"></td>");
+      }
+    echo("</tr></table>");
+
+    echo("<br>Digital Pins at step $curStep");
+    echo("<table border=1><tr>");
+    for($ii=13;$ii>=0;$ii--)
+      {
+	echo("<td>$ii</td>");
+      }
+    echo("</tr><tr>");
+    for($ii=13;$ii>=0;$ii--)
+      {
+	echo("<td><input type=\"text\" name=\"pinD_$ii\" value=\"$pinValueD[$ii]\" size=\"1\"></td>");
+      }
+    echo("</tr></table>");
+    echo("<input type =\"submit\" name=\"submit_scenario\" value=\"".T_LOAD."\">");
+    echo("</form>");
+  }
+  else
+    {
+      echo("<br>Analog Pins at step $curStep");
+      echo("<table border=1><tr>");
+      for($ii=0;$ii<6;$ii++)
+	{
+	  echo("<td>$ii</td>");
+	} 
+      echo("</tr><tr>");
+      for($ii=0;$ii<6;$ii++)
+	{
+	  echo("<td>$pinValueA[$ii]</td>");
+	}
+      echo("</tr></table>");
+      
+      echo("<br>Digital Pins at step $curStep");
+      echo("<table border=1><tr>");
+      for($ii=13;$ii>=0;$ii--)
+	{
+	  echo("<td>$ii</td>");
+	}
+      echo("</tr><tr>");
+      for($ii=13;$ii>=0;$ii--)
+	{
+	  echo("<td>$pinValueD[$ii]</td>");
+	}
+      echo("</tr>");
+      echo("</table>");
+    }
+  
+  echo("</div>");
+}
+
+
+function viking_7_applyAccount($sys_id)
+{
+  global $par,$application;
+  $path   = $par['path'];
+  $sid        = $par['a7_sid'];
+  //if($sid != $sys_id) return;
+  $user       = $par['user'];
+  $curSketch = $par['a7_cur_sketch'];
+  $curSimLen = $par['a7_cur_sim_len'];
+
+
+
+  echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
+  if($application == 0)
+    {
+      echo("<h2>Fill in preferred UserName and your E-mail Address. Your account information will be sent to the e-mail address within 24 hours.<br>The account is free!<br><br>
+        The following features are included:<br>
+        <li>Uploading sketches (your Webuino account can hold max 10 sketches)</li>
+        <li>On-line editing of sketches and scenarios</li>
+</h2>");
+      
+      
+      echo("Disclaimer: Your account can be deleted any time for any reason.<br>");
+      echo("Security:   All sketches loaded into Webuino Simulator is scanned for evil code.<br><br><br>");
+      
+      echo("<table border=\"0\"><tr>");
+      
+      echo("<form name=\"f_apply_account\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
+      echo("<input type=\"hidden\" name=\"action\" value=\"apply_account\">\n");
+      echo("<td>UserName:</td><td>Your E-mail Address:</td></tr><tr><td><input type=\"text\" name=\"username\" value=\"\" size=\"16\"></td>\n");
+      echo("<td><input type=\"text\" name=\"email\" value=\"\" size=\"30\"></td>\n");
+      system("ls upload > list.txt;");
+      echo("<td>");
+      echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_APPLY."\"></td>\n");
+      echo("</form></tr>");
+      echo("</table>");
+    }
+  else if($application == 1)
+    {
+      echo("<h2>Thank you for applying!<br>Your account information will be sent to you within 24 hours.</hr>");  
+    }
+
+  echo("</div>");
+}
+
 
 function viking_7_script($sys_id)
 {
