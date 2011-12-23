@@ -38,6 +38,8 @@ $serialL    = array();
 
 $stepLoop   = array();
 $loopStep   = array();
+$readStep   = array();
+$stepRead   = array();
 
 $pinValueA  = array();
 $pinValueD  = array();
@@ -114,9 +116,11 @@ canvasPos();
 $par['a7_cur_sim_len'] = $_SESSION['a7_cur_sim_len'];
 init($par['a7_cur_sim_len']);
 $par['a7_cur_loop_len'] = $_SESSION['a7_cur_loop_len'];
+$par['a7_cur_read_len'] = $_SESSION['a7_cur_read_len'];
 $par['a7_cur_source']  = $_SESSION['a7_cur_source'];
 $par['a7_cur_step']    = $_SESSION['a7_cur_step'];
 $par['a7_cur_loop']    = $_SESSION['a7_cur_loop'];
+$par['a7_cur_read']    = $_SESSION['a7_cur_read'];
 $par['a7_cur_menu']    = $_SESSION['a7_cur_menu'];
 $par['a7_cur_file']    = $_SESSION['a7_cur_file'];
 $par['a7_cur_sketch_name'] = $_SESSION['a7_cur_sketch_name'];
@@ -130,8 +134,10 @@ readSerial();
 
 $curSimLen  = $par['a7_cur_sim_len'] ;
 $curLoopLen = $par['a7_cur_loop_len'] ;
+$curReadLen = $par['a7_cur_read_len'] ;
 $curSource  = $par['a7_cur_source'] ;
 $curLoop    = $par['a7_cur_loop'] ;
+$curRead    = $par['a7_cur_read'] ;
 
 // GET ==============================================
 //$sys_id        = $_GET['a7_sid'];
@@ -154,6 +160,7 @@ if($action == 'step')
     $par['a7_cur_step'] = $_GET['x'];
     $curStep = $_GET['x'];
     $par['a7_cur_loop'] = $stepLoop[$curStep];
+    $par['a7_cur_read'] = $stepRead[$curStep];
   }
 
 if($action == 'loop')
@@ -161,6 +168,17 @@ if($action == 'loop')
     $par['a7_cur_loop'] = $_GET['x'];
     $loop = $_GET['x'];
     $par['a7_cur_step'] = $loopStep[$loop];
+    $curStep = $par['a7_cur_step'];
+    $par['a7_cur_read'] = $stepRead[$curStep];
+  }
+
+if($action == 'read')
+  {
+    $par['a7_cur_read'] = $_GET['x'];
+    $read = $_GET['x'];
+    $par['a7_cur_step'] = $readStep[$read];
+    $curStep = $par['a7_cur_step'];
+    $par['a7_cur_loop'] = $stepLoop[$curStep];
   }
 
 if($action == 'edit_file')
@@ -294,9 +312,11 @@ decodeStatus($status[$curStep]);
 
 $_SESSION['a7_cur_sim_len']     = $par['a7_cur_sim_len'];
 $_SESSION['a7_cur_loop_len']    = $par['a7_cur_loop_len'];
+$_SESSION['a7_cur_read_len']    = $par['a7_cur_read_len'];
 $_SESSION['a7_cur_source']      = $par['a7_cur_source'];
 $_SESSION['a7_cur_step']        = $par['a7_cur_step'];
 $_SESSION['a7_cur_loop']        = $par['a7_cur_loop'];
+$_SESSION['a7_cur_read']        = $par['a7_cur_read'];
 $_SESSION['a7_cur_menu']        = $par['a7_cur_menu'];
 $_SESSION['a7_cur_file']        = $par['a7_cur_file'];
 $_SESSION['a7_cur_sketch_name'] = $par['a7_cur_sketch_name'];
@@ -315,6 +335,7 @@ function resetSession()
     $_SESSION['a7_cur_source']      = ""; 
     $_SESSION['a7_cur_step']        = 0; 
     $_SESSION['a7_cur_loop']        = 0; 
+    $_SESSION['a7_cur_read']        = 0; 
     $_SESSION['a7_cur_menu']        = ""; 
     $_SESSION['a7_cur_file']        = ""; 
     $_SESSION['a7_cur_sketch_name'] = "";
@@ -756,12 +777,14 @@ function readSimulation($file)
 //==========================================
 {
   global $par;
-  $user       = $par['user'];
-  global $simulation,$servuino,$loopStep,$stepLoop;
+  $user  = $par['user'];
+  global $simulation;
+    //$servuino,$loopStep,$stepLoop,$readStep,$stepRead;
 
   //$file = $servuino.$file;
   $step = 0;
   $loop = 0;
+  $read = 0;
   if(!$file)return;
   $in = fopen($file,"r");
   if($in)
@@ -778,6 +801,69 @@ function readSimulation($file)
               $row[0] = ' ';
 	      $simulation[$step] = $row;
 	      //echo("$row<br>");
+//               if(strstr($row,"digitalRead ") || strstr($row,"analogRead "))
+//               {
+//                  $read++;
+//                  $readStep[$read] = $step;
+//               }
+//               $stepRead[$step] = $read;
+//               if(strstr($row,"Loop "))
+//               {
+//                  $loop++;
+//                  $loopStep[$loop] = $step;
+//               }
+//               $stepLoop[$step] = $loop;
+	    }
+	}
+//       $par['a7_cur_sim_len'] = $step;
+//       $par['a7_cur_loop_len'] = $loop;
+//       $par['a7_cur_read_len'] = $read;
+      fclose($in);
+    }
+  else
+    {
+      $temp = "readSimulation: Fail to open ($file)";
+      vikingError($temp);
+    }
+
+  readArduino();
+
+  return($step);
+}
+
+//==========================================
+function readArduino()
+//==========================================
+{
+  global $par,$fn;
+  $user  = $par['user'];
+  //global $simulation,$servuino,
+  global $loopStep,$stepLoop,$readStep,$stepRead;
+
+
+  $step = 0;
+  $loop = 0;
+  $read = 0;
+  $file = $fn['arduino'];
+  if(!$file)return;
+  $in = fopen($file,"r");
+  if($in)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  //$row = trim($row);
+	  //$row = safeText($row);
+	  //echo("$row<br>");
+	  if($row[0]=='+')
+	    {
+	      $step++;
+              if(strstr($row,"digitalRead ") || strstr($row,"analogRead ") && !strstr($row,"Serial:"))
+              {
+                 $read++;
+                 $readStep[$read] = $step;
+              }
+              $stepRead[$step] = $read;
               if(strstr($row,"Loop "))
               {
                  $loop++;
@@ -788,15 +874,17 @@ function readSimulation($file)
 	}
       $par['a7_cur_sim_len'] = $step;
       $par['a7_cur_loop_len'] = $loop;
+      $par['a7_cur_read_len'] = $read;
       fclose($in);
     }
   else
     {
-      $temp = "readSimulation: Fail to open ($file)";
+      $temp = "readArduino: Fail to open ($file)";
       vikingError($temp);
     }
   return($step);
 }
+
 
 //==========================================
 function readSerial()
@@ -1133,6 +1221,7 @@ function checkSketch($sketch)
 function getPrevRead($step)
 //==========================================
 {
+  
   return(1);
 }
 
@@ -1170,12 +1259,13 @@ function viking_7_menu($sys_id)
   global $par;
   $path = $par['path'];
   $sid        = $par['a7_sid'];
-  //if($sid != $sys_id) return;
   $user       = $par['user'];
   $curStep    = $par['a7_cur_step'];
   $curLoop    = $par['a7_cur_loop'];
+  $curRead    = $par['a7_cur_read'];
   $curSimLen  = $par['a7_cur_sim_len'];
   $curLoopLen = $par['a7_cur_loop_len'];
+  $curReadLen = $par['a7_cur_read_len'];
 
   echo("<ul>");
   echo("         <li><a href=$path&ac=step&x=1>reset</a></li>");
@@ -1196,12 +1286,13 @@ function viking_7_menu($sys_id)
   if($temp > $curLoopLen)$temp = $curLoopLen;
   echo("         <li><a href=$path&ac=loop&x=$temp>loop+</a></li>");
 
-  $temp = getPrevRead($curStep);
+  $temp = $curRead - 1;
   if($temp < 1)$temp = 1;
-  echo("         <li><a href=$path&ac=step&x=$temp>read-</a></li>");
-  $temp = getNextRead($curStep);
-  if($temp > $curLoopLen)$temp = $curLoopLen;
-  echo("         <li><a href=$path&ac=step&x=$temp>read+</a></li>");
+  echo("         <li><a href=$path&ac=read&x=$temp>read-</a></li>");
+
+  $temp = $curRead + 1;
+  if($temp > $curReadLen)$temp = $curReadLen;
+  echo("         <li><a href=$path&ac=read&x=$temp>read+</a></li>");
   echo("</ul>");
 }
 
