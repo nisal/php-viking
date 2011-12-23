@@ -48,41 +48,12 @@ $pinModeD   = array();
 
 // Create Account
 $account = $par['user'];
-$tDir = 'account/'.$account;
 
-if(!is_dir($tDir))
-  {
-    vikingWarning("Create account");
-    if(!mkdir($tDir,0777))vikingError("Not possible to create account");
-    $tDir2 = $tDir.'/upload';
-    if(!mkdir($tDir2,0777))vikingError("Not possible to create upload in account");
-
-    $syscom = "cd $tDir;cp ../../servuino/*.c .;cp ../../servuino/*.h .;";
-    system($syscom);
-
-    $syscom = "cd $tDir;touch g++.error exec.error;";
-    system($syscom);
-    $syscom = "cd $tDir;touch data.serial data.custom data.arduino data.error data.status data.code data.scen sketch.pde;";
-    system($syscom);
-
-    $_SESSION['a7_cur_sim_len']     = "simlen_undefined"; 
-    $_SESSION['a7_cur_loop_len']    = "looplen_undefined";
-    $_SESSION['a7_cur_sketch']      = "sketch_undefined"; 
-    $_SESSION['a7_cur_source']      = "source_undefined"; 
-    $_SESSION['a7_cur_step']        = "0"; 
-    $_SESSION['a7_cur_loop']        = "0"; 
-    $_SESSION['a7_cur_log']         = "log_undefined"; 
-    $_SESSION['a7_cur_menu']        = "menu_undefined"; 
-    $_SESSION['a7_cur_file']        = "file_undefined"; 
-    $_SESSION['a7_cur_sketch_name'] = "sketch_name_undefined"; 
-
-
-  }
 if(!$account)$account = 'public';
 
 // Set filenames
 $upload   = "account/".$account.'/upload/';
-$fn         = array(); 
+$fn = array(); 
 $fn['serial']      = 'account/'.$account.'/data.serial';
 $fn['custom']      = 'account/'.$account.'/data.custom';
 $fn['arduino']     = 'account/'.$account.'/data.arduino';
@@ -95,7 +66,43 @@ $fn['application'] = 'application.txt';
 $fn['sketch']      = 'account/'.$account.'/sketch.pde';
 $fn['scenario']    = 'account/'.$account.'/data.scen';
 $fn['list']        = 'account/'.$account.'/list.txt';
+$fn['setting']     = 'account/'.$account.'/setting.txt';
 
+
+$tDir = 'account/'.$account;
+
+if(!is_dir($tDir))
+  {
+    vikingWarning("Create account");
+    if(!mkdir($tDir,0777))vikingError("Not possible to create account");
+    $tDir2 = $tDir.'/upload';
+    if(!mkdir($tDir2,0777))vikingError("Not possible to create upload in account");
+
+    $syscom = "cd $tDir;cp ../../servuino/*.c .;cp ../../servuino/*.h .;";
+    system($syscom);
+
+    $syscom = "cd $tDir;touch g++.error exec.error setting.txt;";
+    system($syscom);
+    $syscom = "cd $tDir;touch data.serial data.custom data.arduino data.error data.status data.code data.scen sketch.pde;";
+    system($syscom);
+    resetSession();
+  }
+
+$userEvent = $par['user_event'];
+
+if($userEvent == 1) // user logged in!
+  {
+    resetSession();
+    readUserSetting();
+    $par['user_event'] = 0;
+  }
+
+if($userEvent == 2) // user logged out!
+  {
+    writeUserSetting();
+    resetSession();
+    $par['user_event'] = 0;
+  }
 
 $application = 0;
 
@@ -103,28 +110,13 @@ $hBoard = 300; // 300
 $wBoard = 500; // 500
 canvasPos();
 
-// read SESSION parameters ===============================
-if (!isset($_SESSION['a7_cur_sim_len']))$_SESSION['a7_cur_sim_len'] = "simlen_undefined"; 
-if (!isset($_SESSION['a7_cur_loop_len']))$_SESSION['a7_cur_loop_len'] = "looplen_undefined";
-//if (!isset($_SESSION['a7_cur_sketch']))$_SESSION['a7_cur_sketch'] = "sketch_undefined"; 
-if (!isset($_SESSION['a7_cur_source']))$_SESSION['a7_cur_source'] = "source_undefined"; 
-if (!isset($_SESSION['a7_cur_step']))$_SESSION['a7_cur_step'] = "step_undefined"; 
-if (!isset($_SESSION['a7_cur_loop']))$_SESSION['a7_cur_loop'] = "loop_undefined"; 
-if (!isset($_SESSION['a7_cur_log']))$_SESSION['a7_cur_log'] = "log_undefined"; 
-if (!isset($_SESSION['a7_cur_menu']))$_SESSION['a7_cur_menu'] = "menu_undefined"; 
-if (!isset($_SESSION['a7_cur_file']))$_SESSION['a7_cur_file'] = "file_undefined"; 
-if (!isset($_SESSION['a7_cur_sketch_name']))$_SESSION['a7_cur_sketch_name'] = "sketch_name_undefined"; 
-
-
 
 $par['a7_cur_sim_len'] = $_SESSION['a7_cur_sim_len'];
 init($par['a7_cur_sim_len']);
 $par['a7_cur_loop_len'] = $_SESSION['a7_cur_loop_len'];
-//$par['a7_cur_sketch']  = $_SESSION['a7_cur_sketch'];
 $par['a7_cur_source']  = $_SESSION['a7_cur_source'];
 $par['a7_cur_step']    = $_SESSION['a7_cur_step'];
 $par['a7_cur_loop']    = $_SESSION['a7_cur_loop'];
-$par['a7_cur_log']     = $_SESSION['a7_cur_log'];
 $par['a7_cur_menu']    = $_SESSION['a7_cur_menu'];
 $par['a7_cur_file']    = $_SESSION['a7_cur_file'];
 $par['a7_cur_sketch_name'] = $_SESSION['a7_cur_sketch_name'];
@@ -136,11 +128,11 @@ $tFile = $fn['custom'];
 readSimulation($tFile);
 readSerial();
 
-$curSimLen = $par['a7_cur_sim_len'] ;
+$curSimLen  = $par['a7_cur_sim_len'] ;
 $curLoopLen = $par['a7_cur_loop_len'] ;
-//$curSketch = $par['a7_cur_sketch'] ;
-$curSource = $par['a7_cur_source'] ;
-$curLoop   = $par['a7_cur_loop'] ;
+$curSource  = $par['a7_cur_source'] ;
+$curLoop    = $par['a7_cur_loop'] ;
+
 // GET ==============================================
 //$sys_id        = $_GET['a7_sid'];
 //$par['a7_sid'] = $_GET['a7_sid'];
@@ -151,42 +143,6 @@ $curLoop   = $par['a7_cur_loop'] ;
 
 $action  = $_GET['ac'];
 $alt     = $_GET['x'];
-
-// if($action == 'load')
-//   {
-//     $alt = $_GET['x'];
-//     if($alt == 'CGE')
-//       {
-// 	$file = $upload.$curSketch;
-// 	copySketch($file);// C
-// 	compileSketch(); // G
-// 	execSketch($curSimLen,0); // E
-//       }
-//     if($alt == 'GE')
-//       {
-// 	compileSketch(); // G
-// 	execSketch($curSimLen,0); // E
-//       }
-//     if($alt == 'E')
-//       {
-// 	execSketch($curSimLen,0); // E
-//       }
-
-//     $curStep = 0;
-//     init($curSimLen);
-//     readSketchInfo();
-//     readSimulation('data.custom');
-//     readSerial('data.serial');
-//     readStatus();
-//     $par['a7_ready'] = "Sketch loaded!";
-//   }
-
-if($action == 'menu')
-  {
-    $curMenu = $_GET['x'];
-    $_SESSION['cur_menu'] = $curMenu; 
-  }
-
 
 if($action == 'run' && $curSimLen > 0)
   {
@@ -217,22 +173,6 @@ if($action == 'reset')
     $par['a7_cur_step'] = 1;
   }
 
-// if($action == 'log')
-//   {
-//     $source = $_GET['x'];
-//     if($source == 'code')   $curLog = 'data.code';
-//     if($source == 'error')  $curLog = 'data.error';
-//     if($source == 'custom') $curLog = 'data.custom';
-//     if($source == 'arduino')$curLog = 'data.arduino';
-//     if($source == 'scen')   $curLog = 'data.scen';
-//     if($source == 'status') $curLog = 'data.status';
-//     if($source == 'serial') $curLog = 'data.serial';
-//     $par['a7_cur_log'] = $curLog;
-//     //$_SESSION['cur_log'] = $curLog;
-//     $logLen = readAnyFile($curLog);
-//   }
-
-
 // POST =============================================
 
 if (!isset($_POST['action']))$_POST['action'] = "undefined"; 
@@ -255,6 +195,7 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
 	$data = $_POST['file_data'];
 	$what = $_POST['submit_edit'];
 	$curSimLen = $par['a7_cur_sim_len'];
+	if(!$tempFile)return;
 	$fp = fopen($tempFile, 'w')or die("Could not open file ($tempFile) (write)!");;
 	fwrite($fp,$data) or die("Could not write to file ($tempFile) !");
 	fclose($fp);
@@ -313,6 +254,7 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
 	    readSimulation($tFile);
 	    readStatus();
 	    readSerial();
+            writeUserSetting();
 	    $par['a7_ready'] = "Sketch loaded!";
 	  }
 	if($what == T_DELETE)
@@ -346,7 +288,6 @@ decodeStatus($status[$curStep]);
 // $par['a7_cur_step']    = $curStep;
 // $par['a7_cur_sim_len'] = $curSimLen;
 // $par['a7_cur_sketch']  = $curSketch;
-// $par['a7_cur_log']     = $curLog;
 // $par['a7_cur_menu']    = $curMenu; 
 // $par['a7_cur_file']    = $curFile; 
 // $par['a7_cur_sketch_name'] = $curSketchName;
@@ -356,7 +297,6 @@ $_SESSION['a7_cur_loop_len']    = $par['a7_cur_loop_len'];
 $_SESSION['a7_cur_source']      = $par['a7_cur_source'];
 $_SESSION['a7_cur_step']        = $par['a7_cur_step'];
 $_SESSION['a7_cur_loop']        = $par['a7_cur_loop'];
-$_SESSION['a7_cur_log']         = $par['a7_cur_log'];
 $_SESSION['a7_cur_menu']        = $par['a7_cur_menu'];
 $_SESSION['a7_cur_file']        = $par['a7_cur_file'];
 $_SESSION['a7_cur_sketch_name'] = $par['a7_cur_sketch_name'];
@@ -366,6 +306,80 @@ $_SESSION['a7_cur_sketch_name'] = $par['a7_cur_sketch_name'];
 //  Internal functions
 //====================================================
 
+function resetSession()
+{
+
+    $_SESSION['a7_cur_sim_len']     = ""; 
+    $_SESSION['a7_cur_loop_len']    = "";
+    $_SESSION['a7_cur_sketch']      = ""; 
+    $_SESSION['a7_cur_source']      = ""; 
+    $_SESSION['a7_cur_step']        = 0; 
+    $_SESSION['a7_cur_loop']        = 0; 
+    $_SESSION['a7_cur_menu']        = ""; 
+    $_SESSION['a7_cur_file']        = ""; 
+    $_SESSION['a7_cur_sketch_name'] = "";
+}
+//==========================================
+function writeUserSetting()
+//==========================================
+{
+  global $par,$fn;
+
+      $file = $fn['setting'];
+      if(!$file)return;
+      $out = fopen($file,"w");
+      if($out)
+	{
+	  $temp = "SOURCE: ".$par['a7_cur_source']."\n";
+	  fwrite($out,$temp);
+	  $temp = "FILE: ".$par['a7_cur_file']."\n";
+	  fwrite($out,$temp);
+	}
+      else
+	vikingError("Not able to open user setting file write ($file)");  
+
+      fclose($out);
+}
+
+//==========================================
+function readUserSetting()
+//==========================================
+{
+  global $par,$fn;
+
+  $file = $fn['setting'];
+  if(!$file)return;
+  $in = fopen($file,"r");
+  if($in)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  if(strstr($row,"SOURCE"))
+	    {
+	      if($pp = strstr($row,":"))
+		{
+		  sscanf($pp,"%s%s",$junk,$curSource);
+		  $par['a7_cur_source'] = $curSource;
+		  $_SESSION['a7_cur_source'] = $curSource;
+		}
+	    }
+	  if(strstr($row,"FILE"))
+	    {
+	      if($pp = strstr($row,":"))
+		{
+		  sscanf($pp,"%s%s",$junk,$curFile);
+		  $par['a7_cur_file'] = $curFile;
+		  $_SESSION['a7_cur_file'] = $curFile;
+		}
+	    }
+	}
+    }
+  else
+    vikingError("Not able to open user setting file read ($file)");  
+  
+  fclose($in);
+}
 
 //==========================================
 function createApplication($username,$email)
@@ -500,7 +514,7 @@ function compileSketch()
 {
   global $par;
   $user = $par['user'];
-  $syscom ="pwd;cd account/$user;g++ -o servuino servuino.c > g++.error 2>&1;";
+  $syscom ="cd account/$user;g++ -o servuino servuino.c > g++.error 2>&1;";
   //echo("$syscom<br>");
   system($syscom);
 }
@@ -513,7 +527,7 @@ function execSketch($steps,$source)
   $user = $par['user'];
   if($steps < 1)vikingWarning("Simulation length < 0");
 
-  $syscom = "pwd;cd account/$user;./servuino $steps $source >exec.error 2>&1;chmod 777 data.*;";
+  $syscom = "cd account/$user;./servuino $steps $source >exec.error 2>&1;chmod 777 data.*;";
   //echo("$syscom<br>");
   system($syscom);
 }
@@ -748,6 +762,7 @@ function readSimulation($file)
   //$file = $servuino.$file;
   $step = 0;
   $loop = 0;
+  if(!$file)return;
   $in = fopen($file,"r");
   if($in)
     {
@@ -793,6 +808,7 @@ function readSerial()
 
   $file = $fn['serial'];
   $step = 0;
+  if(!$file)return;
   $in = fopen($file,"r");
   if($in)
     {
@@ -829,6 +845,7 @@ function readStatus()
 
   $file = $fn['status'];
   $step = 0;
+  if(!$file)return;
   $in = fopen($file,"r");
   if($in)
     {
@@ -863,6 +880,7 @@ function readAnyFile($file)
 
   $step = 0;
   $content[0] = 0;
+  if(!$file)return;
   $in = fopen($file,"r");
   if($in)
     {
@@ -892,10 +910,11 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
   global $par;
   $user = $par['user'];
 
+  if(!$file)return;
   $in = fopen($file,"r");
   if($in)
     {
-      echo("$name<select name=\"$fname\">");
+      echo("$name <select name=\"$fname\">");
       while (!feof($in))
 	{
 	  $row = fgets($in);
@@ -904,7 +923,7 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
 	  if($row)
 	    {
 	      $dirrow = $dir.$row;
-	      $selected = "";if($sel == $row)$selected = 'selected';
+	      $selected = "";if($sel == $dirrow)$selected = 'selected';
 	      echo("<option value=\"$dirrow\" $selected>$row</option>");
 	    }
 	}
@@ -927,6 +946,8 @@ function readSketchInfo()
   $user = $par['user'];
 
   $tFile = $par['a7_cur_source'];
+
+  if(!$tFile) return;
 
   $in = fopen($tFile,"r");
   if($in)
@@ -993,6 +1014,8 @@ function showFile($title,$file)
 {
   global $par;
   $user  = $par['user'];
+
+  if(!$file)return;
 
   $in = fopen($file,"r");
   if($in)
@@ -1077,7 +1100,7 @@ function checkSketch($sketch)
   $res = 0;
   $user       = $par['user'];
 
-  //$sketch = $upload.$sketch;
+  if(!$sketch)return;
   $in = fopen($sketch,"r");
   if($in)
     {
@@ -1227,6 +1250,7 @@ function viking_7_anyFile($sys_id)
     }
   else if($curEditFlag == 1 && $user)
     {
+      if(!$curFile)return;
       $fh = fopen($curFile, "r") or die("Could not open file ($curFile)!");
       $data = fread($fh, filesize($curFile)) or die("Could not read file ($curFile)!");
       fclose($fh);
@@ -1368,7 +1392,7 @@ function viking_7_library($sys_id)
   $path      = $par['path'];
   $sid       = $par['a7_sid'];
   $user      = $par['user'];
-  //$curSketch = $par['a7_cur_sketch'];
+  $curSource = $par['a7_cur_source'];
   $curSimLen = $par['a7_cur_sim_len'];
   
   echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
@@ -1388,7 +1412,6 @@ function viking_7_library($sys_id)
       $tFile = $fn['list'];
       $syscom = "ls $upload > $tFile;";
       system($syscom);
-      //system("pwd;ls upload;");
       echo("<td>");
       formSelectFile("Sketches","source",$tFile,$curSource,$upload);
       echo("</tr></table><br>");

@@ -66,8 +66,11 @@ if($temp)
   }
 
 // Logout
-if($par['p1'] == 'a4_logout') $par['user'] ='';
-
+if($par['p1'] == 'a4_logout')
+  {
+    $par['user'] ='';
+    $par['user_event'] = 2;
+  }
 // POST =============================================
 if ($_SERVER['REQUEST_METHOD'] == "POST")
   {
@@ -86,7 +89,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 	    $temp_name = getObjectName($sel_db,$id);
 
 	    if($temp_pswd == $user_pswd && $temp_name = $user_name)
-	      $par['user'] = $user_name;;
+	      {
+		$par['user'] = $user_name;
+		$par['user_event'] = 1;
+	      }
 	  }
 	else 
 	  vikingError("User does not exist");	
