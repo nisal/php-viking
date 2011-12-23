@@ -258,16 +258,6 @@ function uploadFile()
 // HTML
 //=====================================================
 
-function viking_lib_pvLink()
-{
-  global $par;
-  $name = $par['lib_pv_link_name'];
-  $link = $par['lib_pv_link_target'];
-
-  $temp = "<a href=\"index.php?pv=$link\">$name</a>";
-}
-
-
 function viking_lib_showError()
 {
   global $vikingError;
