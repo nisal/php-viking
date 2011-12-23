@@ -31,7 +31,7 @@ define("T_4_PASSWORD","Password");
 
 // Declarations =====================================
 
-// Always use database: shop
+// Always use database: users
 $_SESSION['a4_db'] = 'users';
 
 
@@ -65,8 +65,6 @@ if($temp)
     $sel_name   = getObjectName($sel_db,$sel_object);
   }
 
-// PAR 1,2,3,4,5
-
 // Logout
 if($par['p1'] == 'a4_logout') $par['user'] ='';
 
@@ -91,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 	      $par['user'] = $user_name;;
 	  }
 	else 
-	  echo("User does not exist");	
+	  vikingError("User does not exist");	
       }
     
     
@@ -114,11 +112,11 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 		    setObjectText($sel_db,$user_id,$user_pswd1);
 		  }
 		else
-		  echo("Mismatch  password ");
+		  vikingError("Mismatch password");
 	      } 
 	  }
 	else
-	  echo("User name already exists");
+	  vikingError("User name already exists");
       }
   }
 
