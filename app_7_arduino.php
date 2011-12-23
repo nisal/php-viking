@@ -117,12 +117,12 @@ $par['a7_cur_sim_len'] = $_SESSION['a7_cur_sim_len'];
 init($par['a7_cur_sim_len']);
 $par['a7_cur_loop_len'] = $_SESSION['a7_cur_loop_len'];
 $par['a7_cur_read_len'] = $_SESSION['a7_cur_read_len'];
-$par['a7_cur_source']  = $_SESSION['a7_cur_source'];
-$par['a7_cur_step']    = $_SESSION['a7_cur_step'];
-$par['a7_cur_loop']    = $_SESSION['a7_cur_loop'];
-$par['a7_cur_read']    = $_SESSION['a7_cur_read'];
-$par['a7_cur_menu']    = $_SESSION['a7_cur_menu'];
-$par['a7_cur_file']    = $_SESSION['a7_cur_file'];
+$par['a7_cur_source']   = $_SESSION['a7_cur_source'];
+$par['a7_cur_step']     = $_SESSION['a7_cur_step'];
+$par['a7_cur_loop']     = $_SESSION['a7_cur_loop'];
+$par['a7_cur_read']     = $_SESSION['a7_cur_read'];
+$par['a7_cur_menu']     = $_SESSION['a7_cur_menu'];
+$par['a7_cur_file']     = $_SESSION['a7_cur_file'];
 $par['a7_cur_sketch_name'] = $_SESSION['a7_cur_sketch_name'];
 
 
@@ -293,6 +293,11 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
         $username = $_POST['username'];
         $email    = $_POST['email'];
         createApplication($username,$email);
+      }
+
+    if($action == 'set_scenario' )
+      {
+
       }
 
 
@@ -998,6 +1003,7 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
   global $par;
   $user = $par['user'];
 
+  $res = 0;
   if(!$file)return;
   $in = fopen($file,"r");
   if($in)
@@ -1013,6 +1019,7 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
 	      $dirrow = $dir.$row;
 	      $selected = "";if($sel == $dirrow)$selected = 'selected';
 	      echo("<option value=\"$dirrow\" $selected>$row</option>");
+              $res++;
 	    }
 	}
       echo("</select>");
@@ -1023,6 +1030,7 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
       $temp = "formSelectFile:Fail to open ($file)";
       vikingError($temp);
     }
+  return($res);
 }
 
 //==========================================
@@ -1489,14 +1497,7 @@ function viking_7_library($sys_id)
   echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
   if($user)
     {
-      echo("<hr><br><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
-      echo("<input type=\"hidden\" name=\"action\" value=\"upload_source\">");
-      echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
-      echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_UPLOAD_SKETCH."\">");
-      echo("</form><br<br>");
-      echo("<br><hr><br>");
-
-      echo("<table border=\"0\"><tr>");      
+      echo("<hr><table border=\"0\"><tr>");      
       echo("<form name=\"f_load_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
       echo("<input type=\"hidden\" name=\"action\" value=\"set_load_delete\">\n");
       echo("<td>Simulation Length</td><td><input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td>");
@@ -1504,12 +1505,25 @@ function viking_7_library($sys_id)
       $syscom = "ls $upload > $tFile;";
       system($syscom);
       echo("<td>");
-      formSelectFile("Sketches","source",$tFile,$curSource,$upload);
+      $nSketches = formSelectFile("Sketches","source",$tFile,$curSource,$upload);
       echo("</tr></table><br>");
 
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_DELETE."\">");
-      echo("</form><hr>");
+      echo("</form>");
+
+      if($nSketches < 10)
+	{
+	  echo("<hr><h3>You have $nSketches sketches uploaded.Limit is 10.</h3><br><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
+	  echo("<input type=\"hidden\" name=\"action\" value=\"upload_source\">");
+	  echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
+	  echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_UPLOAD_SKETCH."\">");
+	  echo("</form><br<br>");
+	}
+      else
+	echo("<h2>You have 10 sketches uploaded. Delete some of the sketches.</h2>");
+      echo("<br><hr><br>");
+      
       if($ready)echo("<br>$ready<br>");
     }
   else
