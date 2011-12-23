@@ -258,15 +258,25 @@ function uploadFile()
 // HTML
 //=====================================================
 
+function viking_lib_pvLink()
+{
+  global $par;
+  $name = $par['lib_pv_link_name'];
+  $link = $par['lib_pv_link_target'];
+
+  $temp = "<a href=\"index.php?pv=$link\">$name</a>";
+}
+
+
 function viking_lib_showError()
 {
   global $vikingError;
  
-  echo("vikingError<br>"); 
+  //echo("vikingError<br>"); 
   for ($ii=1; $ii<=$vikingError[0];$ii++)
   {
     $temp = $vikingError[$ii];
-    echo("$ii Error: $temp <br>");
+    echo("<br>$ii Error: $temp <br>");
   }
 }
 
@@ -274,11 +284,11 @@ function viking_lib_showWarning()
 {
   global $vikingWarning;
 
-  echo("vikingWarning<br>");
+  //echo("vikingWarning<br>");
   for ($ii=1; $ii<=$vikingWarning[0];$ii++)
   {
     $temp = $vikingWarning[$ii];
-    echo("$ii Warning: $temp <br>");
+    echo("<br>$ii Warning: $temp <br>");
   }
 }
 
