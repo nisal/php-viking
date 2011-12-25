@@ -27,7 +27,17 @@ $vikingWarning = array();
 $errIx = 0;
 $warIx = 0;
 
+//  pv-support
+$par['inc'] = 0;
 
+if($_GET['pv'])
+  $par['pv'] = $_GET['pv'];
+ else
+   $par['pv'] = $_SESSION['pv'];
+//  end of pv-support
+
+
+$_SESSION['pv'] = $par['pv'];
 
 //$par['admin'] = $_SESSION['admin'];
 $par['user']  = $_SESSION['user'];
