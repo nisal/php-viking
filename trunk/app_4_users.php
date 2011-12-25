@@ -26,6 +26,8 @@ define("T_4_LOGOUT_USER","Logout");
 define("T_4_USER_LOGGED_OUT","Logged Out!");
 define("T_4_USERNAME","Username");
 define("T_4_PASSWORD","Password");
+define("T_4_USER","User");
+define("T_4_PSWD","Pswd");
 
 
 
@@ -180,9 +182,9 @@ function viking_4_addUser_Form()
       echo("<table><tr>");
       echo("<form name=\"form_add_user\" action=\"$path\" method=\"post\"> ");
       echo("<input type=\"hidden\" name=\"a4_post_action\" value=\"post_add_user\">");
-      echo("<tr><td>".T_4_USERNAME."</td><td><input type=\"text\" name=\"a4_user_name\" value=\"\"></td></tr>");
-      echo("<tr><td>".T_4_PASSWORD."</td><td><input type=\"password\" name=\"a4_user_pswd1\" value=\"\"></td></tr>");
-      echo("<tr><td>".T_4_PASSWORD."</td><td><input type=\"password\" name=\"a4_user_pswd2\" value=\"\"></td></tr>");
+      echo("<tr><td>".T_4_USER."</td><td><input type=\"text\" name=\"a4_user_name\" value=\"\"></td></tr>");
+      echo("<tr><td>".T_4_PSWD."</td><td><input type=\"password\" name=\"a4_user_pswd1\" value=\"\"></td></tr>");
+      echo("<tr><td>".T_4_PSWD."</td><td><input type=\"password\" name=\"a4_user_pswd2\" value=\"\"></td></tr>");
       echo("<tr><td><input type =\"submit\" name=\"form_submit\" value=\"".T_4_ADD_USER."\"></td>");
       echo("</form>");
       echo("</tr></table>");
@@ -217,9 +219,9 @@ function viking_4_login_Form()
       echo("<table><tr>");
       echo("<form name=\"form_login_user\" action=\"$path\" method=\"post\"> ");
       echo("<input type=\"hidden\" name=\"a4_post_action\" value=\"post_login_user\">");
-      echo("<td>".T_4_USERNAME."</td><td><input type=\"text\" name=\"a4_user_name\" value=\"\"></td></tr>");
-      echo("<tr><td>".T_4_PASSWORD."</td><td><input type=\"password\" name=\"a4_user_pswd\" value=\"\"></td></tr>");
-      echo("<tr><td><input type =\"submit\" name=\"form_submit\" value=\"".T_4_LOGIN_USER."\"></td>");
+      echo("<td>".T_4_USER."</td><td><input type=\"text\" name=\"a4_user_name\" value=\"\" size=\"7\"></td></tr>");
+      echo("<tr><td>".T_4_PSWD."</td><td><input type=\"password\" name=\"a4_user_pswd\" value=\"\" size=\"7\"></td>");
+      echo("<td><input type =\"submit\" name=\"form_submit\" value=\"".T_4_LOGIN_USER."\"></td>");
       echo("</form>");
       echo("</tr></table>");
     }

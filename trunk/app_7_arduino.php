@@ -1,9 +1,7 @@
 <?
-//======================================
-// Arduino
-
-// function viking_7_function1()
-//======================================
+//========================================
+// PHP-VIKING APP 7: Arduino
+//========================================
 define('T_UPLOAD_SKETCH','Upload sketch to account');
 define('T_DELETE','Delete');
 define('T_CONFIG','Configuration');
@@ -17,6 +15,7 @@ define('T_SAVE','Save');
 define('T_LOAD','Load');
 define('T_RUN', 'Run');
 define('T_SET', 'Set');
+define('T_SET_PIN_VALUE', 'Set Pin Value');
 define('T_APPLY', 'Send Application');
 
 define('BLACK',  '0');
@@ -28,7 +27,12 @@ define('BLUE',   '5');
 define('FUCHSIA','6');
 define('AQUA' ,  '7');
 
-// Declarations =====================================
+$UNO_DIG_PINS  = 14;
+$UNO_ANA_PINS  =  6;
+$MEGA_DIG_PINS = 54;
+$MEGA_ANA_PINS = 16;
+
+// Declarations =========================
 
 $simulation = array();
 $content    = array();
@@ -104,29 +108,34 @@ if($userEvent == 2) // user logged out!
     writeUserSetting();
     resetSession();
     $par['user_event'] = 0;
+    $par['pv'] = 'start';
   }
 
 $application = 0;
 
-$hBoard = 300; // 300
-$wBoard = 500; // 500
-canvasPos();
+$hBoard = 300; // 300 240
+$wBoard = 500; // 500 400
 
 
-$par['a7_cur_sim_len'] = $_SESSION['a7_cur_sim_len'];
+
+$par['a7_cur_sim_len']       = $_SESSION['a7_cur_sim_len'];
 init($par['a7_cur_sim_len']);
-$par['a7_cur_loop_len'] = $_SESSION['a7_cur_loop_len'];
-$par['a7_cur_read_len'] = $_SESSION['a7_cur_read_len'];
-$par['a7_cur_source']   = $_SESSION['a7_cur_source'];
-$par['a7_cur_step']     = $_SESSION['a7_cur_step'];
-$par['a7_cur_loop']     = $_SESSION['a7_cur_loop'];
-$par['a7_cur_read']     = $_SESSION['a7_cur_read'];
-$par['a7_cur_menu']     = $_SESSION['a7_cur_menu'];
-$par['a7_cur_file']     = $_SESSION['a7_cur_file'];
-$par['a7_cur_sketch_name'] = $_SESSION['a7_cur_sketch_name'];
-
+$par['a7_cur_loop_len']      = $_SESSION['a7_cur_loop_len'];
+$par['a7_cur_read_len']      = $_SESSION['a7_cur_read_len'];
+$par['a7_cur_source']        = $_SESSION['a7_cur_source'];
+$par['a7_cur_step']          = $_SESSION['a7_cur_step'];
+$par['a7_cur_loop']          = $_SESSION['a7_cur_loop'];
+$par['a7_cur_read']          = $_SESSION['a7_cur_read'];
+$par['a7_cur_menu']          = $_SESSION['a7_cur_menu'];
+$par['a7_cur_file']          = $_SESSION['a7_cur_file'];
+$par['a7_cur_sketch_name']   = $_SESSION['a7_cur_sketch_name'];
+$par['a7_cur_board_type']    = $_SESSION['a7_cur_board_type'];
+$par['a7_cur_board_digpins'] = $_SESSION['a7_cur_board_digpins'];
+$par['a7_cur_board_anapins'] = $_SESSION['a7_cur_board_anapins'];
+$par['a7_ser_log']           = $_SESSION['a7_ser_log'];
 
 readSketchInfo();
+canvasPos();
 
 $tFile = $fn['custom'];
 readSimulation($tFile);
@@ -157,16 +166,16 @@ if($action == 'run' && $curSimLen > 0)
 
 if($action == 'step')
   {
-    $par['a7_cur_step'] = $_GET['x'];
-    $curStep = $_GET['x'];
+    $par['a7_cur_step'] = $alt;
+    $curStep = $alt;
     $par['a7_cur_loop'] = $stepLoop[$curStep];
     $par['a7_cur_read'] = $stepRead[$curStep];
   }
 
 if($action == 'loop')
   {
-    $par['a7_cur_loop'] = $_GET['x'];
-    $loop = $_GET['x'];
+    $par['a7_cur_loop'] = $alt;
+    $loop = $alt;
     $par['a7_cur_step'] = $loopStep[$loop];
     $curStep = $par['a7_cur_step'];
     $par['a7_cur_read'] = $stepRead[$curStep];
@@ -174,8 +183,8 @@ if($action == 'loop')
 
 if($action == 'read')
   {
-    $par['a7_cur_read'] = $_GET['x'];
-    $read = $_GET['x'];
+    $par['a7_cur_read'] = $alt;
+    $read = $alt;
     $par['a7_cur_step'] = $readStep[$read];
     $curStep = $par['a7_cur_step'];
     $par['a7_cur_loop'] = $stepLoop[$curStep];
@@ -184,6 +193,11 @@ if($action == 'read')
 if($action == 'edit_file')
   {
     $curEditFlag = 1;
+  }
+
+if($action == 'winserlog')
+  {
+    $par['a7_ser_log'] = $alt;
   }
 
 if($action == 'reset')
@@ -315,16 +329,20 @@ decodeStatus($status[$curStep]);
 // $par['a7_cur_file']    = $curFile; 
 // $par['a7_cur_sketch_name'] = $curSketchName;
 
-$_SESSION['a7_cur_sim_len']     = $par['a7_cur_sim_len'];
-$_SESSION['a7_cur_loop_len']    = $par['a7_cur_loop_len'];
-$_SESSION['a7_cur_read_len']    = $par['a7_cur_read_len'];
-$_SESSION['a7_cur_source']      = $par['a7_cur_source'];
-$_SESSION['a7_cur_step']        = $par['a7_cur_step'];
-$_SESSION['a7_cur_loop']        = $par['a7_cur_loop'];
-$_SESSION['a7_cur_read']        = $par['a7_cur_read'];
-$_SESSION['a7_cur_menu']        = $par['a7_cur_menu'];
-$_SESSION['a7_cur_file']        = $par['a7_cur_file'];
-$_SESSION['a7_cur_sketch_name'] = $par['a7_cur_sketch_name'];
+$_SESSION['a7_cur_sim_len']        = $par['a7_cur_sim_len'];
+$_SESSION['a7_cur_loop_len']       = $par['a7_cur_loop_len'];
+$_SESSION['a7_cur_read_len']       = $par['a7_cur_read_len'];
+$_SESSION['a7_cur_source']         = $par['a7_cur_source'];
+$_SESSION['a7_cur_step']           = $par['a7_cur_step'];
+$_SESSION['a7_cur_loop']           = $par['a7_cur_loop'];
+$_SESSION['a7_cur_read']           = $par['a7_cur_read'];
+$_SESSION['a7_cur_menu']           = $par['a7_cur_menu'];
+$_SESSION['a7_cur_file']           = $par['a7_cur_file'];
+$_SESSION['a7_cur_sketch_name']    = $par['a7_cur_sketch_name'];
+$_SESSION['a7_cur_board_type']     = $par['a7_cur_board_type'];
+$_SESSION['a7_cur_board_digpins']  = $par['a7_cur_board_digpins'];
+$_SESSION['a7_cur_board_anapins']  = $par['a7_cur_board_anapins'];
+$_SESSION['a7_ser_log']            = $par['a7_ser_log'];
 
 
 //====================================================
@@ -334,16 +352,20 @@ $_SESSION['a7_cur_sketch_name'] = $par['a7_cur_sketch_name'];
 function resetSession()
 {
 
-    $_SESSION['a7_cur_sim_len']     = ""; 
-    $_SESSION['a7_cur_loop_len']    = "";
-    $_SESSION['a7_cur_sketch']      = ""; 
-    $_SESSION['a7_cur_source']      = ""; 
-    $_SESSION['a7_cur_step']        = 0; 
-    $_SESSION['a7_cur_loop']        = 0; 
-    $_SESSION['a7_cur_read']        = 0; 
-    $_SESSION['a7_cur_menu']        = ""; 
-    $_SESSION['a7_cur_file']        = ""; 
-    $_SESSION['a7_cur_sketch_name'] = "";
+    $_SESSION['a7_cur_sim_len']       = ""; 
+    $_SESSION['a7_cur_loop_len']      = "";
+    $_SESSION['a7_cur_sketch']        = ""; 
+    $_SESSION['a7_cur_source']        = ""; 
+    $_SESSION['a7_cur_step']          = 0; 
+    $_SESSION['a7_cur_loop']          = 0; 
+    $_SESSION['a7_cur_read']          = 0; 
+    $_SESSION['a7_cur_menu']          = ""; 
+    $_SESSION['a7_cur_file']          = ""; 
+    $_SESSION['a7_cur_sketch_name']   = "";
+    $_SESSION['a7_cur_board_type']    = "";
+    $_SESSION['a7_cur_board_digpins'] = 0;
+    $_SESSION['a7_cur_board_anapins'] = 0;
+    $_SESSION['a7_ser_log']           = "";
 }
 //==========================================
 function writeUserSetting()
@@ -352,7 +374,12 @@ function writeUserSetting()
   global $par,$fn;
 
       $file = $fn['setting'];
-      if(!$file)return;
+      if(!$file)
+	{
+	  vikingWarning("writeUserSetting: no file ($file)");
+	  return;
+	}
+
       $out = fopen($file,"w");
       if($out)
 	{
@@ -374,7 +401,12 @@ function readUserSetting()
   global $par,$fn;
 
   $file = $fn['setting'];
-  if(!$file)return;
+  if(!$file)
+    {
+      vikingWarning("readUserSetting: no file ($file)");
+      return;
+    }
+
   $in = fopen($file,"r");
   if($in)
     {
@@ -441,68 +473,172 @@ function canvasPos()
 //==========================================
 {
   global $par,$pinModeD,$pinStatusD,$pinStatusA;
+  global $UNO_DIG_PINS,$UNO_ANA_PINS,$MEGA_DIG_PINS,$MEGA_ANA_PINS;
   global $digX,$digY,$anaX,$anaY,$resetX,$resetY;
   global $TXledX,$TXledY,$onOffX,$onOffY,$led13X,$led13Y;
   global $sketchNameX,$sketchNameY;
   $user = $par['user'];
 
+  $board   = $par['a7_cur_board_type'];
+
   //$input  = array_keys($_GET);
   //$coords = explode(',', $input[0]);
   //$bb = $coords[0]; $aa=$coords[1];
 
-  // Digital Pin Positions
-  $yy = 220;
-  for($ii=0; $ii<14; $ii++)
+  if($board == 'boardUno')
     {
-      $xx = 17; $yy = $yy+17;
-      if($ii == 6) $yy = $yy+10;
-      $digX[13-$ii] = $xx;
-      $digY[13-$ii] = $yy;
-      $pinModeD[$ii] = 0;
-      $pinStatusD[$ii] = 0;
+      // Digital Pin Positions
+      $yy = 220;
+      for($ii=0; $ii<$UNO_DIG_PINS; $ii++)
+	{
+	  $xx = 17; $yy = $yy+17;
+	  if($ii == 6) $yy = $yy+10;
+	  $ix = $UNO_DIG_PINS - 1 - $ii;
+	  $digX[$ix] = $xx;
+	  $digY[$ix] = $yy;
+	  $pinModeD[$ii] = 0;
+	  $pinStatusD[$ii] = 0;
+	}
+      
+      // Analog Pin Positions
+      $yy = 363;
+      for($ii=0; $ii<$UNO_ANA_PINS; $ii++)
+	{
+	  $xx = 288; $yy = $yy+17;
+	  $anaX[$ii] = $xx;
+	  $anaY[$ii] = $yy;
+	  $pinStatusA[$ii] = 0;
+	}
+      
+      // Step + - positions
+      $stepForwardY  = 312;
+      $stepForwardX  = 80;
+      $stepBackwardY = 273;
+      $stepBackwardX = 80;
+      
+      $resetY = 411;
+      $resetX = 150;
+      
+      $uploadY = 434;
+      $uploadX = 212;
+      
+      $TXledY = 230;
+      $TXledX =  93;
+      
+      $RXledY = 230;
+      $RXledX = 107;
+      
+      $led13Y = 230;
+      $led13X =  63;
+      
+      $onOffY = 431;
+      $onOffX = 94;
+      
+      $sketchNameY = 280;
+      $sketchNameX = 220;
+      
+      $configY = 360;
+      $configX = 78;     
     }
 
-  // Analog Pin Positions
-  $yy = 363;
-  for($ii=0; $ii<6; $ii++)
+  if($board == 'boardMega')
     {
-      $xx = 288; $yy = $yy+17;
-      $anaX[$ii] = $xx;
-      $anaY[$ii] = $yy;
-      $pinStatusA[$ii] = 0;
+      // Digital Pin Positions
+      $yy = 150;
+      for($ii=0; $ii<$UNO_DIG_PINS; $ii++)
+	{
+	  $xx = 19; $yy = $yy+12;
+	  if($ii == 6) $yy = $yy+8;
+	  $ix = $UNO_DIG_PINS - 1 - $ii;
+	  $digX[$ix] = $xx;
+	  $digY[$ix] = $yy;
+	  $pinModeD[$ix] = 0;
+	  $pinStatusD[$ix] = 0;
+	}
+
+      for($ii=$UNO_DIG_PINS; $ii<22; $ii++)
+	{
+	  $xx = 19; $yy = $yy+12;
+	  if($ii == $UNO_DIG_PINS) $yy = $yy+10;
+	  $digX[$ii] = $xx;
+	  $digY[$ii] = $yy;
+	  $pinModeD[$ii] = 0;
+	  $pinStatusD[$ii] = 0;
+	}
+
+      // 22 column
+      $xx = 32;$yy = 466;
+      for($ii=22; $ii<$MEGA_DIG_PINS; $ii=$ii+2)
+	{
+	  if($ii == 30) $xx = $xx+2;
+	  if($ii == 34) $xx = $xx+2;
+	  $digX[$ii] = $xx;
+	  $digY[$ii] = $yy;
+	  $pinModeD[$ii] = 0;
+	  $pinStatusD[$ii] = 0;
+	  $xx = $xx + 14;
+	}
+      // 23 column
+      $xx = 32;$yy = 478;
+      for($ii=23; $ii<$MEGA_DIG_PINS; $ii=$ii+2)
+	{
+	  if($ii == 31) $xx = $xx+2;
+	  if($ii == 35) $xx = $xx+2;
+	  $digX[$ii] = $xx;
+	  $digY[$ii] = $yy;
+	  $pinModeD[$ii] = 0;
+	  $pinStatusD[$ii] = 0;
+	  $xx = $xx + 14;
+	}
+      
+      // Analog Pin Positions
+      $yy = 253;
+      for($ii=0; $ii<$UNO_ANA_PINS+2; $ii++)
+	{
+	  $xx = 291; $yy = $yy+12;
+	  $anaX[$ii] = $xx;
+	  $anaY[$ii] = $yy;
+	  $pinStatusA[$ii] = 0;
+	}
+      for($ii=$UNO_ANA_PINS+2; $ii<$MEGA_ANA_PINS; $ii++)
+	{
+	  $xx = 291; $yy = $yy+12;
+	  if($ii == $UNO_ANA_PINS+2) $yy = $yy+10;
+	  $anaX[$ii] = $xx;
+	  $anaY[$ii] = $yy;
+	  $pinStatusA[$ii] = 0;
+	}
+      
+      // Step + - positions
+      $stepForwardY  = 312;
+      $stepForwardX  = 80;
+      $stepBackwardY = 273;
+      $stepBackwardX = 80;
+      
+      $resetY = 410;
+      $resetX = 149;
+      
+      $uploadY = 434;
+      $uploadX = 212;
+      
+      $TXledY = 163;
+      $TXledX = 97;
+      
+      $RXledY = 163;
+      $RXledX = 111;
+      
+      $led13Y = 163;
+      $led13X =  67;
+      
+      $onOffY = 384;
+      $onOffX = 95;
+      
+      $sketchNameY = 175;
+      $sketchNameX =  80;
+      
+      $configY = 360;
+      $configX = 78;     
     }
-
-  // Step + - positions
-  $stepForwardY  = 312;
-  $stepForwardX  = 80;
-  $stepBackwardY = 273;
-  $stepBackwardX = 80;
-
-  $resetY = 410;
-  $resetX = 149;
-
-  $uploadY = 434;
-  $uploadX = 212;
-
-  $TXledY = 230;
-  $TXledX = 103;
-
-  $RXledY = 230;
-  $RXledX = 106;
-
-  $led13Y = 230;
-  $led13X =  72;
-
-  $onOffY = 427;
-  $onOffX = 91;
-
-  $sketchNameY = 280;
-  $sketchNameX = 220;
-
-  $configY = 360;
-  $configX = 78;
-
-  $sens = 5;
 }
 
 
@@ -602,35 +738,13 @@ function decodeStatus($code)
       if($temp[$ii]=='F')$pinModeD[$ii] = AQUA;
     }
 
-  // Status Digital Pin
-  $temp = $xpar[2];
-
-  $ii = 0;
-  $values = array(1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192);
-  foreach ($values as $value) 
-    {
-      $result = $value & $temp;
-      //print("$result, $value, '&', $temp<br>");
-      if($result != 0) 
-	{
-	  $pinValueD[$ii] = 1;
-	  $pinStatusD[$ii] = YELLOW;
-	}
-      else
-	{
-	  $pinValueD[$ii]  = 0;	  
-	  $pinStatusD[$ii] = BLACK;
-	}
-      $ii++;	   
-    }
-
   // Status Analog Pin
-  $tempA = $xpar[3]; // Number of Analog Values
+  $tempA = $xpar[2]; // Number of Analog Values
   if($tempA > 0)
     {
       for($ii=0;$ii<$tempA;$ii++)
 	{
-	  $ix = 5+$ii*2;
+	  $ix = 4+$ii*2;
 	  $pinValueA[$xpar[$ix]] = $xpar[$ix+1];
 	  $aw = $xpar[$ix]; 
           $qq = $xpar[$ix+1];
@@ -638,16 +752,17 @@ function decodeStatus($code)
 	  //echo("$tempA Analog $ii $aw $qq<br>");
 	}
     }
-  $tempD = $xpar[4]; // Number of Digital Values
+  $tempD = $xpar[3]; // Number of Digital Values
   if($tempD > 0)
     {
       for($ii=0;$ii<$tempD;$ii++)
 	{
-	  $ix = 5+$ii*2+2*$tempA;
-	  $pinValuesD[$xpar[$ix]] = $xpar[$ix+1];
+	  $ix = 4+$ii*2+2*$tempA;
+	  $pinValueD[$xpar[$ix]] = $xpar[$ix+1];
 	  $aw = $xpar[$ix]; 
           $qq = $xpar[$ix+1];
-	  if($pinValueD[$xpar[$ix]]> 0)$pinStatusD[$ix] = RED;
+	  if($pinValueD[$xpar[$ix]] == 1)$pinStatusD[$aw] = YELLOW;
+	  if($pinValueD[$xpar[$ix]]  > 1)$pinStatusD[$aw] = RED;
 	  //echo("$tempD Digital $ii $aw $qq<br>");
 	}
     }
@@ -790,7 +905,12 @@ function readSimulation($file)
   $step = 0;
   $loop = 0;
   $read = 0;
-  if(!$file)return;
+  if(!$file)
+    {
+      vikingWarning("readSimulation: no file ($file)");
+      return;
+    }
+
   $in = fopen($file,"r");
   if($in)
     {
@@ -805,24 +925,8 @@ function readSimulation($file)
 	      $step++;
               $row[0] = ' ';
 	      $simulation[$step] = $row;
-	      //echo("$row<br>");
-//               if(strstr($row,"digitalRead ") || strstr($row,"analogRead "))
-//               {
-//                  $read++;
-//                  $readStep[$read] = $step;
-//               }
-//               $stepRead[$step] = $read;
-//               if(strstr($row,"Loop "))
-//               {
-//                  $loop++;
-//                  $loopStep[$loop] = $step;
-//               }
-//               $stepLoop[$step] = $loop;
 	    }
 	}
-//       $par['a7_cur_sim_len'] = $step;
-//       $par['a7_cur_loop_len'] = $loop;
-//       $par['a7_cur_read_len'] = $read;
       fclose($in);
     }
   else
@@ -850,7 +954,12 @@ function readArduino()
   $loop = 0;
   $read = 0;
   $file = $fn['arduino'];
-  if(!$file)return;
+  if(!$file)
+    {
+      vikingWarning("readArduino: no file ($file)");
+      return;
+    }
+
   $in = fopen($file,"r");
   if($in)
     {
@@ -901,7 +1010,12 @@ function readSerial()
 
   $file = $fn['serial'];
   $step = 0;
-  if(!$file)return;
+  if(!$file)
+    {
+      vikingWarning("readSerial: no file ($file)");
+      return;
+    }
+
   $in = fopen($file,"r");
   if($in)
     {
@@ -938,7 +1052,12 @@ function readStatus()
 
   $file = $fn['status'];
   $step = 0;
-  if(!$file)return;
+  if(!$file)
+    {
+      vikingWarning("readStatus: no file ($file)");
+      return;
+    }
+
   $in = fopen($file,"r");
   if($in)
     {
@@ -973,7 +1092,11 @@ function readAnyFile($file)
 
   $step = 0;
   $content[0] = 0;
-  if(!$file)return;
+  if(!$file)
+    {
+      vikingWarning("readAnyFile: no file ($file)");
+      return;
+    }
   $in = fopen($file,"r");
   if($in)
     {
@@ -1004,7 +1127,12 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
   $user = $par['user'];
 
   $res = 0;
-  if(!$file)return;
+  if(!$file)
+    {
+      vikingWarning("formSelectFile: no file ($file)");
+      return;
+    }
+
   $in = fopen($file,"r");
   if($in)
     {
@@ -1032,18 +1160,26 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
     }
   return($res);
 }
-
 //==========================================
 function readSketchInfo()
 //==========================================
 {
-  global $par;
-  global $curSketchName;
+  global $par,$fn;
+  global $UNO_DIG_PINS,$UNO_ANA_PINS,$MEGA_DIG_PINS,$MEGA_ANA_PINS;
+  //global $curSketchName;
+
+  $name    = 'unknown';
+  $boardId = 'unknown';
+
   $user = $par['user'];
 
-  $tFile = $par['a7_cur_source'];
+  $tFile = $fn['sketch'];
 
-  if(!$tFile) return;
+  if(!$tFile)
+    {
+      vikingWarning("readSketchInfo: no file ($file)");
+      return;
+    }
 
   $in = fopen($tFile,"r");
   if($in)
@@ -1052,24 +1188,49 @@ function readSketchInfo()
 	{
 	  $row = fgets($in);
 	  $row = trim($row);
-	  if(strstr($row,"SKETCH_NAME"))
+	  if(strstr($row,"SKETCH_NAME:"))
 	    {
-	      //echo("$row");
 	      if($pp = strstr($row,":"))
 		{
 		  sscanf($pp,"%s%s",$junk,$name);
-		  //echo("[$curSketchName]");
+		}
+	    }
+	  if(strstr($row,"BOARD_TYPE:"))
+	    {
+	      if($pp = strstr($row,":"))
+		{
+		  sscanf($pp,"%s%s",$junk,$board);
+		  $par['a7_cur_board_type'] = $board;
+		  if(strstr($board,"MEGA"))
+		    {
+		      //echo("MEGA");
+		      $boardId = 'boardMega';
+		      $boardDigPins = $MEGA_DIG_PINS;
+		      $boardAnaPins = $MEGA_ANA_PINS;
+
+		    }
+		  else
+		    {
+		      //echo("UNO");
+		      $boardId = 'boardUno';
+		      $boardDigPins = $UNO_DIG_PINS;
+		      $boardAnaPins = $UNO_ANA_PINS;
+		    }
 		}
 	    }
 	}
       fclose($in);
-      $par['a7_cur_sketch_name']  = $name;
     }
   else
     {
       $temp = "readSketchInfo: Fail to open ($tFile)";
       vikingError($temp);
     }
+  $par['a7_cur_board_type']    = $boardId;
+  $par['a7_cur_board_digpins'] = $boardDigPins;
+  $par['a7_cur_board_anapins'] = $boardAnaPins;
+  $par['a7_cur_sketch_name']   = $name;
+  //echo("$boardId, $boardDigPins, $boardAnaPins $name");
 }
 
 //==========================================
@@ -1111,7 +1272,11 @@ function showFile($title,$file)
   global $par;
   $user  = $par['user'];
 
-  if(!$file)return;
+  if(!$file)
+    {
+      vikingWarning("showFile: no file ($file)");
+      return;
+    }
 
   $in = fopen($file,"r");
   if($in)
@@ -1196,7 +1361,12 @@ function checkSketch($sketch)
   $res = 0;
   $user       = $par['user'];
 
-  if(!$sketch)return;
+  if(!$sketch)
+    {
+      vikingWarning("checkSketch: no file ($file)");
+      return;
+    }
+
   $in = fopen($sketch,"r");
   if($in)
     {
@@ -1251,21 +1421,27 @@ function viking_7_mainmenu($sys_id)
   $path = $par['path'];
   $user = $par['user'];
 
-  echo("<li><a href=\"index.php?pv=start\">Start</a></li>");
-  echo("<li><a href=\"index.php?pv=lib\">Load Simulator</a></li>");
-  echo("<li><a href=\"index.php?pv=sim\">Simulation</a></li>");
-  echo("<li><a href=\"index.php?pv=config\">Configuration</a></li>");
-  echo("<li><a href=\"index.php?pv=advanced\">Sketch_Scenario</a></li>");
-  echo("<li><a href=\"index.php?pv=help\">Help</a></li>");
-  echo("<li><a href=\"index.php?pv=about\">About</a></li>");
+  echo("<ul>");
+  echo("<li><a href=\"index.php?pv=start\" >Start</a></li>");
+  echo("<li><a href=\"index.php?pv=lib\"   >Library</a></li>");
+  if($user)
+    {
+      if($user != 'guest')echo("<li><a href=\"index.php?pv=load\"  >Load</a></li>");
+      echo("<li><a href=\"index.php?pv=board\" >Board</a></li>");
+      echo("<li><a href=\"index.php?pv=sketch\">Sketch</a></li>");
+      echo("<li><a href=\"index.php?pv=log\">Log</a></li>");
+    }
+  echo("<li><a href=\"index.php?pv=help\"  >Help</a></li>");
+  echo("<li><a href=\"index.php?pv=about\" >About</a></li>");
   if(!$user)
     echo("<li><a href=\"index.php?pv=register\">Register</a></li>");
+  echo("</ul>");
 }
 
 function viking_7_menu($sys_id)
 {
   global $par;
-  $path = $par['path'];
+  $path       = $par['path'];
   $sid        = $par['a7_sid'];
   $user       = $par['user'];
   $curStep    = $par['a7_cur_step'];
@@ -1275,59 +1451,67 @@ function viking_7_menu($sys_id)
   $curLoopLen = $par['a7_cur_loop_len'];
   $curReadLen = $par['a7_cur_read_len'];
 
-  echo("<ul>");
-  echo("         <li><a href=$path&ac=step&x=1>reset</a></li>");
-  $temp = $curSimLen;
-  echo("         <li><a href=$path&ac=step&x=$temp>end</a></li>");
 
-  $temp = $curStep - 1;
-  if($temp < 1)$temp = 1;
-  echo("         <li><a href=$path&ac=step&x=$temp>step-</a></li>");
+  echo("<ul>");
+
   $temp = $curStep + 1;
   if($temp > $curSimLen)$temp = $curSimLen;
   echo("         <li><a href=$path&ac=step&x=$temp>step+</a></li>");
-
-  $temp = $curLoop - 1;
+  $temp = $curStep - 1;
   if($temp < 1)$temp = 1;
-  echo("         <li><a href=$path&ac=loop&x=$temp>loop-</a></li>");
+  echo("         <li><a href=$path&ac=step&x=$temp>step-</a></li>");
+
   $temp = $curLoop + 1;
   if($temp > $curLoopLen)$temp = $curLoopLen;
   echo("         <li><a href=$path&ac=loop&x=$temp>loop+</a></li>");
-
-  $temp = $curRead - 1;
+  $temp = $curLoop - 1;
   if($temp < 1)$temp = 1;
-  echo("         <li><a href=$path&ac=read&x=$temp>read-</a></li>");
+  echo("         <li><a href=$path&ac=loop&x=$temp>loop-</a></li>");
 
   $temp = $curRead + 1;
   if($temp > $curReadLen)$temp = $curReadLen;
-  echo("         <li><a href=$path&ac=read&x=$temp>read+</a></li>");
+  echo("         <li><a href=$path&ac=read&x=$temp>read+</a></li></ul>");
+  $temp = $curRead - 1;
+  if($temp < 1)$temp = 0;
+  echo("         <li><a href=$path&ac=read&x=$temp>read-</a></li>");
+
+  echo("         <ul><li><a href=$path&ac=step&x=1>first</a></li>");
+  $temp = $curSimLen;
+  echo("         <li><a href=$path&ac=step&x=$temp>last</a></li>");
+
   echo("</ul>");
 }
 
 function viking_7_current($sys_id)
 {
   global $par;
+
+  $user = $par['user'];
+
+  if(!$user)return;
   $path   = $par['path'];
   $sid    = $par['a7_sid'];
   $user   = $par['user'];
 
-  $source = $par['a7_cur_source_name'];
+  $sname = $par['a7_cur_sketch_name'];
   $step   = $par['a7_cur_step'];
   $loop   = $par['a7_cur_loop'];
   $stepLength = $par['a7_cur_sim_len'];
   $loopLength = $par['a7_cur_loop_len'];
 
-  echo("$source loop=$loop($loopLength) step=$step($stepLength)");
+  echo("[$sname] loop=$loop($loopLength) step=$step($stepLength)");
 }
 
 function viking_7_canvas($sys_id)
 {
   global $par,$wBoard,$hBoard;
+  
+  $board = $par['a7_cur_board_type'];
 
   $path = $par['path'];
   $sid  = $par['a7_sid'];
   $user = $par['user'];
-  echo("<canvas id=\"boardUno\" width=\"$wBoard\" height=\"$hBoard\"></canvas>\n");
+  echo("<canvas id=\"$board\" width=\"$wBoard\" height=\"$hBoard\"></canvas>\n");
 }
 
 function viking_7_anyFile($sys_id)
@@ -1342,7 +1526,7 @@ function viking_7_anyFile($sys_id)
 
   if($curEditFlag == 0)
     {
-  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 4px; width :90%; height:500px; overflow : auto; margin-left:20px; margin-bottom:20px; \">\n");
+  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 4px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px; \">\n");
   $len = readAnyFile($curFile);
   showAnyFile($len);
   echo("</div>\n");
@@ -1366,6 +1550,32 @@ function viking_7_anyFile($sys_id)
 }
 
 
+function viking_7_winSerLog($sys_id)
+{
+  global $par;
+  $path    = $par['path'];
+  $sid     = $par['a7_sid'];
+  $user    = $par['user'];
+  $curStep = $par['a7_cur_step'];
+
+  $sl = $par['a7_ser_log'];
+
+  if($sl == 'ser')
+    {
+      echo("Serial Interface (<a href=$path&ac=winserlog&x=log>Log Events</a>)");
+      echo("<div id=\"serWin\" style=\"font-family:Courier,monospace; font-size:12px;float:left; border:solid 0px #FF0000; background:#BDBDBD; color:#000000; text-align:left; padding:4px; width:100%; height:600px; overflow:auto; \">");
+      showSerial($curStep);
+      echo("</div>\n"); 
+    }
+  else 
+    {
+      echo("Log Events (<a href=$path&ac=winserlog&x=ser>Serial Interface</a>)");
+      echo("<div id=\"logList\" style=\"margin-right:1px;float:left; border:solid 0px #000000; background:#AFCAE6; color:#000000; text-align:left; padding:4px; width:100%; height:600px; overflow:auto; \">");
+      showStep($curStep);
+      echo("</div>");
+    }
+}
+
 function viking_7_winSerial($sys_id)
 {
   global $par;
@@ -1373,7 +1583,8 @@ function viking_7_winSerial($sys_id)
   $sid        = $par['a7_sid'];
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
-  echo("<div id=\"serWin\"t style=\"font-family: Courier,monospace;float:left; border : solid 2px #FF0000; background :#BDBDBD; color:#FF0000; text-align:left; padding : 4px; width :100%; height:500px; overflow : auto; \">\n");
+
+  echo("<div id=\"serWin\" style=\"font-family:Courier,monospace; font-size:12px;float:left; border:solid 0px #FF0000; background:#BDBDBD; color:#000000; text-align:left; padding:4px; width:100%; height:600px; overflow:auto; \">");
   showSerial($curStep);
   echo("</div>\n"); 
 }
@@ -1385,7 +1596,8 @@ function viking_7_winLog($sys_id)
   $sid        = $par['a7_sid'];
   $user       = $par['user'];
   $curStep = $par['a7_cur_step'];
-  echo("<div id=\"logList\" style=\"margin-right:5px;float:left; border : solid 1px #000000; background : #FFFFFF; color : #000000; text-align:left; padding : 4px; width :100%; height:500px; overflow : auto; \">\n");
+
+  echo("<div id=\"logList\" style=\"margin-right:1px;float:left; border:solid 0px #000000; background:#AFCAE6; color:#000000; text-align:left; padding:4px; width:100%; height:600px; overflow:auto; \">");
   showStep($curStep);
   echo("</div>");
 }
@@ -1393,13 +1605,13 @@ function viking_7_winLog($sys_id)
 function viking_7_winSim($sys_id)
 {
   global $par;
-  $path   = $par['path'];
-  $sid        = $par['a7_sid'];
-  $user       = $par['user'];
+  $path    = $par['path'];
+  $sid     = $par['a7_sid'];
+  $user    = $par['user'];
   $curStep = $par['a7_cur_step'];
-  //echo("<div id=\"simLis\"t style=\"float:right; border : solid 1px #000000; background : #FFFFFF; color : #000000; text-align:left; padding : 4px; width : 98%; height:250px; overflow : auto; \">\n");
+  echo("<div id=\"simLis\"t style=\"float:right; border : solid 1px #000000; background : #FFFFFF; color : #000000; text-align:left; padding : 4px; width : 98%; height:250px; overflow : auto; \">\n");
   showSimulation($curStep);
-  //echo("</div>\n"); 
+  echo("</div>"); 
 }
 
 function viking_7_help($sys_id)
@@ -1441,7 +1653,7 @@ function viking_7_data($sys_id)
   $user    = $par['user'];
   $curFile = $par['a7_cur_file'];
 
-  echo("<table><tr><td>");
+  echo("<div><table><tr><td>");
   echo("<form name=\"f_sel_win\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
   echo("<input type=\"hidden\" name=\"action\" value=\"select_file\">\n");
   echo("<select name=\"file\">");
@@ -1476,16 +1688,16 @@ function viking_7_data($sys_id)
 
   echo("</select>");
   echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_SELECT."\">\n");
-  if($user)
+  if($user && $user != 'guest')
   {
     if($curFile == $fn['sketch'])echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
     if($curFile == $fn['scenario'])echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
   }
   echo("</form></td>");
-  echo("</table>");
+  echo("</table></div>");
 }
 
-function viking_7_library($sys_id)
+function viking_7_load($sys_id)
 {
   global $par,$fn,$upload;
   $path      = $par['path'];
@@ -1512,22 +1724,25 @@ function viking_7_library($sys_id)
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_DELETE."\">");
       echo("</form>");
 
-      if($nSketches < 10)
+      if($user != 'guest')
 	{
-	  echo("<hr><h3>You have $nSketches sketches uploaded.Limit is 10.</h3><br><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
-	  echo("<input type=\"hidden\" name=\"action\" value=\"upload_source\">");
-	  echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
-	  echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_UPLOAD_SKETCH."\">");
-	  echo("</form><br<br>");
+	  if($nSketches < 10 && $user != 'guest')
+	    {
+	      echo("<hr><h3>You have $nSketches sketches uploaded.Limit is 10.</h3><br><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
+	      echo("<input type=\"hidden\" name=\"action\" value=\"upload_source\">");
+	      echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
+	      echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_UPLOAD_SKETCH."\">");
+	      echo("</form><br<br>");
+	    }
+	  else
+	    echo("<h2>You have 10 sketches uploaded. Delete some of the sketches.</h2>");
+	  echo("<br><hr><br>");
 	}
-      else
-	echo("<h2>You have 10 sketches uploaded. Delete some of the sketches.</h2>");
-      echo("<br><hr><br>");
       
       if($ready)echo("<br>$ready<br>");
     }
   else
-    echo("You need to be logged in to access this page<br>Apply for a free account!");
+    echo("You need to be logged in to access this page<br>Apply for a free account or use the demo account.<br> User: <b>guest</b> <br>Password: <b>guest</b> .");
   
   echo("</div>");
 }
@@ -1535,7 +1750,7 @@ function viking_7_library($sys_id)
 
 function viking_7_pinValues($sys_id)
 {
-  global $par,$pinValueA,$pinValueD;
+  global $par,$pinValueA,$pinValueD,$pinModeD;
   $path       = $par['path'];
   $sid        = $par['a7_sid'];
   $user       = $par['user'];
@@ -1543,69 +1758,96 @@ function viking_7_pinValues($sys_id)
   $curSimLen  = $par['a7_cur_sim_len'];
   $curStep    = $par['a7_cur_step'];
 
-  echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
-  if($user)
-  {
-    //echo("Analog Pin Settings at step: $curStep<br>");
-    echo("<br>Analog Pins at step $curStep");
-    echo("<table border=1><tr>");
-    echo("<form name=\"f_set_scenario\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
-    echo("<input type=\"hidden\" name=\"action\" value=\"set_scenario\">\n");
-    for($ii=0;$ii<6;$ii++)
-      {
-	echo("<td>$ii</td>");
-      } 
-    echo("</tr><tr>");
-    for($ii=0;$ii<6;$ii++)
-      {
-	echo("<td><input type=\"text\" name=\"pinA_$ii\" value=\"$pinValueA[$ii]\" size=\"2\"></td>");
-      }
-    echo("</tr></table>");
+  $aPins = $par['a7_cur_board_anapins'];
+  $dPins = $par['a7_cur_board_digpins'];
 
-    echo("<br>Digital Pins at step $curStep");
-    echo("<table border=1><tr>");
-    for($ii=13;$ii>=0;$ii--)
+  echo("<div style=\"font-size:12px;float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
+
+    echo("<form name=\"f_set_pin_value\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
+    echo("<input type=\"hidden\" name=\"action\" value=\"set_scenario\">");
+    echo("<select name=\"pin_value\">");
+    for($ii=0;$ii<$dPins;$ii++)
       {
-	echo("<td>$ii</td>");
+	$temp = $pinModeD[$ii];
+	if($temp == WHITE || $temp == BLUE || $temp == FUCHSIA || $temp == AQUA)     
+	  echo("<option value=\"$ii\">$ii</option>");
       }
-    echo("</tr><tr>");
-    for($ii=13;$ii>=0;$ii--)
-      {
-	echo("<td><input type=\"text\" name=\"pinD_$ii\" value=\"$pinValueD[$ii]\" size=\"1\"></td>");
-      }
-    echo("</tr></table>");
-    echo("<input type =\"submit\" name=\"submit_scenario\" value=\"".T_SET."\">");
+    echo("</select>");
+    echo("<input type=\"radio\" name=\"dvalue\" value=\"0\"> Low");
+    echo("<input type=\"radio\" name=\"dvalue\" value=\"1\"> High");
+    echo("<input type =\"submit\" name=\"submit_pin\" value=\"".T_SET_PIN_VALUE."\"></td>");
     echo("</form>");
-  }
-  else
-    {
-      echo("<br>Analog Pins at step $curStep");
-      echo("<table border=1><tr>");
-      for($ii=0;$ii<6;$ii++)
+//   if($user && $user != 'guest')
+//   {
+//     //echo("Analog Pin Settings at step: $curStep<br>");
+//     echo("<br><b>Analog Pin Values at step $curStep</b>");
+//     echo("<table border=1><tr>");
+//     echo("<form name=\"f_set_scenario\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
+//     echo("<input type=\"hidden\" name=\"action\" value=\"set_scenario\">\n");
+//     $count = 0;
+//     for($ii=0;$ii<$aPins;$ii++)
+//       {
+// 	if($pinValueA[$ii])
+// 	  {
+// 	    $count++;
+// 	    echo("<td>A$ii</td>");
+// 	    echo("<td><input type=\"text\" name=\"pinA_$ii\" value=\"$pinValueA[$ii]\" size=\"3\"></td>");
+// 	    if($count == 8)echo("</tr><tr>");
+// 	  }
+//       } 
+
+//     echo("</tr></table>");
+
+//     echo("<br><b>Digital Pin Values at step $curStep</b>");
+//     echo("<table border=1><tr>");
+//     $count = 0;
+//     for($ii=0;$ii<$dPins;$ii++)
+//       {
+// 	if($pinValueD[$ii])
+// 	  {
+// 	    $count++;
+// 	    echo("<td>D$ii</td>");
+// 	    echo("<td><input type=\"text\" name=\"pinD_$ii\" value=\"$pinValueD[$ii]\" size=\"3\"></td>");
+// 	    if($count == 8)echo("</tr><tr>");
+// 	  }
+//       }
+//     echo("</tr><tr><td><input type =\"submit\" name=\"submit_scenario\" value=\"".T_SET."\"></td>");
+//     echo("</form>");
+//     echo("</tr></table>");
+//   }
+//   else
+//     {
+      echo("<br><b>Analog Pin Values at step $curStep</b>");
+      echo("<table border=0><tr>");
+      $count = 0;
+      for($ii=0;$ii<$aPins;$ii++)
 	{
-	  echo("<td>$ii</td>");
-	} 
-      echo("</tr><tr>");
-      for($ii=0;$ii<6;$ii++)
-	{
-	  echo("<td>$pinValueA[$ii]</td>");
+	  if($pinValueA[$ii])
+	    {
+	      $count++;
+	      echo("<td>$ii =</td>");
+	      echo("<td>$pinValueA[$ii]|</td>");
+	      if($count == 8)echo("</tr><tr>");
+	    }
 	}
       echo("</tr></table>");
       
-      echo("<br>Digital Pins at step $curStep");
-      echo("<table border=1><tr>");
-      for($ii=13;$ii>=0;$ii--)
+      echo("<br><b>Digital Pin Values at step $curStep</b>");
+      echo("<table border=0><tr>");
+      $count = 0;
+      for($ii=0;$ii<$dPins;$ii++)
 	{
-	  echo("<td>$ii</td>");
-	}
-      echo("</tr><tr>");
-      for($ii=13;$ii>=0;$ii--)
-	{
-	  echo("<td>$pinValueD[$ii]</td>");
+	  if($pinValueD[$ii])
+	    {
+	      $count++;
+	      echo("<td>$ii=</td>");
+	      echo("<td>$pinValueD[$ii]</td>");
+	      if($count == 8)echo("</tr><tr>");
+	    }
 	}
       echo("</tr>");
       echo("</table>");
-    }
+      // }
   
   echo("</div>");
 }
@@ -1625,11 +1867,11 @@ function viking_7_applyAccount($sys_id)
       echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
       if($application == 0)
 	{
-	  echo("<h2>Fill in preferred UserName and your E-mail Address. Your account information will be sent to the e-mail address within 24 hours.<br>The account is free!<br><br>
+	  echo("<h3>Fill in preferred UserName and your E-mail Address. Your account information will be sent to the e-mail address within 24 hours.<br>The account is free!<br><br>
         The following features are included:<br>
         <li>Uploading sketches (your Webuino account can hold max 10 sketches)</li>
         <li>On-line editing of sketches and scenarios</li>
-</h2>");
+</h3>");
 	  
 	  
 	  echo("Disclaimer: Your account can be deleted any time for any reason.<br>");
@@ -1649,7 +1891,7 @@ function viking_7_applyAccount($sys_id)
 	}
       else if($application == 1)
 	{
-	  echo("<h2>Thank you for your interest!<br>Your account information will be sent to you within 24 hours.</hr>");  
+	  echo("<h3>Thank you for your interest!<br>Your account information will be sent to you within 24 hours.</h3>");  
 	}
       
       echo("</div>");
@@ -1659,7 +1901,9 @@ function viking_7_applyAccount($sys_id)
 
 function viking_7_script($sys_id)
 {
-  global $par;
+  global $par,$coords;
+  global $wBoard,$hBoard;
+  global $boardId,$boardDigPins,$boardAnaPins;
   global $digX,$digY,$anaX,$anaY,$resetX,$resetY;
   global $TXledX,$TXledY,$onOffX,$onOffY,$led13X,$led13Y;
   global $sketchNameX,$sketchNameY;
@@ -1671,13 +1915,20 @@ function viking_7_script($sys_id)
   $user       = $par['user'];
 
   $curSketchName = $par['a7_cur_sketch_name'];
-  $curStep = $par['a7_cur_step'];
+  $curStep       = $par['a7_cur_step'];
+  $board         = $par['a7_cur_board_type'];
+  $boardDigPins  = $par['a7_cur_board_digpins'];
+  $boardAnaPins  = $par['a7_cur_board_anapins'];
+
+  $image = 'no image';
+  if($board == 'boardUno')$image  = 'arduino_uno.jpg';
+  if($board == 'boardMega')$image = 'arduino_mega.jpg';
 
   echo("<script type= \"text/javascript\">");
   
   echo("function draw(){");
-  echo("var canvas = document.getElementById('boardUno');");
-  echo("if (canvas.getContext){var ctx = canvas.getContext('2d');var imageObj = new Image();imageObj.src = \"arduino_uno.jpg\";ctx.drawImage(imageObj, 0, 0,500,300);");
+  echo("var canvas = document.getElementById('$board');");
+  echo("if (canvas.getContext){var ctx = canvas.getContext('2d');var imageObj = new Image();imageObj.src = \"$image\";ctx.drawImage(imageObj, 0, 0,$wBoard,$hBoard);");
 
   $black  = "ctx.fillStyle = \"#000000\";";
   $yellow = "ctx.fillStyle = \"#FFFF00\";";
@@ -1689,11 +1940,21 @@ function viking_7_script($sys_id)
   $aqua   = "ctx.fillStyle = \"#00FFFF\";";
       
 
+  // Test position
+  $xx = $coords[0];  $yy = $coords[1];
+  if($xx && $yy)
+    {
+      print("ctx.fillStyle = \"#FF0000\";");
+      print("ctx.beginPath();");
+      print("ctx.arc($xx, $yy, 2, 0, Math.PI*2, true);");
+      print("ctx.closePath();");
+      print("ctx.fill();");
+    }
+
   // On OFF led
   print("ctx.fillStyle = \"#FFFF00\";");
   print("ctx.beginPath();");
-  print("ctx.rect($onOffY, $onOffX,8, 5);");
-  //print("ctx.arc($onOffY, $onOffX, 4, 0, Math.PI*2, true);");
+  print("ctx.rect($onOffY-4, $onOffX-3,8, 5);");
   print("ctx.closePath();");
   print("ctx.fill();");
 
@@ -1702,69 +1963,80 @@ function viking_7_script($sys_id)
     {
       print("ctx.fillStyle = \"#FFFF00\";");
       print("ctx.beginPath();");
-      print("ctx.rect($TXledY-4, $TXledX-12,8, 5);");
+      print("ctx.rect($TXledY-4, $TXledX-3,8, 5);");
       //print("ctx.arc($onOffY, $onOffX, 4, 0, Math.PI*2, true);");
       print("ctx.closePath();");
       print("ctx.fill();");
     }
 
   // Digital Pins Mode
-  for($ii=0; $ii<14; $ii++)
+  for($ii=0; $ii<$boardDigPins; $ii++)
     {
-      if($pinModeD[$ii]==0)print($black);
-      if($pinModeD[$ii]==1)print($yellow);
-      if($pinModeD[$ii]==2)print($white);
-      if($pinModeD[$ii]==3)print($red);
-      if($pinModeD[$ii]==4)print($green);
-      if($pinModeD[$ii]==5)print($blue);
-      if($pinModeD[$ii]==6)print($fuchsia);
-      if($pinModeD[$ii]==7)print($aqua);
-      print("ctx.beginPath();");
-      //print("ctx.arc($digY[$ii], $digX[$ii], 5, 0, Math.PI*2, true);");
-      print("ctx.rect($digY[$ii]-4, $digX[$ii]-12,8, 5);");
-      print("ctx.closePath();");
-      print("ctx.fill();");
+      if($pinModeD[$ii]!=0)
+	{
+	  if($pinModeD[$ii]==1)print($yellow);
+	  if($pinModeD[$ii]==2)print($white);
+	  if($pinModeD[$ii]==3)print($red);
+	  if($pinModeD[$ii]==4)print($green);
+	  if($pinModeD[$ii]==5)print($blue);
+	  if($pinModeD[$ii]==6)print($fuchsia);
+	  if($pinModeD[$ii]==7)print($aqua);
+	  
+	  print("ctx.beginPath();");
+	  if($ii < 22)
+	    print("ctx.rect($digY[$ii]-4, $digX[$ii]-12,8, 4);");
+	  else if($ii%2 == 0)
+	    print("ctx.rect($digY[$ii]-5, $digX[$ii]+5,8, 4);");
+	  else if($ii%2 == 1)
+	    print("ctx.rect($digY[$ii]-5, $digX[$ii]+5,8, 4);");
+	  print("ctx.closePath();");
+	  print("ctx.fill();");
+	}
     }
 
   // Digital Pins Status
-  for($ii=0; $ii<14; $ii++)
+  for($ii=0; $ii<$boardDigPins; $ii++)
     {
-      if($pinStatusD[$ii]==0)print($black);
-      if($pinStatusD[$ii]==1)print($yellow);
-      if($pinStatusD[$ii]==2)print($white);
-      if($pinStatusD[$ii]==3)print($red);
-      if($pinStatusD[$ii]==4)print($green);
-      if($pinStatusD[$ii]==5)print($blue);
-      if($pinStatusD[$ii]==6)print($fuchsia);
-      if($pinStatusD[$ii]==7)print($aqua);
-      print("ctx.beginPath();");
-      print("ctx.arc($digY[$ii], $digX[$ii], 5, 0, Math.PI*2, true);");
-      if($ii == 13 && $pinStatusD[13]>0)
-	print("ctx.rect($led13Y-4, $led13X-12,8, 5);");
-      print("ctx.closePath();");
-      print("ctx.fill();");
+      if($pinStatusD[$ii]!=0)
+	{
+	  if($pinStatusD[$ii]==1)print($yellow);
+	  if($pinStatusD[$ii]==2)print($white);
+	  if($pinStatusD[$ii]==3)print($red);
+	  if($pinStatusD[$ii]==4)print($green);
+	  if($pinStatusD[$ii]==5)print($blue);
+	  if($pinStatusD[$ii]==6)print($fuchsia);
+	  if($pinStatusD[$ii]==7)print($aqua);
+	  print("ctx.beginPath();");
+	  print("ctx.arc($digY[$ii], $digX[$ii], 4, 0, Math.PI*2, true);");
+	  if($ii == 13 && $pinStatusD[13]>0)
+	    print("ctx.rect($led13Y-4, $led13X-3,8, 5);");
+	  print("ctx.closePath();");
+	  print("ctx.fill();");
+	}
     }
 
   // Analog Pins Status
-  for($ii=0; $ii<6; $ii++)
+  for($ii=0; $ii<$boardAnaPins; $ii++)
     {
-      if($pinStatusA[$ii]==0)print($black);
-      if($pinStatusA[$ii]==1)print($yellow);
-      if($pinStatusA[$ii]==2)print($white);
-      if($pinStatusA[$ii]==3)print($red);
-      if($pinStatusA[$ii]==4)print($green);
-      if($pinStatusA[$ii]==5)print($blue);
-      if($pinStatusA[$ii]==6)print($fuchsia);
-      if($pinStatusA[$ii]==7)print($aqua);
-      print("ctx.beginPath();");
-      print("ctx.arc($anaY[$ii], $anaX[$ii], 5, 0, Math.PI*2, true);");
-      print("ctx.closePath();");
-      print("ctx.fill();");
+      if($pinStatusA[$ii]!=0)
+	{
+	  if($pinStatusA[$ii]==1)print($yellow);
+	  if($pinStatusA[$ii]==2)print($white);
+	  if($pinStatusA[$ii]==3)print($red);
+	  if($pinStatusA[$ii]==4)print($green);
+	  if($pinStatusA[$ii]==5)print($blue);
+	  if($pinStatusA[$ii]==6)print($fuchsia);
+	  if($pinStatusA[$ii]==7)print($aqua);
+	  print("ctx.beginPath();");
+	  print("ctx.arc($anaY[$ii], $anaX[$ii], 4, 0, Math.PI*2, true);");
+	  print("ctx.closePath();");
+	  print("ctx.fill();");
+	}
     }
 
   // Write Sketch Name on IC
   print("ctx.font = \"15pt Calibri\";");
-  print("ctx.fillStyle = \"#FFFFFF\";");
+  print("ctx.fillStyle = \"#FF0000\";");
   print("ctx.fillText(\"$curSketchName\",$sketchNameY,$sketchNameX);");
   
   echo(" }");
@@ -1772,4 +2044,17 @@ function viking_7_script($sys_id)
   
   echo("</script>");
 }
+
+
+function viking_7_isMap($sys_id)
+{
+  global $par,$wBoard,$hBoard;
+
+  $board = $par['a7_cur_board_type'];
+  if($board == 'boardUno')
+    echo("<a href=$path><img src=\"arduino_uno.jpg\"ismap width=$wBoard height=$hBoard></a>");
+  if($board == 'boardMega')
+    echo("<a href=$path><img src=\"arduino_mega.jpg\"ismap width=$wBoard height=$hBoard></a>");
+}
+
 ?>
