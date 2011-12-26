@@ -126,6 +126,20 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 	else
 	  vikingError("User name already exists");
       }
+
+    if($post_action == 'post_del_user')
+      {
+	$user_name  = $_POST['a4_user_name'];
+	
+	$object_id = getObjectIdbyName($sel_db,$user_name);
+	if($id != 'void')
+	  {
+	    $father_id = 1;
+	    deleteObject($sel_db,$object_id,$father_id);
+	  }
+	else
+	  vikingError("User name does not exists ($user_name)");
+      }
   }
 
 
@@ -190,6 +204,7 @@ function viking_4_addUser_Form()
       echo("</tr></table>");
     }
 }
+
 function viking_4_addUser_Link()
 {  
   global $par;
@@ -204,6 +219,43 @@ function viking_4_addUser_Link()
     }
   else  if($sel_db && $user == 'admin')
     echo("<a href=$path&p1=open_4_addUser>".T_4_ADD_USER."</a>");
+}
+
+function viking_4_delUser_Form()
+{  
+  global $par;
+  $path       = $par['path'];
+  $sel_name   = $par['a4_name'];
+  $app_open   = $par['p1'];
+  $sel_db     = $par['a4_db'];
+  $user       = $par['user'];
+
+  if($app_open == "open_4_delUser"  && $sel_db && $user == 'admin')
+    {
+      echo("<table><tr>");
+      echo("<form name=\"form_del_user\" action=\"$path\" method=\"post\"> ");
+      echo("<input type=\"hidden\" name=\"a4_post_action\" value=\"post_del_user\">");
+      echo("<tr><td>".T_4_USER."</td><td><input type=\"text\" name=\"a4_user_name\" value=\"\"></td></tr>");
+      echo("<tr><td><input type =\"submit\" name=\"form_submit\" value=\"".T_4_DEL_USER."\"></td>");
+      echo("</form>");
+      echo("</tr></table>");
+    }
+}
+
+function viking_4_delUser_Link()
+{  
+  global $par;
+  $path       = $par['path'];
+  $app_open   = $par['p1'];
+  $sel_db     = $par['a4_db'];
+  $user       = $par['user'];
+
+  if($app_open == "open_4_delUser")
+    {
+      echo(T_4_DEL_USER);
+    }
+  else  if($sel_db && $user == 'admin')
+    echo("<a href=$path&p1=open_4_delUser>".T_4_DEL_USER."</a>");
 }
 
 function viking_4_login_Form()
@@ -238,6 +290,16 @@ function viking_4_login_logout()
   else 
     echo("<a href=$path&p1=open_4_login>".T_4_LOGIN_USER."</a>");
    
+}
+
+function viking_4_showUserByName()
+{  
+  global $par;
+  $path   = $par['path'];
+  $user   = $par['user'];
+  
+  $db = 'users';
+  listAllObjects($db);   
 }
 
 

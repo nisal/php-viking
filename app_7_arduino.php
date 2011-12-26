@@ -1431,6 +1431,7 @@ function viking_7_mainmenu($sys_id)
       echo("<li><a href=\"index.php?pv=sketch\">Sketch</a></li>");
       echo("<li><a href=\"index.php?pv=log\">Log</a></li>");
     }
+  echo("<li><a href=\"index.php?pv=admin\" >Admin</a></li>");
   echo("<li><a href=\"index.php?pv=help\"  >Help</a></li>");
   echo("<li><a href=\"index.php?pv=about\" >About</a></li>");
   if(!$user)
