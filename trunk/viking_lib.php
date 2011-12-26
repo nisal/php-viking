@@ -33,6 +33,19 @@ if(!is_dir($g_db_dir))
 
 
 //=======================================
+function getLastNodeId($db_name)
+//=======================================
+{
+  $file = "php-viking/db/".$db_name.".ids";
+
+  $fh = fopen($file, 'r') or die("getNextNodeId can't open file: $file");
+  $row = fgets($fh);
+  sscanf($row, "%d", $id);
+  fclose($fh);
+  return($id);
+}
+
+//=======================================
 function getNextNodeId($db_name)
 //=======================================
 {
@@ -702,7 +715,17 @@ function setObjectFile($db,$object_id,$value)
 function listAllObjects($db)
 //========================
 {
-  echo("Not implemented");
+  $nn = getLastNodeId($db);
+  for($ii=1;$ii<=$nn;$ii++)
+    showObject(1,$db,$ii);
+}
+
+//========================
+function showObjectbyName($db,$name)
+//========================
+{
+  $id = getObjectIdbyName($db,$name);
+  showObject(1,$db,$id);
 }
 
 //========================
