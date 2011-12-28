@@ -94,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 	      {
 		$par['user'] = $user_name;
 		$par['user_event'] = 1;
+		loginCounter();
 	      }
 	  }
 	else 
@@ -160,7 +161,26 @@ $_SESSION['user'] = $par['user'];
 //  Internal functions
 //====================================================
 
+//=======================================
+function loginCounter()
+//=======================================
+{
+  $file = 'login.counter';
 
+  $fh = fopen($file, 'r');
+  $row = fgets($fh);
+  sscanf($row, "%d", $id);
+  fclose($fh);
+
+  $id++;
+
+  $fh = fopen($file, 'w');
+  fwrite($fh, $id);    
+  fwrite($fh, "\n");
+  fclose($fh);
+
+  return($id);
+}
 //====================================================
 //  HTML functions
 //====================================================
