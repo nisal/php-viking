@@ -71,7 +71,7 @@ $pinModeD   = array();
 $account = $par['user'];
 $user    = $par['user'];
 
-//if(!$account)$account = 'public';
+if(!$account)$account = 'public';
 
 // Set filenames
 $upload   = "account/".$account.'/upload/';
@@ -92,6 +92,7 @@ $fn['list']        = 'account/'.$account.'/list.txt';
 $fn['setting']     = 'setting.txt';
 $fn['start']       = 'start.htm';
 $fn['about']       = 'about.htm';
+$fn['register']    = 'register.htm';
 $fn['help']        = 'help.htm';
 
 
@@ -252,7 +253,7 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
       {
 	$par['a7_cur_file'] = $_POST['file'];
 	$curFile = $par['a7_cur_file'];
-	if($curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm')$par['tinyMCE'] = 1;
+	if($curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm' || $curFile == 'register.htm')$par['tinyMCE'] = 1;
 	else
 	  $par['tinyMCE'] = 0;
 	$what = $_POST['submit_select'];
@@ -1692,7 +1693,7 @@ function viking_7_anyFile($sys_id)
       if($curFile == $fn['scenario'])echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
       if($user == 'admin')
 	{
-	  if($curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
+	  if($curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
 	}
       echo("</td></tr><tr><td><textarea name=\"file_data\" cols=50 rows=35>$data</textarea></td></tr></table>");  
       echo("</form><br>");
@@ -1780,10 +1781,7 @@ function viking_7_winSim($sys_id)
 function viking_7_help($sys_id)
 {
   global $par,$fn;
-  $path  = $par['path'];
-  $user  = $par['user'];
   $tFile = $fn['help'];
-
   $len = readAnyFile($tFile);
   showAnyFile($len);
 }
@@ -1791,10 +1789,15 @@ function viking_7_help($sys_id)
 function viking_7_about($sys_id)
 {
   global $par,$fn;
-  $path  = $par['path'];
-  $user  = $par['user'];
   $tFile = $fn['about'];
+  $len = readAnyFile($tFile);
+  showAnyFile($len);
+}
 
+function viking_7_register($sys_id)
+{
+  global $par,$fn;
+  $tFile = $fn['register'];
   $len = readAnyFile($tFile);
   showAnyFile($len);
 }
@@ -1802,10 +1805,7 @@ function viking_7_about($sys_id)
 function viking_7_start($sys_id)
 {
   global $par,$fn;
-  $path  = $par['path'];
-  $user  = $par['user'];
   $tFile = $fn['start'];
-
   $len = readAnyFile($tFile);
   showAnyFile($len);
 }
@@ -1815,7 +1815,6 @@ function viking_7_error($sys_id)
 {
   global $par,$fn;
   $path   = $par['path'];
-  $sid    = $par['a7_sid'];
   $user   = $par['user'];
 
   //if($user)echo("[Webuino Version 2011-12-22] Any errors (compile,exec and servuino) will be shown here<br>");
@@ -1857,6 +1856,9 @@ function viking_7_data($sys_id)
     $selected = "";$temp = $fn['about'];if($curFile == $temp)$selected = 'selected';
     echo("<option value=\"$temp\"   $selected>About</option>");
 
+    $selected = "";$temp = $fn['register'];if($curFile == $temp)$selected = 'selected';
+    echo("<option value=\"$temp\"   $selected>Register</option>");
+
     $selected = "";$temp = $fn['custom'];if($curFile == $temp)$selected = 'selected';
     echo("<option value=\"$temp\"   $selected>Custom Log</option>");
 
@@ -1894,7 +1896,7 @@ function viking_7_data($sys_id)
 
   if($user == 'admin')
   {
-    if($curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] )echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
+    if($curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] )echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
   }
 
   echo("</form></td>");
@@ -2043,15 +2045,6 @@ function viking_7_applyAccount($sys_id)
       echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
       if($application == 0)
 	{
-	  echo("<h3>Fill in preferred UserName and your E-mail Address. Your account information will be sent to the e-mail address within 24 hours.<br>The account is free!<br><br>
-        The following features are included:<br>
-        <li>Uploading sketches (your Webuino account can hold max 10 sketches)</li>
-        <li>On-line editing of sketches and scenarios</li>
-</h3>");
-	  
-	  
-	  echo("Disclaimer: Your account can be deleted any time for any reason.<br>");
-	  echo("Security:   All sketches loaded into Webuino Simulator is scanned for evil code.<br><br><br>");
 	  
 	  echo("<table border=\"0\"><tr>");
 	  
