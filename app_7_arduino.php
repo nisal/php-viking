@@ -1671,9 +1671,9 @@ function checkSketch($sketch)
         }
       fclose($in);
 
-      if($sketch_name_ok  == NO){vikingWarning("No name in sketch: $sketch");$res = 1;}
-      if($board_type_ok   == NO){vikingWarning("No board type in sketch: $sketch");$res = 1;}
-      if($no_system_calls == NO){vikingWarning("No system calls allowed: $sketch");$res = 1;}
+      if($sketch_name_ok  == NO){vikingWarning("No name in sketch");$res = 1;}
+      if($board_type_ok   == NO){vikingWarning("No board type in sketch");$res = 1;}
+      if($no_system_calls == NO){vikingWarning("No system calls allowed");$res = 1;}
     }
   else
    {
