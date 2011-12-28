@@ -10,13 +10,17 @@ $warning = '';
 $error   = '';
 
 $par = array();
-$vikingError = array();
+$vikingError   = array();
 $vikingWarning = array();
+$vikingError[0]   = 0;
+$vikingWarning[0] = 0;
+
 $errIx = 0;
 $warIx = 0;
 
 //  pv-support
 $par['inc'] = 0;
+
 
 if($_GET['pv'])
   $par['pv'] = $_GET['pv'];
@@ -259,8 +263,8 @@ function uploadFile()
 function viking_lib_showError()
 {
   global $vikingError;
- 
-  //echo("vikingError<br>"); 
+  
+  if($vikingError[0] < 1)return;
   for ($ii=1; $ii<=$vikingError[0];$ii++)
   {
     $temp = $vikingError[$ii];
@@ -272,7 +276,7 @@ function viking_lib_showWarning()
 {
   global $vikingWarning;
 
-  //echo("vikingWarning<br>");
+  if($vikingWarning[0] < 1)return;
   for ($ii=1; $ii<=$vikingWarning[0];$ii++)
   {
     $temp = $vikingWarning[$ii];

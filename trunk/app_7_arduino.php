@@ -89,7 +89,7 @@ $fn['sketch']      = 'account/'.$account.'/sketch.pde';
 $fn['scenario']    = 'account/'.$account.'/data.scen';
 $fn['scenexp']     = 'account/'.$account.'/data.scenario';
 $fn['list']        = 'account/'.$account.'/list.txt';
-$fn['setting']     = 'setting.txt';
+$fn['setting']     = 'account/'.$account.'/setting.txt';
 $fn['start']       = 'start.htm';
 $fn['about']       = 'about.htm';
 $fn['register']    = 'register.htm';
@@ -131,8 +131,11 @@ if($tDir && !is_dir($tDir))
 
 $userEvent = $par['user_event'];
 
+accessControl(); // Benny. Keep this until debugged
+
 if($userEvent == 1) // user logged in!
   {
+    accessControl();
     resetSession();
     readUserSetting();
     $par['user_event'] = 0;
@@ -151,7 +154,7 @@ $application = 0;
 $hBoard = 300; // 300 240
 $wBoard = 500; // 500 400
 
-
+readLoginCounter();
 
 $par['a7_cur_sim_len']       = $_SESSION['a7_cur_sim_len'];
 init($par['a7_cur_sim_len']);
@@ -194,6 +197,11 @@ $curStep    = $par['a7_cur_step'];
 
 $action  = $_GET['ac'];
 $alt     = $_GET['x'];
+
+if($action == 'access_control')
+  {
+    accessControl();
+  }
 
 if($action == 'run' && $curSimLen > 0)
   {
@@ -315,19 +323,24 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
 	    if($curSimLen > 2000)$curSimLen = 2000;
 	    $par['a7_cur_sim_len'] =  $curSimLen;
 	    $par['a7_cur_source']  =  $curSource;
-	    copySketch($curSource);
-	    compileSketch();
-	    execSketch($curSimLen,0);
-	    $par['a7_cur_step'] = 0;
-	    $par['a7_cur_loop'] = 0;
-	    init($curSimLen);
-	    readSketchInfo();
-	    $tFile = $fn['custom'];
-	    readSimulation($tFile);
-	    readStatus();
-	    //readSerial();
-            writeUserSetting();
-	    $par['a7_ready'] = "Sketch loaded!";
+	    $res = copySketch($curSource);
+	    if($res == 0)
+	      {
+		compileSketch();
+		execSketch($curSimLen,0);
+		$par['a7_cur_step'] = 0;
+		$par['a7_cur_loop'] = 0;
+		init($curSimLen);
+		readSketchInfo();
+		$tFile = $fn['custom'];
+		readSimulation($tFile);
+		readStatus();
+		//readSerial();
+		writeUserSetting();
+		$par['a7_ready'] = "Sketch loaded!";
+	      }
+	    else
+		$par['a7_ready'] = "Sketch not loaded!";
 	  }
 	else
 	  vikingWarning("No sketch selected !");
@@ -439,6 +452,94 @@ function resetSession()
     $_SESSION['a7_ser_log']           = "";
 }
 //==========================================
+function accessControlFile($file,$rw)
+//==========================================
+{
+  $out = fopen($file,"$rw");
+  if($out)
+      return(OK);
+  else
+    return(NOK);
+}
+//==========================================
+function accessControl()
+//==========================================
+{
+  global $par,$fn;
+  
+  $file = $fn['serial'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['custom'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['arduino'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['error'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['exec'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['g++'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['status'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['code'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['application'];
+  $res = accessControlFile($file,"w");
+  if($res == NOK)vikingError("Write Access: $file"); 
+
+  $file = $fn['sketch'];
+  $res = accessControlFile($file,"w");
+  if($res == NOK)vikingError("Write Access: $file"); 
+
+  $file = $fn['scenario'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['scenexp'];
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
+
+  $file = $fn['list'];
+  $res = accessControlFile($file,"w");
+  if($res == NOK)vikingError("Write Access: $file"); 
+
+  $file = $fn['setting'];
+  $res = accessControlFile($file,"w");
+  if($res == NOK)vikingError("Write Access: $file");
+
+  $file = $fn['start'];
+  $res = accessControlFile($file,"w");
+  if($res == NOK)vikingError("Write Access: $file"); 
+
+  $file = $fn['about'];
+  $res = accessControlFile($file,"w");
+  if($res == NOK)vikingError("Write Access: $file"); 
+
+  $file = $fn['register'];
+  $res = accessControlFile($file,"w");
+  if($res == NOK)vikingError("Write Access: $file");  
+
+  $file = $fn['help'];
+  $res = accessControlFile($file,"w");
+  if($res == NOK)vikingError("Write Access: $file"); 
+}
+//==========================================
 function writeUserSetting()
 //==========================================
 {
@@ -450,7 +551,7 @@ function writeUserSetting()
 	  vikingWarning("writeUserSetting: no file ($file)");
 	  return;
 	}
-
+	  echo("benny1");
       $out = fopen($file,"w");
       if($out)
 	{
@@ -458,6 +559,7 @@ function writeUserSetting()
 	  fwrite($out,$temp);
 	  $temp = "FILE: ".$par['a7_cur_file']."\n";
 	  fwrite($out,$temp);
+	  echo("benny2");
 	}
       else
 	vikingError("Not able to open user setting file write ($file)");  
@@ -734,11 +836,13 @@ function copySketch($sketch)
 	    vikingError("Failed to copy ($sketch)");
 	  }
 	}
-      else
-	vikingError("Sketch did not pass check: $sketch");
     }
   else
-    vikingError("Unable to copy sketch: ($sketch) to ($fTemp)");
+    {
+      $res = 1;
+      vikingError("Unable to copy sketch: ($sketch) to ($fTemp)");
+    }
+  return($res);
 }
 
 //==========================================
@@ -1230,7 +1334,7 @@ function readScenario()
 }
 
 //==========================================
-function readAnyFile($file)
+function readAnyFile($check,$file)
 //==========================================
 {
   global $par;
@@ -1258,12 +1362,39 @@ function readAnyFile($file)
 	}
       fclose($in);
     }
-  else
+  else if($check == YES)
     {
       $temp = "readAnyFile: Fail to open ($file)";
       vikingError($temp);
     }
   return($step);
+}
+
+//==========================================
+function readLoginCounter()
+//==========================================
+{
+  global $par;
+
+  $file = 'login.counter';
+  if(!$file)
+    {
+      vikingWarning("readLoginCounter: no file ($file)");
+      return;
+    }
+  $in = fopen($file,"r");
+  if($in)
+    {
+      $row = fgets($in);
+      $par['login_counter'] = $row;
+      fclose($in);
+    }
+  else
+    {
+      $temp = "readLoginCounter: Fail to open ($file)";
+      vikingError($temp);
+    }
+  return;
 }
 
 //==========================================
@@ -1505,9 +1636,13 @@ function checkSketch($sketch)
 {
    
   global $par;
-  $res = 0;
-  $user       = $par['user'];
+  $res  = 0;
+  $user = $par['user'];
 
+  $sketch_name_ok  = NO;
+  $board_type_ok   = NO;
+  $no_system_calls = YES;
+  
   if(!$sketch)
     {
       vikingWarning("checkSketch: no file ($file)");
@@ -1520,19 +1655,24 @@ function checkSketch($sketch)
       while (!feof($in))
         {
           $row = fgets($in);
-          //$row = trim($row);
-          if(strstr($row,"SKETCH_NAME"))
+          if(strstr($row,"SKETCH_NAME:"))
             {
-              //echo("$row");
-              if($pp = strstr($row,":"))
-                {
-                  sscanf($pp,"%s%s",$junk,$name);
-                  //echo("[$curSketchName]");
-                }
+	      $sketch_name_ok = YES;
+            }
+          if(strstr($row,"BOARD_TYPE:"))
+            {
+	      $board_type_ok = YES;
+            }
+          if(strstr($row,"system"))
+            {
+	      $no_system_calls = NO;
             }
         }
       fclose($in);
-      if(!$name)vikingWarning("No name in sketch: $sketch");
+
+      if($sketch_name_ok  == NO){vikingWarning("No name in sketch: $sketch");$res = 1;}
+      if($board_type_ok   == NO){vikingWarning("No board type in sketch: $sketch");$res = 1;}
+      if($no_system_calls == NO){vikingWarning("No system calls allowed: $sketch");$res = 1;}
     }
   else
    {
@@ -1675,7 +1815,7 @@ function viking_7_anyFile($sys_id)
   if($curEditFlag == 0)
     {
   echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
-  $len = readAnyFile($curFile);
+  $len = readAnyFile(YES,$curFile);
   showAnyFile($len);
   echo("</div>\n");
     }
@@ -1771,7 +1911,6 @@ function viking_7_winSim($sys_id)
 {
   global $par;
   $path    = $par['path'];
-  $sid     = $par['a7_sid'];
   $user    = $par['user'];
   $curStep = $par['a7_cur_step'];
   echo("<div id=\"simLis\"t style=\"float:right; border : solid 1px #000000; background : #FFFFFF; color : #000000; text-align:left; padding : 4px; width : 98%; height:250px; overflow : auto; \">\n");
@@ -1783,7 +1922,7 @@ function viking_7_help($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['help'];
-  $len = readAnyFile($tFile);
+  $len = readAnyFile(YES,$tFile);
   showAnyFile($len);
 }
 
@@ -1791,7 +1930,7 @@ function viking_7_about($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['about'];
-  $len = readAnyFile($tFile);
+  $len = readAnyFile(YES,$tFile);
   showAnyFile($len);
 }
 
@@ -1799,7 +1938,7 @@ function viking_7_register($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['register'];
-  $len = readAnyFile($tFile);
+  $len = readAnyFile(YES,$tFile);
   showAnyFile($len);
 }
 
@@ -1807,10 +1946,26 @@ function viking_7_start($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['start'];
-  $len = readAnyFile($tFile);
+  $len = readAnyFile(YES,$tFile);
   showAnyFile($len);
 }
 
+function viking_7_loginCounter($sys_id)
+{
+  global $par;
+  $temp = $par['login_counter'];
+  echo("[$temp]");
+}
+
+function viking_7_accessControl($sys_id)
+{
+  global $par;
+  $path    = $par['path'];
+  $user    = $par['user'];
+
+  if($user == 'admin')
+    echo(" <a href=$path&ac=access_control>Access Control</a>");
+}
 
 function viking_7_error($sys_id)
 {
@@ -1820,13 +1975,13 @@ function viking_7_error($sys_id)
 
   //if($user)echo("[Webuino Version 2011-12-22] Any errors (compile,exec and servuino) will be shown here<br>");
   $file = $fn['g++'];
-  $len = readAnyFile($file);
+  $len = readAnyFile(NO,$file);
   showAnyFile($len);
   $file = $fn['exec'];
-  $len = readAnyFile($file);
+  $len = readAnyFile(NO,$file);
   showAnyFile($len);
   $file = $fn['error'];
-  $len = readAnyFile($file);
+  $len = readAnyFile(NO,$file);
   showAnyFile($len);
 }
 
@@ -1912,6 +2067,7 @@ function viking_7_load($sys_id)
   $user      = $par['user'];
   $curSource = $par['a7_cur_source'];
   $curSimLen = $par['a7_cur_sim_len'];
+  $ready     = $par['a7_ready'];
   
   echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
   if($user && $user != 'guest')
