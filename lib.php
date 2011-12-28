@@ -28,7 +28,6 @@ if($_GET['pv'])
    $par['pv'] = $_SESSION['pv'];
 //  end of pv-support
 
-
 $_SESSION['pv'] = $par['pv'];
 
 //$par['admin'] = $_SESSION['admin'];

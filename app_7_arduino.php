@@ -39,6 +39,9 @@ define('RX',       '10');
 define('INPUT' ,   '11');
 define('OUTPUT' ,  '12');
 
+define('YES' , '1');
+define('NO' ,  '2');
+
 
 
 $UNO_DIG_PINS  = 14;
@@ -500,12 +503,12 @@ function accessControl()
   if($res == NOK)vikingError("Read Access: $file"); 
 
   $file = $fn['application'];
-  $res = accessControlFile($file,"w");
-  if($res == NOK)vikingError("Write Access: $file"); 
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
 
   $file = $fn['sketch'];
-  $res = accessControlFile($file,"w");
-  if($res == NOK)vikingError("Write Access: $file"); 
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
 
   $file = $fn['scenario'];
   $res = accessControlFile($file,"r");
@@ -520,24 +523,24 @@ function accessControl()
   if($res == NOK)vikingError("Write Access: $file"); 
 
   $file = $fn['setting'];
-  $res = accessControlFile($file,"w");
-  if($res == NOK)vikingError("Write Access: $file");
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file");
 
   $file = $fn['start'];
-  $res = accessControlFile($file,"w");
-  if($res == NOK)vikingError("Write Access: $file"); 
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
 
   $file = $fn['about'];
-  $res = accessControlFile($file,"w");
-  if($res == NOK)vikingError("Write Access: $file"); 
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
 
   $file = $fn['register'];
-  $res = accessControlFile($file,"w");
-  if($res == NOK)vikingError("Write Access: $file");  
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file");  
 
   $file = $fn['help'];
-  $res = accessControlFile($file,"w");
-  if($res == NOK)vikingError("Write Access: $file"); 
+  $res = accessControlFile($file,"r");
+  if($res == NOK)vikingError("Read Access: $file"); 
 }
 //==========================================
 function writeUserSetting()
@@ -551,7 +554,6 @@ function writeUserSetting()
 	  vikingWarning("writeUserSetting: no file ($file)");
 	  return;
 	}
-	  echo("benny1");
       $out = fopen($file,"w");
       if($out)
 	{
@@ -559,7 +561,6 @@ function writeUserSetting()
 	  fwrite($out,$temp);
 	  $temp = "FILE: ".$par['a7_cur_file']."\n";
 	  fwrite($out,$temp);
-	  echo("benny2");
 	}
       else
 	vikingError("Not able to open user setting file write ($file)");  
@@ -1362,7 +1363,7 @@ function readAnyFile($check,$file)
 	}
       fclose($in);
     }
-  else if($check == YES)
+  else if($check == 1)
     {
       $temp = "readAnyFile: Fail to open ($file)";
       vikingError($temp);
@@ -1815,7 +1816,7 @@ function viking_7_anyFile($sys_id)
   if($curEditFlag == 0)
     {
   echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
-  $len = readAnyFile(YES,$curFile);
+  $len = readAnyFile(1,$curFile);
   showAnyFile($len);
   echo("</div>\n");
     }
@@ -1922,7 +1923,7 @@ function viking_7_help($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['help'];
-  $len = readAnyFile(YES,$tFile);
+  $len = readAnyFile(1,$tFile);
   showAnyFile($len);
 }
 
@@ -1930,7 +1931,7 @@ function viking_7_about($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['about'];
-  $len = readAnyFile(YES,$tFile);
+  $len = readAnyFile(1,$tFile);
   showAnyFile($len);
 }
 
@@ -1938,7 +1939,7 @@ function viking_7_register($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['register'];
-  $len = readAnyFile(YES,$tFile);
+  $len = readAnyFile(1,$tFile);
   showAnyFile($len);
 }
 
@@ -1946,7 +1947,7 @@ function viking_7_start($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['start'];
-  $len = readAnyFile(YES,$tFile);
+  $len = readAnyFile(1,$tFile);
   showAnyFile($len);
 }
 
@@ -1975,13 +1976,13 @@ function viking_7_error($sys_id)
 
   //if($user)echo("[Webuino Version 2011-12-22] Any errors (compile,exec and servuino) will be shown here<br>");
   $file = $fn['g++'];
-  $len = readAnyFile(NO,$file);
+  $len = readAnyFile(2,$file);
   showAnyFile($len);
   $file = $fn['exec'];
-  $len = readAnyFile(NO,$file);
+  $len = readAnyFile(2,$file);
   showAnyFile($len);
   $file = $fn['error'];
-  $len = readAnyFile(NO,$file);
+  $len = readAnyFile(2,$file);
   showAnyFile($len);
 }
 
