@@ -3,18 +3,6 @@
    z2 {color:red;}
 </style>
 
-<!-- TinyMCE -->
-<script type="text/javascript" src="tinymce/jscripts/tiny_mce/tiny_mce.js"></script>
-<script type="text/javascript">
-     tinyMCE.init({
-       mode : "textareas",
-	   theme : "simple"
-	   });
-</script>
-<!-- /TinyMCE -->
-
-
-
 <?
 
 $info    = '';
@@ -325,6 +313,28 @@ function viking_lib_editInfoText_Form()
       echo("<textarea name=\"lib_text_info\" cols=10 rows=6>$data</textarea>");
       echo("<input type =\"submit\" name=\"form_submit\" value=\"".T_SAVE."\">");
       echo("</form>");
+    }
+}
+
+//========================================
+function viking_lib_tinyMCE()
+//========================================
+{
+  global $par;
+  $tinyMCE = $par['tinyMCE'];
+ 
+  if($tinyMCE)
+    {
+      echo("<!-- TinyMCE -->");
+      echo("<script type=\"text/javascript\" src=\"tinymce/jscripts/tiny_mce/tiny_mce.js\"></script>");
+      echo("<script type=\"text/javascript\">");
+      echo("tinyMCE.init({");
+      echo("mode : \"textareas\",");
+      //echo("theme : \"simple\"");
+      echo("theme : \"advanced\"");
+      echo("   });");
+      echo("</script>");
+      echo("<!-- /TinyMCE -->");
     }
 }
 

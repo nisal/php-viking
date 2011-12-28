@@ -15,7 +15,8 @@ define('T_SAVE','Save');
 define('T_LOAD','Load');
 define('T_RUN', 'Run');
 define('T_SET', 'Set');
-define('T_SET_PIN_VALUE', 'Set Pin Value');
+define('T_SET_DIG_PIN_VALUE', 'Set Digital Pin Value');
+define('T_SET_ANA_PIN_VALUE', 'Set Analog Pin Value');
 define('T_APPLY', 'Send Application');
 
 
@@ -52,6 +53,7 @@ $content    = array();
 $status     = array();
 $serial     = array();
 $serialL    = array();
+$scenario   = array();
 
 $stepLoop   = array();
 $loopStep   = array();
@@ -67,8 +69,9 @@ $pinModeD   = array();
 
 // Create Account
 $account = $par['user'];
+$user    = $par['user'];
 
-if(!$account)$account = 'public';
+//if(!$account)$account = 'public';
 
 // Set filenames
 $upload   = "account/".$account.'/upload/';
@@ -84,6 +87,7 @@ $fn['code']        = 'account/'.$account.'/data.code';
 $fn['application'] = 'application.txt';
 $fn['sketch']      = 'account/'.$account.'/sketch.pde';
 $fn['scenario']    = 'account/'.$account.'/data.scen';
+$fn['scenexp']     = 'account/'.$account.'/data.scenario';
 $fn['list']        = 'account/'.$account.'/list.txt';
 $fn['setting']     = 'setting.txt';
 $fn['start']       = 'start.htm';
@@ -93,16 +97,30 @@ $fn['help']        = 'help.htm';
 
 $tDir = 'account/'.$account;
 
-if(!is_dir($tDir))
+if($tDir && !is_dir($tDir))
   {
     vikingWarning("Create account");
     if(!mkdir($tDir,0777))vikingError("Not possible to create account");
     $tDir2 = $tDir.'/upload';
     if(!mkdir($tDir2,0777))vikingError("Not possible to create upload in account");
-
-    $syscom = "cd $tDir;cp ../../servuino/*.c .;cp ../../servuino/*.h .;";
+    
+    //$syscom = "cd $tDir;cp ../../servuino/*.c .;cp ../../servuino/*.h .;";
+    //system($syscom);
+    $syscom = "cd $tDir;ln -s ../../servuino/servuino.c servuino.c;";
     system($syscom);
-
+    $syscom = "cd $tDir;ln -s ../../servuino/servuino_lib.c servuino_lib.c;";
+    system($syscom);
+    $syscom = "cd $tDir;ln -s ../../servuino/servuino.h servuino.h;";
+    system($syscom);
+    $syscom = "cd $tDir;ln -s ../../servuino/arduino_lib.c arduino_lib.c;";
+    system($syscom);
+    $syscom = "cd $tDir;ln -s ../../servuino/common.h common.h;";
+    system($syscom);
+    $syscom = "cd $tDir;ln -s ../../servuino/common_lib.c common_lib.c;";
+    system($syscom);
+    $syscom = "cd $tDir;ln -s ../../servuino/code.h code.h;";
+    system($syscom);
+    
     $syscom = "cd $tDir;touch g++.error exec.error setting.txt;";
     system($syscom);
     $syscom = "cd $tDir;touch data.serial data.custom data.arduino data.error data.status data.code data.scen sketch.pde;";
@@ -155,7 +173,7 @@ canvasPos();
 
 $tFile = $fn['custom'];
 readSimulation($tFile);
-readSerial();
+//readSerial();
 
 $curSimLen  = $par['a7_cur_sim_len'] ;
 $curLoopLen = $par['a7_cur_loop_len'] ;
@@ -163,6 +181,7 @@ $curReadLen = $par['a7_cur_read_len'] ;
 $curSource  = $par['a7_cur_source'] ;
 $curLoop    = $par['a7_cur_loop'] ;
 $curRead    = $par['a7_cur_read'] ;
+$curStep    = $par['a7_cur_step'];
 
 // GET ==============================================
 //$sys_id        = $_GET['a7_sid'];
@@ -233,6 +252,9 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
       {
 	$par['a7_cur_file'] = $_POST['file'];
 	$curFile = $par['a7_cur_file'];
+	if($curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm')$par['tinyMCE'] = 1;
+	else
+	  $par['tinyMCE'] = 0;
 	$what = $_POST['submit_select'];
 	if($what == T_EDIT) $curEditFlag = 1;
       }
@@ -258,7 +280,7 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
 	    $tFile = $fn['custom'];
 	    readSimulation($tFile);
 	    readStatus();
-	    readSerial();
+	    //readSerial();
 	    $par['a7_ready'] = "Sketch loaded!";
 	  }
 	if($what == T_RUN)
@@ -270,7 +292,7 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
 	    $tFile = $fn['custom'];
 	    readSimulation($tFile);
 	    readStatus();
-	    readSerial();
+	    //readSerial();
 	    $par['a7_ready'] = "Sketch Executed!";
 	  }
 
@@ -286,7 +308,7 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
       {
 	$curSource = $_POST['source'];
 	$what = $_POST['submit_load_del'];
-	if($what == T_LOAD)
+	if($what == T_LOAD && $curSource)
 	  {
 	    $curSimLen = $_POST['sim_len'];
 	    $par['a7_cur_sim_len'] =  $curSimLen;
@@ -301,10 +323,12 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
 	    $tFile = $fn['custom'];
 	    readSimulation($tFile);
 	    readStatus();
-	    readSerial();
+	    //readSerial();
             writeUserSetting();
 	    $par['a7_ready'] = "Sketch loaded!";
 	  }
+	else
+	  vikingWarning("No sketch selected !");
 	if($what == T_DELETE)
 	  {
 	    unlink($curSource);
@@ -325,9 +349,46 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
         createApplication($username,$email);
       }
 
-    if($action == 'set_scenario' )
+    if($action == 'set_dig_scenario' )
       {
+	$pin   = $_POST['pin_value'];
+	if(!$pin)$pin = "0";
+	$value = $_POST['dvalue'];
+	if(!$value)$value = "0";
+        if($pin != "-")
+	  {
+	    $pinType = 2;//DIG
+	    $do = 10; // ADD=10, DELETE = 20
+	    $syscom = "cd account/$user;./servuino $curSimLen 1 $pinType $pin $value $curStep $do >exec.error 2>&1;chmod 777 data.*;";
+	    echo("$syscom<br>");
+	    system($syscom);
+	    init($curSimLen);
+	    readSketchInfo();
+	    $tFile = $fn['custom'];
+	    readSimulation($tFile);
+	    readStatus();
+	  }
+      }
 
+    if($action == 'set_ana_scenario' )
+      {
+	$pin   = $_POST['pin_value'];
+	if(!$pin)$pin = "0";
+	$value = $_POST['dvalue'];
+	if(!$value)$value = "0";
+        if($pin != "-")
+	  {
+	    $pinType = 1;//DIG=2 ANA=1
+	    $do = 10;    // ADD=10, DELETE=20
+	    $syscom = "cd account/$user;./servuino $curSimLen 1 $pinType $pin $value $curStep $do >exec.error 2>&1;chmod 777 data.*;";
+	    echo("$syscom<br>");
+	    system($syscom);
+	    init($curSimLen);
+	    readSketchInfo();
+	    $tFile = $fn['custom'];
+	    readSimulation($tFile);
+	    readStatus();
+	  }
       }
 
 
@@ -336,8 +397,6 @@ readStatus();
 decodeStatus($status[$curStep]);
 
 // set SESSION parameters ===============================
-
-
 
 $_SESSION['a7_cur_sim_len']        = $par['a7_cur_sim_len'];
 $_SESSION['a7_cur_loop_len']       = $par['a7_cur_loop_len'];
@@ -369,7 +428,7 @@ function resetSession()
     $_SESSION['a7_cur_step']          = 0; 
     $_SESSION['a7_cur_loop']          = 0; 
     $_SESSION['a7_cur_read']          = 0; 
-    $_SESSION['a7_cur_menu']          = ""; 
+    $_SESSION['a7_cur_menu']          = "start"; 
     $_SESSION['a7_cur_file']          = ""; 
     $_SESSION['a7_cur_sketch_name']   = "";
     $_SESSION['a7_cur_board_type']    = "";
@@ -778,14 +837,14 @@ function decodeStatus($code)
 	}
     }
 }
-//==========================================
-function show($step)
-//==========================================
-{
-  global $par,$simulation;
-  $user = $par['user'];
-  echo("$simulation[$step]<br>");
-}
+// //==========================================
+// function show($step)
+// //==========================================
+// {
+//   global $par,$simulation;
+//   $user = $par['user'];
+//   echo("$simulation[$step]<br>");
+// }
 
 //==========================================
 function init($steps)
@@ -797,6 +856,7 @@ function init($steps)
   for($ii=0;$ii<=$steps;$ii++)
     {
       $simulation[$ii] = "";
+      $scenario[$ii] = "";
       $serial[$ii] = "";
       $serialL[$ii] = "";
     }
@@ -824,6 +884,28 @@ function showStep($target)
 }
 
 //==========================================
+function showScenario($target)
+//==========================================
+{
+  global $par;
+  $path   = $par['path'];
+  $user   = $par['user'];
+  global $scenario;
+
+  echo("$scenario[0]<br>");
+  for($ii=$target+1;$ii>0;$ii--)
+    {
+      if($ii==$target+1)
+	echo("next> $scenario[$ii]<br>");
+      else if($ii==$target)
+	echo("now> $scenario[$ii]<br>");
+      else
+	echo("<a href=\"$path&ac=step&x=$ii\">$scenario[$ii]</a><br>");
+    }
+}
+
+
+//==========================================
 function showSerial($target)
 //==========================================
 {
@@ -834,7 +916,7 @@ function showSerial($target)
   $user   = $par['user'];
 
   $stemp = array();
-
+ 
   $jj = 1;
   //for($ii=$target;$ii>0;$ii--)
   for($ii=1;$ii<=$target;$ii++)
@@ -1087,6 +1169,58 @@ function readStatus()
   else
     {
       $temp = "readStatus: Fail to open ($file)";
+      vikingError($temp);
+    }
+
+  return($step);
+}
+
+//==========================================
+function readScenario()
+//==========================================
+{
+  global $par,$fn;
+  $user  = $par['user'];
+  global $scenario,$servuino;
+
+  $file = $fn['scenexp'];
+  $step = 0;
+  if(!$file)
+    {
+      vikingWarning("readScenario: no file ($file)");
+      return;
+    }
+
+  $in = fopen($file,"r");
+  if($in)
+    {
+      $temp = "No Pin definition";
+      $row  = fgets($in);
+      if(strstr($row,"Digital:"))
+	{
+	  $temp = $row;
+	}
+      $row  = fgets($in);
+      if(strstr($row,"Analog:"))
+	{
+	  $temp = $temp.$row;
+	}
+      $scenario[0] = $temp;
+
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  if($row[0] != '#')
+	    {
+	      $step++;
+	      $scenario[$step] = $row;
+	    }
+	}
+      fclose($in);
+    }
+  else
+    {
+      $temp = "readScenario: Fail to open ($file)";
       vikingError($temp);
     }
 
@@ -1434,7 +1568,7 @@ function viking_7_mainmenu($sys_id)
 
   echo("<ul>");
   echo("<li><a href=\"index.php?pv=start\" >Start</a></li>");
-  echo("<li><a href=\"index.php?pv=lib\"   >Library</a></li>");
+  //echo("<li><a href=\"index.php?pv=lib\"   >Library</a></li>");
   if($user)
     {
       if($user != 'guest')echo("<li><a href=\"index.php?pv=load\"  >Load</a></li>");
@@ -1538,7 +1672,7 @@ function viking_7_anyFile($sys_id)
 
   if($curEditFlag == 0)
     {
-  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 4px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px; \">\n");
+  echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
   $len = readAnyFile($curFile);
   showAnyFile($len);
   echo("</div>\n");
@@ -1570,7 +1704,6 @@ function viking_7_winSerLog($sys_id)
 {
   global $par;
   $path    = $par['path'];
-  $sid     = $par['a7_sid'];
   $user    = $par['user'];
   $curStep = $par['a7_cur_step'];
 
@@ -1578,14 +1711,29 @@ function viking_7_winSerLog($sys_id)
 
   if($sl == 'ser')
     {
-      echo("Serial Interface (<a href=$path&ac=winserlog&x=log>Log Events</a>)");
+      echo(" (<a href=$path&ac=winserlog&x=log>Log Events</a>)");
+      echo(" (<a href=$path&ac=winserlog&x=sce>Scenario</a>)");
+      echo(" Serial Interface ");
       echo("<div id=\"serWin\" style=\"font-family:Courier,monospace; font-size:12px;float:left; border:solid 0px #FF0000; background:#BDBDBD; color:#000000; text-align:left; padding:4px; width:100%; height:600px; overflow:auto; \">");
+      readSerial();
       showSerial($curStep);
+      echo("</div>\n"); 
+    }
+  else if($sl == 'sce')
+    {
+      echo(" (<a href=$path&ac=winserlog&x=log>Log Events</a>)");
+      echo(" Scenario ");
+      echo(" (<a href=$path&ac=winserlog&x=ser>Serial Interface</a>)");
+      echo("<div id=\"serWin\" style=\"font-family:Courier,monospace; font-size:12px;float:left; border:solid 0px #FF0000; background:#BDBDBD; color:#000000; text-align:left; padding:4px; width:100%; height:600px; overflow:auto; \">");
+      readScenario();
+      showScenario($curStep);
       echo("</div>\n"); 
     }
   else 
     {
-      echo("Log Events (<a href=$path&ac=winserlog&x=ser>Serial Interface</a>)");
+      echo(" Log events ");
+      echo(" (<a href=$path&ac=winserlog&x=sce>Scenario</a>)");
+      echo(" (<a href=$path&ac=winserlog&x=ser>Serial Interface</a>)");
       echo("<div id=\"logList\" style=\"margin-right:1px;float:left; border:solid 0px #000000; background:#AFCAE6; color:#000000; text-align:left; padding:4px; width:100%; height:600px; overflow:auto; \">");
       showStep($curStep);
       echo("</div>");
@@ -1595,12 +1743,12 @@ function viking_7_winSerLog($sys_id)
 function viking_7_winSerial($sys_id)
 {
   global $par;
-  $path   = $par['path'];
-  $sid        = $par['a7_sid'];
-  $user       = $par['user'];
+  $path    = $par['path'];
+  $user    = $par['user'];
   $curStep = $par['a7_cur_step'];
 
   echo("<div id=\"serWin\" style=\"font-family:Courier,monospace; font-size:12px;float:left; border:solid 0px #FF0000; background:#BDBDBD; color:#000000; text-align:left; padding:4px; width:100%; height:600px; overflow:auto; \">");
+  readSerial();
   showSerial($curStep);
   echo("</div>\n"); 
 }
@@ -1608,9 +1756,8 @@ function viking_7_winSerial($sys_id)
 function viking_7_winLog($sys_id)
 {
   global $par;
-  $path   = $par['path'];
-  $sid        = $par['a7_sid'];
-  $user       = $par['user'];
+  $path    = $par['path'];
+  $user    = $par['user'];
   $curStep = $par['a7_cur_step'];
 
   echo("<div id=\"logList\" style=\"margin-right:1px;float:left; border:solid 0px #000000; background:#AFCAE6; color:#000000; text-align:left; padding:4px; width:100%; height:600px; overflow:auto; \">");
@@ -1708,7 +1855,7 @@ function viking_7_data($sys_id)
     echo("<option value=\"$temp\"   $selected>Help</option>");
 
     $selected = "";$temp = $fn['about'];if($curFile == $temp)$selected = 'selected';
-    echo("<option value=\"$temp\"   $selected>Help</option>");
+    echo("<option value=\"$temp\"   $selected>About</option>");
 
     $selected = "";$temp = $fn['custom'];if($curFile == $temp)$selected = 'selected';
     echo("<option value=\"$temp\"   $selected>Custom Log</option>");
@@ -1732,7 +1879,10 @@ function viking_7_data($sys_id)
   echo("<option value=\"$temp\"   $selected>Sketch</option>");
 
   $selected = "";$temp = $fn['scenario'];if($curFile == $temp)$selected = 'selected';
-  echo("<option value=\"$temp\"   $selected>Scenario</option>");
+  echo("<option value=\"$temp\"   $selected>Scenario Inp</option>");
+
+  $selected = "";$temp = $fn['scenexp'];if($curFile == $temp)$selected = 'selected';
+  echo("<option value=\"$temp\"   $selected>Scenario Out</option>");
 
   echo("</select>");
   echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_SELECT."\">\n");
@@ -1814,22 +1964,37 @@ function viking_7_pinValues($sys_id)
 
   echo("<div style=\"font-size:12px;float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
 
-    echo("<form name=\"f_set_pin_value\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
-    echo("<input type=\"hidden\" name=\"action\" value=\"set_scenario\">");
+    echo("<hr><form name=\"f_set_dig_scenario\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
+    echo("<input type=\"hidden\" name=\"action\" value=\"set_dig_scenario\">");
     echo("<select name=\"pin_value\">");
+    echo("<option value=\"-\">-</option>");
     for($ii=0;$ii<$dPins;$ii++)
       {
 	$temp = $pinModeD[$ii];
-	if($temp == WHITE || $temp == BLUE || $temp == FUCHSIA || $temp == AQUA)     
+	if($temp == INPUT || $temp == I_CHANGE || $temp == I_RISING || $temp == I_FALLING || $temp == I_LOW)     
 	  echo("<option value=\"$ii\">$ii</option>");
       }
     echo("</select>");
     echo("<input type=\"radio\" name=\"dvalue\" value=\"0\"> Low");
     echo("<input type=\"radio\" name=\"dvalue\" value=\"1\"> High");
-    echo("<input type =\"submit\" name=\"submit_pin\" value=\"".T_SET_PIN_VALUE."\"></td>");
+    echo("<input type =\"submit\" name=\"submit_dig_scenario\" value=\"".T_SET_DIG_PIN_VALUE."\">");
     echo("</form>");
 
-    echo("<br><b>Analog Pin Values at step $curStep</b>");
+    echo("<form name=\"f_set_ana_scenario\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
+    echo("<input type=\"hidden\" name=\"action\" value=\"set_ana_scenario\">");
+    echo("<select name=\"pin_value\">");
+    echo("<option value=\"-\">-</option>");
+    for($ii=0;$ii<$aPins;$ii++)
+      {    
+	  echo("<option value=\"$ii\">$ii</option>");
+      }
+    echo("</select>");
+    echo("<input type=\"text\" name=\"dvalue\" value=\"\" size=\"4\">");
+    echo("<input type =\"submit\" name=\"submit_ana_scenario\" value=\"".T_SET_ANA_PIN_VALUE."\">");
+    echo("</form>");
+    echo("The value is valid from step $curStep to next breakpoint<br>"); 
+
+    echo("<hr><b>Analog Pin Values at step $curStep</b>");
     echo("<table border=0><tr>");
     $count = 0;
     for($ii=0;$ii<$aPins;$ii++)
