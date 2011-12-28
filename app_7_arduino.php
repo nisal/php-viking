@@ -312,7 +312,7 @@ if (!isset($_POST['action']))$_POST['action'] = "undefined";
 	if($what == T_LOAD && $curSource)
 	  {
 	    $curSimLen = $_POST['sim_len'];
-	    if($curSimLen > 2000)$curSimlen = 2000;
+	    if($curSimLen > 2000)$curSimLen = 2000;
 	    $par['a7_cur_sim_len'] =  $curSimLen;
 	    $par['a7_cur_source']  =  $curSource;
 	    copySketch($curSource);
