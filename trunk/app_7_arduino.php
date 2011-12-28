@@ -1573,7 +1573,7 @@ function viking_7_mainmenu($sys_id)
   //echo("<li><a href=\"index.php?pv=lib\"   >Library</a></li>");
   if($user)
     {
-      if($user != 'guest')echo("<li><a href=\"index.php?pv=load\"  >Load</a></li>");
+      echo("<li><a href=\"index.php?pv=load\"  >Load</a></li>");
       echo("<li><a href=\"index.php?pv=board\" >Board</a></li>");
       echo("<li><a href=\"index.php?pv=sketch\">Sketch</a></li>");
       echo("<li><a href=\"index.php?pv=log\">Log</a></li>");
@@ -1914,7 +1914,7 @@ function viking_7_load($sys_id)
   $curSimLen = $par['a7_cur_sim_len'];
   
   echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
-  if($user)
+  if($user && $user != 'guest')
     {
       echo("<hr><table border=\"0\"><tr>");      
       echo("<form name=\"f_load_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
@@ -1933,7 +1933,7 @@ function viking_7_load($sys_id)
 
       if($user != 'guest')
 	{
-	  if($nSketches < 10 && $user != 'guest')
+	  if($nSketches < 10)
 	    {
 	      echo("<hr><h3>You have $nSketches sketches uploaded.Limit is 10.</h3><br><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
 	      echo("<input type=\"hidden\" name=\"action\" value=\"upload_source\">");
