@@ -1857,7 +1857,7 @@ function viking_7_anyFile($sys_id)
   else
     $file = $curFile;
   
-  if($curEditFlag == 0)
+  if($curEditFlag == 0 && $file)
     {
       echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
       $len = readAnyFile(1,$file);
