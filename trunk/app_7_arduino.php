@@ -86,7 +86,7 @@ $userEvent = $par['user_event'];
 if($userEvent == 1) // user logged in!
   {
     $fn['setting'] = 'account/'.$user.'/setting.txt';
-    accessControl();
+    //accessControl();
     resetSession();
     readUserSetting();
     $par['user_event'] = 0;
