@@ -2093,7 +2093,7 @@ function viking_7_data($sys_id)
 
   echo("</select>");
   echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_SELECT."\">\n");
-  if($user && $user != 'guest')
+  if($user)
     {
       if($curFile == $fn['sketch'])echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
       if($curFile == $fn['scenario'])echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
@@ -2120,7 +2120,7 @@ function viking_7_load($sys_id)
   $ready     = $par['a7_ready'];
   
   echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
-  if($user && $user != 'guest')
+  if($user)
     {
       echo("<hr><table border=\"0\"><tr>");      
       echo("<form name=\"f_load_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
@@ -2139,8 +2139,6 @@ function viking_7_load($sys_id)
       if($curEditFlag == 1)echo("  <b>Editing</b> <i>$selSource</i>");
       echo("</form>");
 
-      if($user != 'guest')
-	{
 	  if($nSketches < 10)
 	    {
 	      echo("<hr><h4>You have $nSketches sketches stored. Limit is 10.</h4><br><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
@@ -2151,7 +2149,6 @@ function viking_7_load($sys_id)
 	    }
 	  else
 	    echo("<h2>You have 10 sketches stored. Delete some of the sketches.</h2>");
-	}
 
       echo("<hr>");
       echo("<h4>Create a new sketch from template</h4>");
