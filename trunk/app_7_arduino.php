@@ -1957,6 +1957,8 @@ function viking_7_anyFile($sys_id)
   if($par['pv'] == 'load')$file = $selSource;
   else
     $file = $curFile;
+
+  if(!$file)$file = $selSource;
   
   if($curEditFlag == 0 && $file)
     {
