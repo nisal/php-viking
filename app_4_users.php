@@ -291,8 +291,8 @@ function viking_4_login_Form()
       echo("<table><tr>");
       echo("<form name=\"form_login_user\" action=\"$path\" method=\"post\"> ");
       echo("<input type=\"hidden\" name=\"a4_post_action\" value=\"post_login_user\">");
-      echo("<td>".T_4_USER."</td><td><input type=\"text\" name=\"a4_user_name\" value=\"\" size=\"7\"></td></tr>");
-      echo("<tr><td>".T_4_PSWD."</td><td><input type=\"password\" name=\"a4_user_pswd\" value=\"\" size=\"7\"></td>");
+      echo("<td>".T_4_USER."</td><td><input type=\"text\" name=\"a4_user_name\" value=\"\" size=\"9\"></td></tr>");
+      echo("<tr><td>".T_4_PSWD."</td><td><input type=\"password\" name=\"a4_user_pswd\" value=\"\" size=\"9\"></td>");
       echo("<td><input type =\"submit\" name=\"form_submit\" value=\"".T_4_LOGIN_USER."\"></td>");
       echo("</form>");
       echo("</tr></table>");

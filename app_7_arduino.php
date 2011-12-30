@@ -366,7 +366,7 @@ if($user)
 	$par['a7_sel_source'] =  $curSource;
 	$what = $_POST['submit_load_del'];
 	if($what == T_EDIT) $curEditFlag = 1;
-	if($what == T_LOAD && $curSource)
+	else if($what == T_LOAD && $curSource)
 	  {
 	    $curSimLen = $_POST['sim_len'];
 	    if($curSimLen > 2000)$curSimLen = 2000;
@@ -1925,9 +1925,13 @@ function viking_7_anyFile($sys_id)
   else if($curEditFlag == 1 && $user)
     {
       if(!$file)return;
-      $fh = fopen($file, "r") or die("Could not open file ($file)!");
-      $data = fread($fh, filesize($file)) or die("Could not read file ($file)!");
-      fclose($fh);
+      $fileSize = filesize($file);
+      if($fileSize > 0)
+	{
+	  $fh = fopen($file, "r") or die("Could not open file ($file)!");
+	  $data = fread($fh, filesize($file)) or die("Could not read file ($file)!");
+	  fclose($fh);
+	}
 
       echo("<form name=\"f_edit_file\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
       echo("<input type=\"hidden\" name=\"action\" value=\"edit_file\">\n");
@@ -1940,12 +1944,11 @@ function viking_7_anyFile($sys_id)
 	{
 	  if($file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
 	}
-      echo("</td></tr><tr><td><textarea name=\"file_data\" cols=50 rows=35>$data</textarea></td></tr></table>");  
+      echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=80 rows=35>$data</textarea></td></tr></table>");  
       echo("</form><br>");
     }
   echo("$ready");
 }
-
 
 function viking_7_winSerLog($sys_id)
 {
@@ -2334,7 +2337,7 @@ function viking_7_applyAccount($sys_id)
     }
   else if($application == 1)
     {
-      echo("<h3>Thank you for your interest!<br>Your account information will be sent to you within 24 hours.</h3>");  
+      echo("<b>Thank you for your interest!<br>Your account information will be sent to you within 24 hours.</b>");  
     }
       
   echo("</div>");
