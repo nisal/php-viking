@@ -1925,7 +1925,6 @@ function viking_7_current($sys_id)
   $loop   = $par['a7_cur_loop'];
   $stepLength = $par['a7_cur_sim_len'];
   $loopLength = $par['a7_cur_loop_len'];
-
   echo("[$sname] loop=$loop($loopLength) step=$step($stepLength)");
 }
 
