@@ -22,13 +22,16 @@ $warIx = 0;
 $par['inc'] = 0;
 
 
-if($_GET['pv'])
-  $par['pv'] = $_GET['pv'];
- else
-   $par['pv'] = $_SESSION['pv'];
-//  end of pv-support
+$par['pv']      = $_SESSION['pv'];
+$par['prev_pv'] = $_SESSION['pv']; // Always previous
+$par['pv_mem']  = $_SESSION['pv_mem'];
 
-$_SESSION['pv'] = $par['pv'];
+if($_GET['pv'])$par['pv']         = $_GET['pv'];
+if($_GET['pv_mem'])$par['pv_mem'] = $_GET['pv_mem'];
+
+$_SESSION['pv']      = $par['pv'];
+$_SESSION['pv_mem']  = $par['pv_mem'];
+$_SESSION['pv_prev'] = $par['pv_prev'];
 
 //$par['admin'] = $_SESSION['admin'];
 $par['user']  = $_SESSION['user'];

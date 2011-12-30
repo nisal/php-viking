@@ -14,6 +14,7 @@ define('T_CREATE','Create');
 define('T_EDIT','Edit');
 define('T_SAVE','Save');
 define('T_LOAD','Load');
+define('T_VIEW','View');
 define('T_RUN', 'Run');
 define('T_SET', 'Set');
 define('T_SET_DIG_PIN_VALUE', 'Set Digital Pin Value');
@@ -110,6 +111,7 @@ init($par['a7_cur_sim_len']);
 $par['a7_cur_loop_len']      = $_SESSION['a7_cur_loop_len'];
 $par['a7_cur_read_len']      = $_SESSION['a7_cur_read_len'];
 $par['a7_cur_source']        = $_SESSION['a7_cur_source'];
+$par['a7_sel_source']        = $_SESSION['a7_sel_source'];
 $par['a7_cur_step']          = $_SESSION['a7_cur_step'];
 $par['a7_cur_loop']          = $_SESSION['a7_cur_loop'];
 $par['a7_cur_read']          = $_SESSION['a7_cur_read'];
@@ -120,6 +122,7 @@ $par['a7_cur_board_type']    = $_SESSION['a7_cur_board_type'];
 $par['a7_cur_board_digpins'] = $_SESSION['a7_cur_board_digpins'];
 $par['a7_cur_board_anapins'] = $_SESSION['a7_cur_board_anapins'];
 $par['a7_ser_log']           = $_SESSION['a7_ser_log'];
+$par['a7_row_number']        = $_SESSION['a7_row_number'];
 
 
 //=================================================
@@ -217,6 +220,11 @@ if($user)
     if($action == 'run' && $curSimLen > 0)
       {
 	execSketch($curSimLen,0);
+      }
+
+    if($action == 'rownumber')
+      {
+	$par['a7_row_number'] = $alt;
       }
 
     if($action == 'step')
@@ -391,6 +399,10 @@ if($user)
 	    else
 	      $par['a7_ready'] = "Sketch not loaded!";
 	  }
+	else if($what == T_VIEW)
+	  {
+	    // Do nothing
+	  }
 	else
 	  vikingWarning("No sketch selected !");
 	if($what == T_DELETE)
@@ -480,6 +492,7 @@ $_SESSION['a7_cur_sim_len']        = $par['a7_cur_sim_len'];
 $_SESSION['a7_cur_loop_len']       = $par['a7_cur_loop_len'];
 $_SESSION['a7_cur_read_len']       = $par['a7_cur_read_len'];
 $_SESSION['a7_cur_source']         = $par['a7_cur_source'];
+$_SESSION['a7_sel_source']         = $par['a7_sel_source'];
 $_SESSION['a7_cur_step']           = $par['a7_cur_step'];
 $_SESSION['a7_cur_loop']           = $par['a7_cur_loop'];
 $_SESSION['a7_cur_read']           = $par['a7_cur_read'];
@@ -490,6 +503,7 @@ $_SESSION['a7_cur_board_type']     = $par['a7_cur_board_type'];
 $_SESSION['a7_cur_board_digpins']  = $par['a7_cur_board_digpins'];
 $_SESSION['a7_cur_board_anapins']  = $par['a7_cur_board_anapins'];
 $_SESSION['a7_ser_log']            = $par['a7_ser_log'];
+$_SESSION['a7_row_number']         = $par['a7_row_number'];
 
 
 //====================================================
@@ -513,6 +527,7 @@ function resetSession()
   $_SESSION['a7_cur_board_digpins'] = 0;
   $_SESSION['a7_cur_board_anapins'] = 0;
   $_SESSION['a7_ser_log']           = "";
+  $_SESSION['a7_row_number']        = 0;
 }
 //==========================================
 function accessControlFile($file,$rw)
@@ -524,6 +539,28 @@ function accessControlFile($file,$rw)
   else
     return(NOK);
 }
+
+//==========================================
+function rowNumber($data)
+//==========================================
+{
+  $row = array();
+
+  $res = "";
+  $row = strtok($data, "\n");
+  $row[0] = $tok;
+
+  $ix = 0;
+  $res = "";
+  while ($tok !== false) {
+    $ix++;
+    echo "$tok<br>";
+    $tok = strtok("\n");
+    $row[$ix] = $tok;
+  }
+
+}
+
 //==========================================
 function accessControl()
 //==========================================
@@ -954,7 +991,6 @@ function decodeStatus($code)
   $ix = 0;
   while ($tok !== false) {
     $ix++;
-    //echo "Word=$tok<br />";
     $tok = strtok(",");
     $xpar[$ix] = $tok;
   }
@@ -1145,10 +1181,15 @@ function showAnyFile($target)
   global $par;
   global $content;
 
-  $user = $par['user'];
+  $rowNumber = $par['a7_row_number'];
+  $user      = $par['user'];
+
   for($ii=1;$ii<=$target;$ii++)
     {
-      echo("$content[$ii]<br>");
+      if($rowNumber == 1)
+	echo("$ii: $content[$ii]<br>");
+      else
+	echo("$content[$ii]<br>");
     }
 }
 
@@ -1910,6 +1951,8 @@ function viking_7_anyFile($sys_id)
   $curFile   = $par['a7_cur_file'];
   $selSource = $par['a7_sel_source'];
   $ready     = $par['a7_ready'];
+  $memPV     = $par['pv_mem'];
+  $curPV     = $par['pv'];
 
   if($par['pv'] == 'load')$file = $selSource;
   else
@@ -1917,6 +1960,13 @@ function viking_7_anyFile($sys_id)
   
   if($curEditFlag == 0 && $file)
     {
+      if($par['pv'] != 'large')
+	echo(" (<a href=$path&pv=large&pv_mem=$curPV>Wide Window</a>)");
+      else
+	echo(" (<a href=$path&pv=$memPV>Narrow Window</a>)");
+
+      if($par['a7_row_number']==0)echo(" (<a href=$path&ac=rownumber&x=1>Row Number ON</a>)");
+      if($par['a7_row_number']==1)echo(" (<a href=$path&ac=rownumber&x=0>Row Number OFF</a>)");
       echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
       $len = readAnyFile(1,$file);
       showAnyFile($len);
@@ -1932,6 +1982,16 @@ function viking_7_anyFile($sys_id)
 	  $data = fread($fh, filesize($file)) or die("Could not read file ($file)!");
 	  fclose($fh);
 	}
+      if($par['pv'] != 'large')
+	{
+	  $ncols = 80;
+	  echo(" (<a href=$path&pv=large&pv_mem=$curPV&ac=edit_file>Wide Window</a>)");
+	}
+      else
+	{
+	  $ncols = 120;
+	  echo(" (<a href=$path&pv=$memPV&ac=edit_file>Narrow Window</a>)");
+	}
 
       echo("<form name=\"f_edit_file\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
       echo("<input type=\"hidden\" name=\"action\" value=\"edit_file\">\n");
@@ -1944,7 +2004,7 @@ function viking_7_anyFile($sys_id)
 	{
 	  if($file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
 	}
-      echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=80 rows=35>$data</textarea></td></tr></table>");  
+      echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
       echo("</form><br>");
     }
   echo("$ready");
@@ -2030,6 +2090,8 @@ function viking_7_help($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['help'];
+  $curStep   = $par['a7_cur_step'];
+
   $len = readAnyFile(1,$tFile);
   showAnyFile($len);
 }
@@ -2038,6 +2100,7 @@ function viking_7_about($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['about'];
+
   $len = readAnyFile(1,$tFile);
   showAnyFile($len);
 }
@@ -2046,6 +2109,7 @@ function viking_7_register($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['register'];
+
   $len = readAnyFile(1,$tFile);
   showAnyFile($len);
 }
@@ -2054,6 +2118,7 @@ function viking_7_start($sys_id)
 {
   global $par,$fn;
   $tFile = $fn['start'];
+
   $len = readAnyFile(1,$tFile);
   showAnyFile($len);
 }
@@ -2080,10 +2145,12 @@ function viking_7_error($sys_id)
   global $par,$fn;
   $path   = $par['path'];
   $user   = $par['user'];
+  $rowNumber = $par['a7_row_number'];
 
   //if($user)echo("[Webuino Version 2011-12-22] Any errors (compile,exec and servuino) will be shown here<br>");
   if($user)
     {
+      $par['a7_row_number'] = 0;
       $file = $fn['g++'];
       $len = readAnyFile(2,$file);
       showAnyFile($len);
@@ -2093,6 +2160,7 @@ function viking_7_error($sys_id)
       $file = $fn['error'];
       $len = readAnyFile(2,$file);
       showAnyFile($len);
+      $par['a7_row_number'] = $rowNumber;
     }
 }
 
@@ -2197,8 +2265,16 @@ function viking_7_load($sys_id)
 
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_DELETE."\">");
-      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_EDIT."\">");
-      if($curEditFlag == 1)echo("  <b>Editing</b> <i>$selSource</i>");
+      if($curEditFlag == 0)
+	{
+	  echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_EDIT."\">");
+	}
+      else
+	{
+	  echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_VIEW."\">");
+	  echo("  <b>Editing</b> <i>$selSource</i>");
+	}
+
       echo("</form>");
 
 	  if($nSketches < 10)
