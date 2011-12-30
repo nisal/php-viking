@@ -406,13 +406,6 @@ if($user)
         runTarget($targetStep);
       }
 
-    if($action == 'apply_account' )
-      {
-        $username = $_POST['username'];
-        $email    = $_POST['email'];
-        createApplication($username,$email);
-      }
-
     if($action == 'set_dig_scenario' )
       {
 	$pin   = $_POST['pin_value'];
@@ -462,6 +455,20 @@ if($user)
 
 
   } // end if user
+else
+  {
+    if (!isset($_POST['action']))$_POST['action'] = "undefined"; 
+
+    $action = $_POST['action'];
+
+    if($action == 'apply_account' )
+      {
+        $username = $_POST['username'];
+        $email    = $_POST['email'];
+        createApplication($username,$email);
+      }
+
+  }
 
 //=================================================
 //+++++++++++++++++++++++++++++++++++++++++++++++++
