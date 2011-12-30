@@ -1,6 +1,6 @@
 <?
 //========================================
-// PHP-VIKING APP 7: Arduino
+// PHP-VIKING APP 7: Arduino Simulator
 //========================================
 define('T_UPLOAD_SKETCH','Upload sketch to account');
 define('T_DELETE','Delete');
