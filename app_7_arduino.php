@@ -258,6 +258,11 @@ if($user)
 	$curEditFlag = 1;
       }
 
+    if($action == 'edit_sketch')
+      {
+	$curEditFlag = 1;
+      }
+
     if($action == 'winserlog')
       {
 	$par['a7_ser_log'] = $alt;
@@ -275,7 +280,8 @@ if($user)
     $action = $_POST['action'];
 
     //echo("$action");
-    
+
+    // Data Form
     if($action == 'select_file' )
       {
 	$par['a7_cur_file'] = $_POST['file'];
@@ -296,55 +302,86 @@ if($user)
 	$data = $_POST['file_data'];
 	$what = $_POST['submit_edit'];
 	$curSimLen = $par['a7_cur_sim_len'];
-	if(!$tempFile)return;
-
-
-	// Always save file
-	$res = evilCode($data);
-	if($res == 0)
+	if($tempFile)
 	  {
-	    $fp = fopen($tempFile, 'w')or die("Could not open file ($tempFile) (write)!");;
-	    fwrite($fp,$data) or die("Could not write to file ($tempFile) !");
-	    fclose($fp);
+	    
+	    
+	    // Always save file
+	    $res = evilCode($data);
+	    if($res == 0)
+	      {
+		$fp = fopen($tempFile, 'w')or die("Could not open file ($tempFile) (write)!");;
+		fwrite($fp,$data) or die("Could not write to file ($tempFile) !");
+		fclose($fp);
+	      }
+	    else
+	      $par['a7_ready'] = "File did not pass check for evil code!";
+	    
+	    if($what == T_SAVE) 
+	      {
+		$par['a7_cur_file'] = $tempFile;
+		$curEditFlag = 1;
+	      }
+	    
+	    if($res == 0)
+	      {
+		if($what == T_LOAD)
+		  {
+		    compileSketch();
+		    execSketch($curSimLen,1);
+		    $par['a7_cur_step'] = 0;
+		    init($curSimLen);
+		    readSketchInfo();
+		    $tFile = $fn['custom'];
+		    readSimulation($tFile);
+		    readStatus();
+		    //readSerial();
+		    $par['a7_ready'] = "Sketch loaded!";
+		  }
+		if($what == T_RUN)
+		  {
+		    execSketch($curSimLen,1);
+		    $par['a7_cur_step'] = 0;
+		    init($curSimLen);
+		    readSketchInfo();
+		    $tFile = $fn['custom'];
+		    readSimulation($tFile);
+		    readStatus();
+		    //readSerial();
+		    $par['a7_ready'] = "Sketch Executed!";
+		  }
+	      }
+	  }
+	
+      }
+    if($action == 'edit_sketch')
+      {
+	$tempFile = $_POST['file_name'];
+	$data     = $_POST['file_data'];
+	$what     = $_POST['submit_edit'];
+
+	if($tempFile)
+	  {
+	    
+	    // Always save file
+	    $res = evilCode($data);
+	    if($res == 0)
+	      {
+		$fp = fopen($tempFile, 'w')or die("Could not open sketch ($tempFile) (write)!");;
+		fwrite($fp,$data) or die("Could not write to sketch ($tempFile) !");
+		fclose($fp);
+	      }
+	    else
+	      $par['a7_ready'] = "Sketch did not pass check for evil code!";
+	    
+	    if($what == T_SAVE) 
+	      {
+		$par['a7_sel_source'] = $tempFile;
+		$curEditFlag = 1;
+	      }
 	  }
 	else
-	  $par['a7_ready'] = "File did not pass check for evil code!";
-	
-	if($what == T_SAVE) 
-	  {
-	    $par['a7_sel_source'] = $tempFile;
-	    $curEditFlag = 1;
-	  }
-
-	if($res == 0)
-	  {
-	    if($what == T_LOAD)
-	      {
-		compileSketch();
-		execSketch($curSimLen,1);
-		$par['a7_cur_step'] = 0;
-		init($curSimLen);
-		readSketchInfo();
-		$tFile = $fn['custom'];
-		readSimulation($tFile);
-		readStatus();
-	    //readSerial();
-		$par['a7_ready'] = "Sketch loaded!";
-	      }
-	    if($what == T_RUN)
-	      {
-		execSketch($curSimLen,1);
-		$par['a7_cur_step'] = 0;
-		init($curSimLen);
-		readSketchInfo();
-		$tFile = $fn['custom'];
-		readSimulation($tFile);
-		readStatus();
-		//readSerial();
-		$par['a7_ready'] = "Sketch Executed!";
-	      }
-	  }
-	
+	  $par['a7_ready'] = "No Sketch specified!";
       }
     if($action == 'upload_source' )
       {
@@ -1940,7 +1977,7 @@ function viking_7_canvas($sys_id)
   echo("<canvas id=\"$board\" width=\"$wBoard\" height=\"$hBoard\"></canvas>\n");
 }
 
-function viking_7_anyFile($sys_id)
+function viking_7_editFile($sys_id)
 {
   global $par,$servuino,$fn,$upload;
   global $curEditFlag;
@@ -1953,16 +1990,17 @@ function viking_7_anyFile($sys_id)
   $memPV     = $par['pv_mem'];
   $curPV     = $par['pv'];
 
-  if($par['pv'] == 'load')$file = $selSource;
-  else
-    $file = $curFile;
 
-  if(!$file)$file = $selSource;
+  $file = $curFile;
+
+  //echo("file=$file<br> curpv=$curPV<br> mempv=$memPV<br>");
+
+  if(!$file)vikingWarning("editFile: No file specified");;
   
   if($curEditFlag == 0 && $file)
     {
-      if($par['pv'] != 'large')
-	echo(" (<a href=$path&pv=large&pv_mem=$curPV>Wide Window</a>)");
+      if($par['pv'] != 'large_file')
+	echo(" (<a href=$path&pv=large_file&pv_mem=$curPV>Wide Window</a>)");
       else
 	echo(" (<a href=$path&pv=$memPV>Narrow Window</a>)");
 
@@ -1983,10 +2021,10 @@ function viking_7_anyFile($sys_id)
 	  $data = fread($fh, filesize($file)) or die("Could not read file ($file)!");
 	  fclose($fh);
 	}
-      if($par['pv'] != 'large')
+      if($par['pv'] != 'large_file')
 	{
 	  $ncols = 80;
-	  echo(" (<a href=$path&pv=large&pv_mem=$curPV&ac=edit_file>Wide Window</a>)");
+	  echo(" (<a href=$path&pv=large_file&pv_mem=$curPV&ac=edit_file>Wide Window</a>)");
 	}
       else
 	{
@@ -1998,13 +2036,78 @@ function viking_7_anyFile($sys_id)
       echo("<input type=\"hidden\" name=\"action\" value=\"edit_file\">\n");
       echo("<input type=\"hidden\" name=\"file_name\" value=\"$file\">\n");
       echo("<table><tr><td>");
-      if($par['pv'] == 'load')echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
       if($file == $fn['sketch'])echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_LOAD."\">\n");
       if($file == $fn['scenario'])echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
       if($user == 'admin')
 	{
 	  if($file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
 	}
+      echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
+      echo("</form><br>");
+    }
+  echo("$ready");
+}
+
+function viking_7_editSketch($sys_id)
+{
+  global $par,$servuino,$fn,$upload;
+  global $curEditFlag;
+
+  $user      = $par['user'];
+  $path      = $par['path'];
+  //$curFile   = $par['a7_cur_file'];
+  $selSource = $par['a7_sel_source'];
+  $ready     = $par['a7_ready'];
+  $memPV     = $par['pv_mem'];
+  $curPV     = $par['pv'];
+
+
+  $file = $selSource;
+
+  //echo("file=$file<br> curpv=$curPV<br> mempv=$memPV<br>");
+
+  if(!$file)vikingWarning("editSketch: No file specified");;
+  
+  if($curEditFlag == 0 && $file)
+    {
+      if($par['pv'] != 'large_sketch')
+	echo(" (<a href=$path&pv=large_sketch&pv_mem=$curPV>Wide Window</a>)");
+      else
+	echo(" (<a href=$path&pv=$memPV>Narrow Window</a>)");
+
+      if($par['a7_row_number']==0)echo(" (<a href=$path&ac=rownumber&x=1>Row Number ON</a>)");
+      if($par['a7_row_number']==1)echo(" (<a href=$path&ac=rownumber&x=0>Row Number OFF</a>)");
+      echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
+      $len = readAnyFile(1,$file);
+      showAnyFile($len);
+      echo("</div>\n");
+    }
+  else if($curEditFlag == 1 && $user)
+    {
+      if(!$file)return;
+      $fileSize = filesize($file);
+      if($fileSize > 0)
+	{
+	  $fh = fopen($file, "r") or die("Could not open file ($file)!");
+	  $data = fread($fh, filesize($file)) or die("Could not read file ($file)!");
+	  fclose($fh);
+	}
+      if($par['pv'] != 'large_sketch')
+	{
+	  $ncols = 80;
+	  echo(" (<a href=$path&pv=large_sketch&pv_mem=$curPV&ac=edit_file>Wide Window</a>)");
+	}
+      else
+	{
+	  $ncols = 120;
+	  echo(" (<a href=$path&pv=$memPV&ac=edit_file>Narrow Window</a>)");
+	}
+
+      echo("<form name=\"f_edit_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
+      echo("<input type=\"hidden\" name=\"action\" value=\"edit_sketch\">\n");
+      echo("<input type=\"hidden\" name=\"file_name\" value=\"$file\">\n");
+      echo("<table><tr><td>");
+      echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
       echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
       echo("</form><br>");
     }
@@ -2173,9 +2276,10 @@ function viking_7_data($sys_id)
   $sid     = $par['a7_sid'];
   $user    = $par['user'];
   $curFile = $par['a7_cur_file'];
+  $curPV   = $par['pv'];
 
   echo("<div><table><tr><td>");
-  echo("<form name=\"f_sel_win\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
+  echo("<form name=\"f_sel_win\" action=\"$path&pv_mem=$curPV\" method=\"post\" enctype=\"multipart/form-data\">\n ");
   echo("<input type=\"hidden\" name=\"action\" value=\"select_file\">\n");
   echo("<select name=\"file\">");
   if($user == 'admin')
@@ -2253,6 +2357,7 @@ function viking_7_load($sys_id)
   echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
   if($user)
     {
+      echo("<hr><b>Loaded Sketch:</b> $curSource");
       echo("<hr><table border=\"0\"><tr>");      
       echo("<form name=\"f_load_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
       echo("<input type=\"hidden\" name=\"action\" value=\"set_load_delete\">\n");
@@ -2261,7 +2366,7 @@ function viking_7_load($sys_id)
       $syscom = "ls $upload > $tFile;";
       system($syscom);
       echo("<td>");
-      $nSketches = formSelectFile("Loaded Sketch","source",$tFile,$curSource,$upload);
+      $nSketches = formSelectFile("Loaded Sketch","source",$tFile,$selSource,$upload);
       echo("</td></tr></table><br>");
 
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
