@@ -272,9 +272,12 @@ if($user)
       {
 	$par['a7_cur_file'] = $_POST['file'];
 	$curFile = $par['a7_cur_file'];
-	if($curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm' || $curFile == 'register.htm')$par['tinyMCE'] = 1;
-	else
-	  $par['tinyMCE'] = 0;
+	if($user == 'admin')
+	  {
+	    if($curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm' || $curFile == 'register.htm')$par['tinyMCE'] = 1;
+	    else
+	      $par['tinyMCE'] = 0;
+	  }
 	$what = $_POST['submit_select'];
 	if($what == T_EDIT) $curEditFlag = 1;
       }
@@ -287,43 +290,53 @@ if($user)
 	$curSimLen = $par['a7_cur_sim_len'];
 	if(!$tempFile)return;
 
+
 	// Always save file
-	$fp = fopen($tempFile, 'w')or die("Could not open file ($tempFile) (write)!");;
-	fwrite($fp,$data) or die("Could not write to file ($tempFile) !");
-	fclose($fp);
+	$res = evilCode($data);
+	if($res == 0)
+	  {
+	    $fp = fopen($tempFile, 'w')or die("Could not open file ($tempFile) (write)!");;
+	    fwrite($fp,$data) or die("Could not write to file ($tempFile) !");
+	    fclose($fp);
+	  }
+	else
+	  $par['a7_ready'] = "File did not pass check for evil code!";
+	
 	if($what == T_SAVE) 
 	  {
 	    $par['a7_sel_source'] = $tempFile;
 	    $curEditFlag = 1;
 	  }
 
-	if($what == T_LOAD)
+	if($res == 0)
 	  {
-	    compileSketch();
-	    execSketch($curSimLen,1);
-	    $par['a7_cur_step'] = 0;
-	    init($curSimLen);
-	    readSketchInfo();
-	    $tFile = $fn['custom'];
-	    readSimulation($tFile);
-	    readStatus();
+	    if($what == T_LOAD)
+	      {
+		compileSketch();
+		execSketch($curSimLen,1);
+		$par['a7_cur_step'] = 0;
+		init($curSimLen);
+		readSketchInfo();
+		$tFile = $fn['custom'];
+		readSimulation($tFile);
+		readStatus();
 	    //readSerial();
-	    $par['a7_ready'] = "Sketch loaded!";
+		$par['a7_ready'] = "Sketch loaded!";
+	      }
+	    if($what == T_RUN)
+	      {
+		execSketch($curSimLen,1);
+		$par['a7_cur_step'] = 0;
+		init($curSimLen);
+		readSketchInfo();
+		$tFile = $fn['custom'];
+		readSimulation($tFile);
+		readStatus();
+		//readSerial();
+		$par['a7_ready'] = "Sketch Executed!";
+	      }
 	  }
-	if($what == T_RUN)
-	  {
-	    execSketch($curSimLen,1);
-	    $par['a7_cur_step'] = 0;
-	    init($curSimLen);
-	    readSketchInfo();
-	    $tFile = $fn['custom'];
-	    readSimulation($tFile);
-	    readStatus();
-	    //readSerial();
-	    $par['a7_ready'] = "Sketch Executed!";
-	  }
-
-
+	
       }
     if($action == 'upload_source' )
       {
@@ -1396,7 +1409,6 @@ function readAnyFile($check,$file)
 	{
 	  $row = fgets($in);
 	  $row = trim($row);
-	  //$row = safeText2($row);
 	  $step++;
 	  $content[$step] = $row;
 	  $content[0] = $step;
@@ -1729,6 +1741,7 @@ function checkSketch($sketch)
       if($board_type_ok   == NO){vikingWarning("No board type in sketch");$res = 1;}
       if($no_system_calls == NO){vikingWarning("No system calls allowed");$res = 1;}
       if($no_script       == NO){vikingWarning("No script allowed")      ;$res = 1;}
+      if($no_php          == NO){vikingWarning("No php allowed")         ;$res = 1;}
     }
   else
     {
@@ -1738,19 +1751,41 @@ function checkSketch($sketch)
   return($res);
 
 }
-//==========================================
-function getPrevRead($step)
-//==========================================
-{
-  
-  return(1);
-}
 
 //==========================================
-function getNextRead($step)
+function evilCode($data)
 //==========================================
-{
-  return(1);
+{ 
+  global $par;
+  $res  = 0;
+  $user = $par['user'];
+  
+  $no_system_calls = YES;
+  $no_script       = YES;
+  $no_php          = YES;
+    
+  if(strstr($data,"system"))
+    {
+      $no_system_calls = NO;
+    }
+  if(strstr($data,"script"))
+    {
+      $no_script = NO;
+    }
+  if(strstr($data,"<?"))
+    {
+      $no_php = NO;
+    }
+  if(strstr($data,"?>"))
+    {
+      $no_php = NO;
+    }
+
+  if($no_system_calls == NO){vikingWarning("No system calls allowed");$res = 1;}
+  if($no_php          == NO){vikingWarning("No php");                 $res = 1;}
+  if($no_script       == NO){vikingWarning("No script allowed")      ;$res = 1;}
+
+  return($res);
 }
    
 //====================================================
@@ -1867,6 +1902,7 @@ function viking_7_anyFile($sys_id)
   $path      = $par['path'];
   $curFile   = $par['a7_cur_file'];
   $selSource = $par['a7_sel_source'];
+  $ready     = $par['a7_ready'];
 
   if($par['pv'] == 'load')$file = $selSource;
   else
@@ -1900,6 +1936,7 @@ function viking_7_anyFile($sys_id)
       echo("</td></tr><tr><td><textarea name=\"file_data\" cols=50 rows=35>$data</textarea></td></tr></table>");  
       echo("</form><br>");
     }
+  echo("$ready");
 }
 
 
