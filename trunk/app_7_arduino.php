@@ -80,6 +80,7 @@ $fn['start']       = 'start.htm';
 $fn['about']       = 'about.htm';
 $fn['register']    = 'register.htm';
 $fn['help']        = 'help.htm';
+$fn['faq']         = 'faq.htm';
 $fn['new_sketch']  = 'new_sketch.pde';
 
 $userEvent = $par['user_event'];
@@ -288,7 +289,7 @@ if($user)
 	$curFile = $par['a7_cur_file'];
 	if($user == 'admin')
 	  {
-	    if($curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm' || $curFile == 'register.htm')$par['tinyMCE'] = 1;
+	    if($curFile == 'faq.htm' || $curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm' || $curFile == 'register.htm')$par['tinyMCE'] = 1;
 	    else
 	      $par['tinyMCE'] = 0;
 	  }
@@ -320,7 +321,11 @@ if($user)
 	    if($what == T_SAVE) 
 	      {
 		$par['a7_cur_file'] = $tempFile;
+		$curFile = $par['a7_cur_file'];
 		$curEditFlag = 1;
+		if($curFile == 'faq.htm' || $curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm' || $curFile == 'register.htm')$par['tinyMCE'] = 1;
+		else
+		  $par['tinyMCE'] = 0;
 	      }
 	    
 	    if($res == 0)
@@ -1906,6 +1911,7 @@ function viking_7_mainmenu($sys_id)
     }
   if($user == 'admin')echo("<li><a href=\"index.php?pv=admin\" >Admin</a></li>");
   echo("<li><a href=\"index.php?pv=help\"  >Help</a></li>");
+  echo("<li><a href=\"index.php?pv=faq\"  >FAQ</a></li>");
   echo("<li><a href=\"index.php?pv=about\" >About</a></li>");
   if(!$user)
     echo("<li><a href=\"index.php?pv=register\">Register</a></li>");
@@ -2050,7 +2056,7 @@ function viking_7_editFile($sys_id)
       if($file == $fn['scenario'])echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
       if($user == 'admin')
 	{
-	  if($file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
+	  if($file == $fn['faq'] || $file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
 	}
       echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
       echo("</form><br>");
@@ -2200,6 +2206,15 @@ function viking_7_winSim($sys_id)
   echo("</div>"); 
 }
 
+function viking_7_faq($sys_id)
+{
+  global $par,$fn;
+  $tFile = $fn['faq'];
+
+  $len = readAnyFile(1,$tFile);
+  showAnyFile($len);
+}
+
 function viking_7_help($sys_id)
 {
   global $par,$fn;
@@ -2306,6 +2321,9 @@ function viking_7_data($sys_id)
       $selected = "";$temp = $fn['about'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>About</option>");
 
+      $selected = "";$temp = $fn['faq'];if($curFile == $temp)$selected = 'selected';
+      echo("<option value=\"$temp\"   $selected>FAQ</option>");
+
       $selected = "";$temp = $fn['register'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>Register</option>");
 
@@ -2346,7 +2364,7 @@ function viking_7_data($sys_id)
 
   if($user == 'admin')
     {
-      if($curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] )echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
+      if($curFile == $fn['faq'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] )echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
     }
 
   echo("</form></td>");
