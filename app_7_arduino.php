@@ -784,7 +784,7 @@ function canvasPos()
   global $UNO_DIG_PINS,$UNO_ANA_PINS,$MEGA_DIG_PINS,$MEGA_ANA_PINS;
   global $digX,$digY,$anaX,$anaY,$resetX,$resetY;
   global $TXledX,$TXledY,$onOffX,$onOffY,$led13X,$led13Y;
-  global $sketchNameX,$sketchNameY;
+  global $sketchNameX,$sketchNameY,$helpX,$helpY,$help2X,$help2Y;
   $user = $par['user'];
 
   $board   = $par['a7_cur_board_type'];
@@ -846,7 +846,12 @@ function canvasPos()
       $sketchNameX = 220;
       
       $configY = 360;
-      $configX = 78;     
+      $configX = 78;   
+
+      $helpY  =  10;
+      $helpX  =  69; 
+      $help2Y =   5;
+      $help2X = 140; 
     }
 
   if($board == 'boardMega')
@@ -945,7 +950,12 @@ function canvasPos()
       $sketchNameX =  80;
       
       $configY = 360;
-      $configX = 78;     
+      $configX = 78;
+
+      $helpY  =   5;
+      $helpX  =  69; 
+      $help2Y =   0;
+      $help2X = 140;      
     }
 }
 
@@ -2511,7 +2521,6 @@ function viking_7_applyAccount($sys_id)
       echo("<input type=\"hidden\" name=\"action\" value=\"apply_account\">\n");
       echo("<td>UserName:</td><td>Your E-mail Address:</td></tr><tr><td><input type=\"text\" name=\"username\" value=\"\" size=\"16\"></td>\n");
       echo("<td><input type=\"text\" name=\"email\" value=\"\" size=\"30\"></td>\n");
-      system("ls upload > list.txt;");
       echo("<td>");
       echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_APPLY."\"></td>\n");
       echo("</form></tr>");
@@ -2534,7 +2543,7 @@ function viking_7_script($sys_id)
   global $boardId,$boardDigPins,$boardAnaPins;
   global $digX,$digY,$anaX,$anaY,$resetX,$resetY;
   global $TXledX,$TXledY,$onOffX,$onOffY,$led13X,$led13Y;
-  global $sketchNameX,$sketchNameY;
+  global $sketchNameX,$sketchNameY,$helpX,$helpY,$help2X,$help2Y;
   global $pinModeD,$pinStatusD,$pinStatusA,$serial;
 
   $path   = $par['path'];
@@ -2658,7 +2667,109 @@ function viking_7_script($sys_id)
   print("ctx.font = \"15pt Calibri\";");
   print("ctx.fillStyle = \"#FF0000\";");
   print("ctx.fillText(\"$curSketchName\",$sketchNameY,$sketchNameX);");
+
+  // Help
+  print($yellow);  // HIGH
+  print("ctx.beginPath();");
+  print("ctx.arc($helpY, $helpX, 4, 0, Math.PI*2, true);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"HIGH\",$helpY+7,$helpX+4);");
+  print($black);  // LOW
+  $helpX = $helpX + 10;
+  print("ctx.beginPath();");
+  print("ctx.arc($helpY, $helpX, 4, 0, Math.PI*2, true);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"LOW\",$helpY+7,$helpX+4);");
+  print($green);  // PWM, Analog Write
+  $helpX = $helpX + 10;
+  print("ctx.beginPath();");
+  print("ctx.arc($helpY, $helpX, 4, 0, Math.PI*2, true);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"Write,PWM\",$helpY+7,$helpX+4);");
+  print($red);  // ANALOG READ
+  $helpX = $helpX + 10;
+  print("ctx.beginPath();");
+  print("ctx.arc($helpY, $helpX, 4, 0, Math.PI*2, true);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"Analog Read\",$helpY+7,$helpX+4);");
   
+
+  print($green);  // OUTPUT
+  print("ctx.beginPath();");
+  print("ctx.rect($help2Y, $help2X,8, 4);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"Output\",$help2Y+10,$help2X+5);");
+  $help2X = $help2X + 10;
+  print($red);  // INPUT
+  print("ctx.beginPath();");
+  print("ctx.rect($help2Y, $help2X,8, 4);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"Input\",$help2Y+10,$help2X+5);");
+  $help2X = $help2X + 10;
+  print($white);  // RX
+  print("ctx.beginPath();");
+  print("ctx.rect($help2Y, $help2X,8, 4);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"RX\",$help2Y+10,$help2X+5);");
+  $help2X = $help2X + 10;
+  print($grey);  // TX
+  print("ctx.beginPath();");
+  print("ctx.rect($help2Y, $help2X,8, 4);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"TX\",$help2Y+10,$help2X+5);");
+  $help2X = $help2X + 10;
+  print($blue);  // CHANGE
+  print("ctx.beginPath();");
+  print("ctx.rect($help2Y, $help2X,8, 4);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"Change\",$help2Y+10,$help2X+5);");
+  $help2X = $help2X + 10;
+  print($orange);  // RISING
+  print("ctx.beginPath();");
+  print("ctx.rect($help2Y, $help2X,8, 4);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"Rising\",$help2Y+10,$help2X+5);");
+  $help2X = $help2X + 10;
+  print($yellow);  // FALLING
+  print("ctx.beginPath();");
+  print("ctx.rect($help2Y, $help2X,8, 4);");
+  print("ctx.closePath();");
+  print("ctx.fill();");
+  print("ctx.font = \"8pt Calibri\";");
+  print("ctx.fillStyle = \"#000000\";");
+  print("ctx.fillText(\"Falling\",$help2Y+10,$help2X+5);");
+
+
   echo(" }");
   echo(" }");
   
