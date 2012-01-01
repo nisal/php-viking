@@ -826,8 +826,8 @@ function createApplication($username,$email)
 	      $out = fopen($file,"a");
 	      if($out)
 		{
-		  $temp = $fileSize." ".$username."   ".$email."\n";
-		  //echo("$temp<br>");
+		  $date = date("Y-m-d H:i:s");
+		  $temp = $date." ".$username."   ".$email."\n";
 		  fwrite($out,$temp);
 		  $application = 1;
 		}
