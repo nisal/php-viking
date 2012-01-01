@@ -5,7 +5,6 @@
 define('T_UPLOAD_SKETCH','Upload sketch to account');
 define('T_DELETE','Delete');
 define('T_CONFIG','Configuration');
-define('T_SELECT','Select');
 define('T_LOOP_F','Next Loop');
 define('T_LOOP_B','Prev Loop');
 define('T_STEP_F','Next Step');
@@ -13,6 +12,7 @@ define('T_STEP_B','Prev Step');
 define('T_CREATE','Create');
 define('T_EDIT','Edit');
 define('T_SAVE','Save');
+define('T_SELECT','Select');
 define('T_LOAD','Load');
 define('T_VIEW','View');
 define('T_RUN', 'Run');
@@ -53,24 +53,6 @@ $MEGA_ANA_PINS = 16;
 
 // Declarations =========================
 
-$simulation = array();
-$content    = array();
-$status     = array();
-$serial     = array();
-$serialL    = array();
-$scenario   = array();
-
-$stepLoop   = array();
-$loopStep   = array();
-$readStep   = array();
-$stepRead   = array();
-
-$pinValueA  = array();
-$pinValueD  = array();
-$pinStatusA = array();
-$pinStatusD = array();
-$pinModeD   = array();
-
 $user    = $par['user'];
 
 // Set filenames
@@ -82,6 +64,9 @@ $fn['register']    = 'register.htm';
 $fn['help']        = 'help.htm';
 $fn['faq']         = 'faq.htm';
 $fn['new_sketch']  = 'new_sketch.pde';
+
+$par['a7_cur_source']        = $_SESSION['a7_cur_source'];
+$par['a7_cur_file']          = $_SESSION['a7_cur_file'];
 
 $userEvent = $par['user_event'];
 
@@ -107,30 +92,46 @@ $application = 0;
 
 readLoginCounter();
 
-$par['a7_cur_sim_len']       = $_SESSION['a7_cur_sim_len'];
-init($par['a7_cur_sim_len']);
-$par['a7_cur_loop_len']      = $_SESSION['a7_cur_loop_len'];
-$par['a7_cur_read_len']      = $_SESSION['a7_cur_read_len'];
-$par['a7_cur_source']        = $_SESSION['a7_cur_source'];
-$par['a7_sel_source']        = $_SESSION['a7_sel_source'];
-$par['a7_cur_step']          = $_SESSION['a7_cur_step'];
-$par['a7_cur_loop']          = $_SESSION['a7_cur_loop'];
-$par['a7_cur_read']          = $_SESSION['a7_cur_read'];
-$par['a7_cur_menu']          = $_SESSION['a7_cur_menu'];
-$par['a7_cur_file']          = $_SESSION['a7_cur_file'];
-$par['a7_cur_sketch_name']   = $_SESSION['a7_cur_sketch_name'];
-$par['a7_cur_board_type']    = $_SESSION['a7_cur_board_type'];
-$par['a7_cur_board_digpins'] = $_SESSION['a7_cur_board_digpins'];
-$par['a7_cur_board_anapins'] = $_SESSION['a7_cur_board_anapins'];
-$par['a7_ser_log']           = $_SESSION['a7_ser_log'];
-$par['a7_row_number']        = $_SESSION['a7_row_number'];
-
 
 //=================================================
 //+++++++++++++++++++++++++++++++++++++++++++++++++
 //=================================================
 if($user)
   {
+    $simulation = array();
+    $content    = array();
+    $status     = array();
+    $serial     = array();
+    $serialL    = array();
+    $scenario   = array();
+    
+    $stepLoop   = array();
+    $loopStep   = array();
+    $readStep   = array();
+    $stepRead   = array();
+    
+    $pinValueA  = array();
+    $pinValueD  = array();
+    $pinStatusA = array();
+    $pinStatusD = array();
+    $pinModeD   = array();
+
+    $par['a7_cur_sim_len']       = $_SESSION['a7_cur_sim_len'];
+    init($par['a7_cur_sim_len']);
+    $par['a7_cur_loop_len']      = $_SESSION['a7_cur_loop_len'];
+    $par['a7_cur_read_len']      = $_SESSION['a7_cur_read_len'];
+    $par['a7_sel_source']        = $_SESSION['a7_sel_source'];
+    $par['a7_cur_step']          = $_SESSION['a7_cur_step'];
+    $par['a7_cur_loop']          = $_SESSION['a7_cur_loop'];
+    $par['a7_cur_read']          = $_SESSION['a7_cur_read'];
+    //$par['a7_cur_menu']          = $_SESSION['a7_cur_menu'];
+    $par['a7_cur_sketch_name']   = $_SESSION['a7_cur_sketch_name'];
+    $par['a7_cur_board_type']    = $_SESSION['a7_cur_board_type'];
+    $par['a7_cur_board_digpins'] = $_SESSION['a7_cur_board_digpins'];
+    $par['a7_cur_board_anapins'] = $_SESSION['a7_cur_board_anapins'];
+    $par['a7_ser_log']           = $_SESSION['a7_ser_log'];
+    $par['a7_row_number']        = $_SESSION['a7_row_number'];
+    
     $account = $par['user'];
 
     $tDir = 'account/'.$account;
@@ -199,7 +200,11 @@ if($user)
     $curSimLen  = $par['a7_cur_sim_len'] ;
     $curLoopLen = $par['a7_cur_loop_len'] ;
     $curReadLen = $par['a7_cur_read_len'] ;
+
     $curSource  = $par['a7_cur_source'] ;
+    $selSource  = $par['a7_sel_source'] ;
+    $curFile    = $par['a7_cur_file'] ;
+
     $curLoop    = $par['a7_cur_loop'] ;
     $curRead    = $par['a7_cur_read'] ;
     $curStep    = $par['a7_cur_step'];
@@ -213,9 +218,19 @@ if($user)
     $action  = $_GET['ac'];
     $alt     = $_GET['x'];
 
+
     if($action == 'access_control')
       {
 	accessControl();
+      }
+
+    if($action == 'delete_sketch' && $user != 'guest')
+      {
+	if (file_exists($selSource)) 
+	  {
+	    unlink($selSource);
+	    $par['a7_sel_source'] = '-';
+	  }
       }
 
     if($action == 'run' && $curSimLen > 0)
@@ -309,7 +324,7 @@ if($user)
 	    
 	    // Always save file
 	    $res = evilCode($data);
-	    if($res == 0)
+	    if($res == 0 && $user != 'guest')
 	      {
 		$fp = fopen($tempFile, 'w')or die("Could not open file ($tempFile) (write)!");;
 		fwrite($fp,$data) or die("Could not write to file ($tempFile) !");
@@ -370,7 +385,7 @@ if($user)
 	    
 	    // Always save file
 	    $res = evilCode($data);
-	    if($res == 0)
+	    if($res == 0 && $user != 'guest')
 	      {
 		$fp = fopen($tempFile, 'w')or die("Could not open sketch ($tempFile) (write)!");;
 		fwrite($fp,$data) or die("Could not write to sketch ($tempFile) !");
@@ -388,13 +403,13 @@ if($user)
 	else
 	  $par['a7_ready'] = "No Sketch specified!";
       }
-    if($action == 'upload_source' )
+    if($action == 'upload_source' && $user != 'guest')
       {
 	$par['a7_cur_source'] = uploadFile2();
 	$curSource = $par['a7_cur_source'];
       }
 
-    if($action == 'set_load_new_sketch' )
+    if($action == 'set_load_new_sketch' && $user != 'guest' )
       {
 	$temp = $fn['new_sketch'];
 	$newSketchName = $_POST['new_sketch_name'];
@@ -410,7 +425,7 @@ if($user)
       }
 
 
-    if($action == 'set_load_delete' )
+    if($action == 'set_load' )
       {
 	$curSource = $_POST['source'];
 	$par['a7_sel_source'] =  $curSource;
@@ -441,17 +456,12 @@ if($user)
 	    else
 	      $par['a7_ready'] = "Sketch not loaded!";
 	  }
-	else if($what == T_VIEW)
+	else if($what == T_SELECT)
 	  {
 	    // Do nothing
 	  }
 	else
 	  vikingWarning("No sketch selected !");
-	if($what == T_DELETE)
-	  {
-	    unlink($curSource);
-	  }
-
       }
 
     if($action == 'run_target' )
@@ -508,45 +518,48 @@ if($user)
     decodeStatus($status[$curStep]);
 
 
+    // set SESSION parameters ===============================
+    $_SESSION['a7_cur_sim_len']        = $par['a7_cur_sim_len'];
+    $_SESSION['a7_cur_loop_len']       = $par['a7_cur_loop_len'];
+    $_SESSION['a7_cur_read_len']       = $par['a7_cur_read_len'];
+    $_SESSION['a7_sel_source']         = $par['a7_sel_source'];
+    $_SESSION['a7_cur_step']           = $par['a7_cur_step'];
+    $_SESSION['a7_cur_loop']           = $par['a7_cur_loop'];
+    $_SESSION['a7_cur_read']           = $par['a7_cur_read'];
+    //$_SESSION['a7_cur_menu']           = $par['a7_cur_menu'];
+    $_SESSION['a7_cur_sketch_name']    = $par['a7_cur_sketch_name'];
+    $_SESSION['a7_cur_board_type']     = $par['a7_cur_board_type'];
+    $_SESSION['a7_cur_board_digpins']  = $par['a7_cur_board_digpins'];
+    $_SESSION['a7_cur_board_anapins']  = $par['a7_cur_board_anapins'];
+    $_SESSION['a7_ser_log']            = $par['a7_ser_log'];
+    $_SESSION['a7_row_number']         = $par['a7_row_number'];
+    
   } // end if user
-else
-  {
-    if (!isset($_POST['action']))$_POST['action'] = "undefined"; 
-
-    $action = $_POST['action'];
-
-    if($action == 'apply_account' )
-      {
-        $username = $_POST['username'];
-        $email    = $_POST['email'];
-        createApplication($username,$email);
-      }
-
-  }
 
 //=================================================
 //+++++++++++++++++++++++++++++++++++++++++++++++++
 //=================================================
 
-// set SESSION parameters ===============================
+ else
+   {
+     if (!isset($_POST['action']))$_POST['action'] = "undefined"; 
 
-$_SESSION['a7_cur_sim_len']        = $par['a7_cur_sim_len'];
-$_SESSION['a7_cur_loop_len']       = $par['a7_cur_loop_len'];
-$_SESSION['a7_cur_read_len']       = $par['a7_cur_read_len'];
+     $action = $_POST['action'];
+
+     if($action == 'apply_account' )
+       {
+	 $username = $_POST['username'];
+	 $email    = $_POST['email'];
+	 createApplication($username,$email);
+       }
+
+   }
+
+
+// Always set SESSION parameters ===============================
+
 $_SESSION['a7_cur_source']         = $par['a7_cur_source'];
-$_SESSION['a7_sel_source']         = $par['a7_sel_source'];
-$_SESSION['a7_cur_step']           = $par['a7_cur_step'];
-$_SESSION['a7_cur_loop']           = $par['a7_cur_loop'];
-$_SESSION['a7_cur_read']           = $par['a7_cur_read'];
-$_SESSION['a7_cur_menu']           = $par['a7_cur_menu'];
 $_SESSION['a7_cur_file']           = $par['a7_cur_file'];
-$_SESSION['a7_cur_sketch_name']    = $par['a7_cur_sketch_name'];
-$_SESSION['a7_cur_board_type']     = $par['a7_cur_board_type'];
-$_SESSION['a7_cur_board_digpins']  = $par['a7_cur_board_digpins'];
-$_SESSION['a7_cur_board_anapins']  = $par['a7_cur_board_anapins'];
-$_SESSION['a7_ser_log']            = $par['a7_ser_log'];
-$_SESSION['a7_row_number']         = $par['a7_row_number'];
-
 
 //====================================================
 //  Internal functions
@@ -562,7 +575,7 @@ function resetSession()
   $_SESSION['a7_cur_step']          = 0; 
   $_SESSION['a7_cur_loop']          = 0; 
   $_SESSION['a7_cur_read']          = 0; 
-  $_SESSION['a7_cur_menu']          = "start"; 
+  //$_SESSION['a7_cur_menu']          = "start"; 
   $_SESSION['a7_cur_file']          = ""; 
   $_SESSION['a7_cur_sketch_name']   = "";
   $_SESSION['a7_cur_board_type']    = "";
@@ -752,30 +765,79 @@ function readUserSetting()
   fclose($in);
 }
 
+
+//==========================================
+function check_email_address($email) 
+//==========================================
+{
+
+  // First, we check that there's one @ symbol, 
+  // and that the lengths are right.
+  if (!ereg("^[^@]{1,64}@[^@]{1,255}$", $email)) {
+    // Email invalid because wrong number of characters 
+    // in one section or wrong number of @ symbols.
+    return false;
+  }
+  // Split it into sections to make life easier
+  $email_array = explode("@", $email);
+  $local_array = explode(".", $email_array[0]);
+  for ($i = 0; $i < sizeof($local_array); $i++) {
+    if
+      (!ereg("^(([A-Za-z0-9!#$%&'*+/=?^_`{|}~-][A-Za-z0-9!#$%&
+↪'*+/=?^_`{|}~\.-]{0,63})|(\"[^(\\|\")]{0,62}\"))$",
+	     $local_array[$i])) {
+      return false;
+    }
+  }
+  // Check if domain is IP. If not, 
+  // it should be valid domain name
+  if (!ereg("^\[?[0-9\.]+\]?$", $email_array[1])) {
+    $domain_array = explode(".", $email_array[1]);
+    if (sizeof($domain_array) < 2) {
+      return false; // Not enough parts to domain
+    }
+    for ($i = 0; $i < sizeof($domain_array); $i++) {
+      if
+	(!ereg("^(([A-Za-z0-9][A-Za-z0-9-]{0,61}[A-Za-z0-9])|
+↪([A-Za-z0-9]+))$",
+	       $domain_array[$i])) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 //==========================================
 function createApplication($username,$email)
 //==========================================
 {
   global $application,$fn;
-
+  
   if($email && $username)
     {
-      $file = $fn['application'];
-      $fileSize = filesize($file);
-      if($fileSize < 900000)
+      $res = check_email_address($email);
+      if($res)
 	{
-	  $out = fopen($file,"a");
-	  if($out)
+	  $file = $fn['application'];
+	  $fileSize = filesize($file);
+	  if($fileSize < 900000)
 	    {
-	      $temp = $fileSize." ".$username."   ".$email."\n";
-	      //echo("$temp<br>");
-	      fwrite($out,$temp);
-	      $application = 1;
+	      $out = fopen($file,"a");
+	      if($out)
+		{
+		  $temp = $fileSize." ".$username."   ".$email."\n";
+		  //echo("$temp<br>");
+		  fwrite($out,$temp);
+		  $application = 1;
+		}
+	      fclose($out);
 	    }
-	  fclose($out);
+	  else
+	    vikingError("Application rejected due to overload");  
 	}
       else
-	vikingError("Application rejected due to overload");  
+	vikingError("Non valid E-mail Address");
     }
   else
     vikingError("Application rejected");  
@@ -1092,14 +1154,6 @@ function decodeStatus($code)
 	}
     }
 }
-// //==========================================
-// function show($step)
-// //==========================================
-// {
-//   global $par,$simulation;
-//   $user = $par['user'];
-//   echo("$simulation[$step]<br>");
-// }
 
 //==========================================
 function init($steps)
@@ -1497,6 +1551,9 @@ function readAnyFile($check,$file)
 
   $step = 0;
   $content[0] = 0;
+
+  if($file == '-')return(0);
+
   if(!$file)
     {
       vikingWarning("readAnyFile: no file ($file)");
@@ -1509,6 +1566,47 @@ function readAnyFile($check,$file)
 	{
 	  $row = fgets($in);
 	  $row = trim($row);
+	  //$row = str_replace(" ","&nbsp;",$row);
+	  $step++;
+	  $content[$step] = $row;
+	  $content[0] = $step;
+	}
+      fclose($in);
+    }
+  else if($check == 1)
+    {
+      $temp = "readAnyFile: Fail to open ($file)";
+      vikingError($temp);
+    }
+  return($step);
+}
+
+//==========================================
+function readAnySketch($check,$file)
+//==========================================
+{
+  global $par;
+  global $content,$servuino;
+  $user = $par['user'];
+
+  $step = 0;
+  $content[0] = 0;
+
+  if($file == '-')return(0);
+
+  if(!$file)
+    {
+      vikingWarning("readAnyFile: no file ($file)");
+      return;
+    }
+  $in = fopen($file,"r");
+  if($in)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  $row = trim($row);
+	  $row = str_replace(" ","&nbsp;",$row);
 	  $step++;
 	  $content[$step] = $row;
 	  $content[0] = $step;
@@ -1689,10 +1787,10 @@ function getExtension2($str)
 {
   global $par;
   $user       = $par['user'];
-  $i = strrpos($str,".");
-  if (!$i) { return ""; }
-  $l = strlen($str) - $i;
-  $ext = substr($str,$i+1,$l);
+  $ii = strrpos($str,".");
+  if (!$ii) { return ""; }
+  $ll = strlen($str) - $ii;
+  $ext = substr($str,$ii+1,$ll);
   return $ext;
 }
 
@@ -2009,8 +2107,6 @@ function viking_7_editFile($sys_id)
 
   $file = $curFile;
 
-  //echo("file=$file<br> curpv=$curPV<br> mempv=$memPV<br>");
-
   if(!$file)vikingWarning("editFile: No file specified");;
   
   if($curEditFlag == 0 && $file)
@@ -2022,7 +2118,7 @@ function viking_7_editFile($sys_id)
 
       if($par['a7_row_number']==0)echo(" (<a href=$path&ac=rownumber&x=1>Row Number ON</a>)");
       if($par['a7_row_number']==1)echo(" (<a href=$path&ac=rownumber&x=0>Row Number OFF</a>)");
-      echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
+      echo("<div id=\"anyFile\" style=\"font-family:Courier,monospace; font-size:11px;float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
       $len = readAnyFile(1,$file);
       showAnyFile($len);
       echo("</div>\n");
@@ -2093,8 +2189,8 @@ function viking_7_editSketch($sys_id)
 
       if($par['a7_row_number']==0)echo(" (<a href=$path&ac=rownumber&x=1>Row Number ON</a>)");
       if($par['a7_row_number']==1)echo(" (<a href=$path&ac=rownumber&x=0>Row Number OFF</a>)");
-      echo("<div id=\"anyFile\" style=\"float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
-      $len = readAnyFile(1,$file);
+      echo("<div id=\"anyFile\" style=\"font-family:Courier,monospace; font-size:11px;float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:500px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
+      $len = readAnySketch(1,$file);
       showAnyFile($len);
       echo("</div>\n");
     }
@@ -2385,42 +2481,39 @@ function viking_7_load($sys_id)
   echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
   if($user)
     {
-      echo("<hr><b>Loaded Sketch:</b> $curSource");
+      $fTemp = basename($curSource);
+      echo("<hr><b>Loaded Sketch:</b> $fTemp<br>");
+      $fTemp = basename($selSource);
+      echo("<b>Selected Sketch:</b> $fTemp");
+      if($selSource && $selSource!='-')echo("<a href=\"$path&ac=delete_sketch\" onclick=\"return confirm('Are you sure you want to delete: $fTemp ?');\"> (delete)</a>");
       echo("<hr><table border=\"0\"><tr>");      
-      echo("<form name=\"f_load_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
-      echo("<input type=\"hidden\" name=\"action\" value=\"set_load_delete\">\n");
+      echo("<form name=\"f_load\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
+      echo("<input type=\"hidden\" name=\"action\" value=\"set_load\">\n");
       echo("<td>Simulation Length</td><td><input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td>");
       $tFile = $fn['list'];
       $syscom = "ls $upload > $tFile;";
       system($syscom);
       echo("<td>");
-      $nSketches = formSelectFile("Loaded Sketch","source",$tFile,$selSource,$upload);
+      $nSketches = formSelectFile("Account Sketches","source",$tFile,$selSource,$upload);
       echo("</td></tr></table><br>");
 
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
-      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_DELETE."\">");
-      if($curEditFlag == 0)
-	{
-	  echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_EDIT."\">");
-	}
-      else
-	{
-	  echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_VIEW."\">");
-	  echo("  <b>Editing</b> <i>$selSource</i>");
-	}
-
+      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_SELECT."\">");
+      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_EDIT."\">");
+      
       echo("</form>");
 
-	  if($nSketches < 10)
-	    {
-	      echo("<hr><h4>You have $nSketches sketches stored. Limit is 10.</h4><br><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
-	      echo("<input type=\"hidden\" name=\"action\" value=\"upload_source\">");
-	      echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
-	      echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_UPLOAD_SKETCH."\">");
-	      echo("</form><br>");
-	    }
-	  else
-	    echo("<h2>You have 10 sketches stored. Delete some of the sketches.</h2>");
+      if($nSketches < 10)
+	{
+	  echo("<hr><h4>You have $nSketches sketches stored. Limit is 10.</h4><br><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
+	  echo("<input type=\"hidden\" name=\"action\" value=\"upload_source\">");
+	  echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
+	  echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_UPLOAD_SKETCH."\">");
+	  echo("</form><br>");
+	}
+      else
+	echo("<h2>You have 10 sketches stored. Delete some of the sketches.</h2>");
+
 
       echo("<hr>");
       echo("<h4>Create a new sketch from template</h4>");

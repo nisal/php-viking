@@ -1,13 +1,6 @@
 <?
 //======================================
 // Users
-
-// function viking_4_showUserLoggedIn()
-// function viking_4_addUser()
-// function viking_4_delUser()
-// function viking_4_editUser()
-// function viking_4_loginUser()
-// function viking_4_logoutUser()
 //======================================
 
 // Swedish
