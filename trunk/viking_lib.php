@@ -1,7 +1,5 @@
 <?
 
-
-
 $g_db_dir = 'php-viking/db/';
 if(!is_dir($g_db_dir))
   {
@@ -27,10 +25,6 @@ if(!is_dir($g_db_dir))
     // 	mkdir($g_db_dir_images);
     //       }
   }
-
-
-
-
 
 //=======================================
 function getLastNodeId($db_name)
