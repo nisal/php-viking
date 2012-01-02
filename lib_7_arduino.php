@@ -782,6 +782,8 @@ function readSimulation($file)
 	  //echo("$row<br>");
 	  if($row[0]=='+')
 	    {
+	      $pp = strpos($row,"?");
+	      $row[$pp] = ' ';
 	      $step++;
               $row[0] = ' ';
 	      $simulation[$step] = $row;
@@ -838,7 +840,7 @@ function readArduino()
 		  $readStep[$read] = $step;
 		}
               $stepRead[$step] = $read;
-              if(strstr($row,"Loop "))
+              if(strstr($row,"servuinoLoop "))
 		{
 		  $loop++;
 		  $loopStep[$loop] = $step;
@@ -918,6 +920,7 @@ function readStatus()
       return;
     }
 
+
   $in = fopen($file,"r");
   if($in)
     {
@@ -925,10 +928,9 @@ function readStatus()
       $row = fgets($in);
       while (!feof($in))
 	{
-	  $step++;
 	  $row = fgets($in);
+	  $step++;
 	  $row = trim($row);
-	  //$row = safeText($row);
 	  $status[$step] = $row;
 	}
       fclose($in);
