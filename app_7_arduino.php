@@ -11,6 +11,7 @@ define('T_LOOP_B','Prev Loop');
 define('T_STEP_F','Next Step');
 define('T_STEP_B','Prev Step');
 define('T_CREATE','Create');
+define('T_COPY','Copy');
 define('T_EDIT','Edit');
 define('T_SAVE','Save');
 define('T_SELECT','Select');
@@ -162,6 +163,8 @@ if($user)
 	$tDir2 = $tDir.'/upload';
 	if(!mkdir($tDir2,0777))vikingError("Not possible to create upload in account");
 	
+	$syscom = "cd $tDir;touch index.htm;";
+	system($syscom);
 	$syscom = "cd $tDir;ln -s ../../servuino/servuino.c servuino.c;";
 	system($syscom);
 	$syscom = "cd $tDir;ln -s ../../servuino/servuino_lib.c servuino_lib.c;";
@@ -409,12 +412,27 @@ if($user)
 	$newSketchName = $_POST['new_sketch_name'];
 	$dest = $upload.$newSketchName;
 	if (!copy($temp,$dest)) {
-	  vikingError("Failed to copy ($sketch)");
+	  vikingError("Failed to copy ($temp -> $dest)");
 	}
 	else
 	  {
-	    $par['a7_cur_source'] = $fn['new_sketch'];
-	    $curSource = $par['a7_cur_source'];
+	    $par['a7_sel_source'] = $dest;
+	    $selSource = $par['a7_sel_source'];
+	  }
+      }
+
+    if($action == 'copy_sketch' && $user != 'guest' )
+      {
+	$temp = $_POST['copy_source'];
+	$newSketchName = $_POST['copy_sketch_name'];
+	$dest = $upload.$newSketchName;
+	if (!copy($temp,$dest)) {
+	  vikingError("Failed to copy ($temp -> $dest)");
+	}
+	else
+	  {
+	    $par['a7_sel_source'] = $dest;
+	    $selSource = $par['a7_sel_source'];
 	  }
       }
 
@@ -468,15 +486,15 @@ if($user)
     if($action == 'set_dig_scenario' )
       {
 	$pin   = $_POST['pin_value'];
-	if(!$pin)$pin = "0";
+	if($pin==0)$pin = "0";
 	$value = $_POST['dvalue'];
-	if(!$value)$value = "0";
+	if($value==0)$value = "0";
         if($pin != "-")
 	  {
 	    $pinType = 2;//DIG
 	    $do = 10; // ADD=10, DELETE = 20
 	    $syscom = "cd account/$user;./servuino $curSimLen 1 $pinType $pin $value $curStep $do >exec.error 2>&1;chmod 777 data.*;";
-	    echo("$syscom<br>");
+	    //echo("$syscom<br>");
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
@@ -489,15 +507,15 @@ if($user)
     if($action == 'set_ana_scenario' )
       {
 	$pin   = $_POST['pin_value'];
-	if(!$pin)$pin = "0";
+	if($pin==0)$pin = "0";
 	$value = $_POST['dvalue'];
-	if(!$value)$value = "0";
+	if($value==0)$value = "0";
         if($pin != "-")
 	  {
 	    $pinType = 1;//DIG=2 ANA=1
 	    $do = 10;    // ADD=10, DELETE=20
 	    $syscom = "cd account/$user;./servuino $curSimLen 1 $pinType $pin $value $curStep $do >exec.error 2>&1;chmod 777 data.*;";
-	    echo("$syscom<br>");
+	    //echo("$syscom<br>");
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
@@ -1059,7 +1077,7 @@ function viking_7_load($sys_id)
       $syscom = "ls $upload > $tFile;";
       system($syscom);
       echo("<td>");
-      $nSketches = formSelectFile("Account Sketches","source",$tFile,$selSource,$upload);
+      $nSketches = formSelectFile("Account Sketches ","source",$tFile,$selSource,$upload);
       echo("</td></tr></table><br>");
 
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
@@ -1084,9 +1102,22 @@ function viking_7_load($sys_id)
       echo("<h4>Create a new sketch from template</h4>");
       echo("<table border=\"0\"><tr>");      
       echo("<form name=\"f_load_new_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
-      echo("<input type=\"hidden\" name=\"action\" value=\"set_load_new_sketch\">\n");
-      echo("<td>New Sketch Name</td><td><input type=\"text\" name=\"new sketch_name\" value=\"$user.pde\" size=\"10\"></td>");
+      echo("<input type=\"hidden\" name=\"action\" value=\"set_load_new_sketch\">");
+      echo("<td>New Sketch Name</td><td><input type=\"text\" name=\"new sketch_name\" value=\"$user.pde\" size=\"20\"></td>");
       echo("<td><input type =\"submit\" name=\"submit_load_new_sketch\" value=\"".T_CREATE."\"></td>");
+      echo("</tr></table><br>");
+      echo("</form>");
+
+      echo("<hr>");
+      echo("<h4>Copy sketch</h4>");
+      echo("<table border=\"0\"><tr>");      
+      echo("<form name=\"f_copy_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
+      echo("<input type=\"hidden\" name=\"action\" value=\"copy_sketch\">");
+      echo("<td>");
+      $nSketches = formSelectFile("Source Sketch","copy_source",$tFile,$selSource,$upload);
+      echo("</td></tr><tr>");
+      echo("<td>New Sketch Name <input type=\"text\" name=\"copy_sketch_name\" value=\"$user.pde\" size=\"20\"></td>");
+      echo("<tr><td><input type =\"submit\" name=\"submit_copy_sketch\" value=\"".T_COPY."\"></td>");
       echo("</tr></table><br>");
       echo("</form>");
       
@@ -1176,6 +1207,15 @@ function viking_7_pinValues($sys_id)
 }
 
 
+function viking_7_downloadSketch($sys_id)
+{
+  global $fn,$upload;
+
+  $tFile = $fn['list'];
+  $syscom = "ls $upload > $tFile;";
+  system($syscom);
+  $nSketches = linkFile($tFile,$selSource,$upload);
+}
 function viking_7_applyAccount($sys_id)
 {
   global $par,$application;

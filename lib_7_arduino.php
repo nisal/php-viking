@@ -1144,6 +1144,47 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
     }
   return($res);
 }
+
+//==========================================
+function linkFile($file,$sel,$dir)
+//==========================================
+{
+  global $par;
+  $user = $par['user'];
+
+  $res = 0;
+  if(!$file)
+    {
+      vikingWarning("formSelectFile: no file ($file)");
+      return;
+    }
+
+  $in = fopen($file,"r");
+  if($in)
+    {
+      echo("<hr>Download Area<br>");
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  $row = trim($row);
+	  //$row = safeText($row);
+	  if($row)
+	    {
+	      $dirrow = $dir.$row;
+	      echo("<a href=\"$dirrow\">$row</a> |");
+              $res++;
+	    }
+	}
+      echo("<hr>");
+      fclose($in);
+    }
+  else
+    {
+      $temp = "linkFile:Fail to open ($file)";
+      vikingError($temp);
+    }
+  return($res);
+}
 //==========================================
 function readSketchInfo()
 //==========================================
