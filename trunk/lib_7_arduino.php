@@ -23,6 +23,31 @@ function resetSession()
   $_SESSION['a7_row_number']        = 0;
 }
 //==========================================
+function tokString($str,$delimiter)
+//==========================================
+{
+  global $g_tok;
+  if(!$str)return;
+ 
+  $str = trim($str);
+
+  //echo("====== tokstr: ($str)<br>");
+
+  $tok = strtok($str, $delimiter);
+  //$g_tok[1] = $tok;
+
+  $ix = 0;
+  while ($tok !== false) {
+    $ix++;
+    $g_tok[$ix] = $tok;
+    //echo("tok: $ix ($tok)<br>");
+    $tok = strtok($delimiter);
+  }
+  $g_tok[0] = $ix;
+  //echo("toklen: $ix<br>");
+  return;
+}
+//==========================================
 function accessControlFile($file,$rw)
 //==========================================
 {
@@ -33,26 +58,26 @@ function accessControlFile($file,$rw)
     return(NO);
 }
 
-//==========================================
-function rowNumber($data)
-//==========================================
-{
-  $row = array();
+// //==========================================
+// function rowNumber($data)
+// //==========================================
+// {
+//   $row = array();
 
-  $res = "";
-  $row = strtok($data, "\n");
-  $row[0] = $tok;
+//   $res = "";
+//   $row = strtok($data, "\n");
+//   $row[0] = $tok;
 
-  $ix = 0;
-  $res = "";
-  while ($tok !== false) {
-    $ix++;
-    echo "$tok<br>";
-    $tok = strtok("\n");
-    $row[$ix] = $tok;
-  }
+//   $ix = 0;
+//   $res = "";
+//   while ($tok !== false) {
+//     $ix++;
+//     echo "$tok<br>";
+//     $tok = strtok("\n");
+//     $row[$ix] = $tok;
+//   }
 
-}
+// }
 
 //==========================================
 function accessControl()
@@ -535,13 +560,92 @@ function execSketch($steps,$source)
 }
 
 //==========================================
+function decodeAllStatus($step,$code)
+//==========================================
+{
+  //global $par;
+  //$user = $par['user'];
+  //global $pinValueA,$pinValueD,$pinStatusA,$pinStatusD,$pinModeD;
+  global $valueInPinA,$valueOutPinD;
+
+  //$curStep = $par['a7_cur_step'];
+
+  if(!$code)return;
+
+  $xpar = array();
+  $tok = strtok($code, ",");
+  $xpar[0] = $tok;
+//   if($tok != $curStep)
+//     {
+//       vikingError("Sync Error Step: $step - $curStep");
+//       return;
+//     }
+  $ix = 0;
+  while ($tok !== false) {
+    $ix++;
+    $tok = strtok(",");
+    $xpar[$ix] = $tok;
+  }
+
+  // Mode Digital Pin
+//   $temp = $xpar[1];
+//   $bb = strlen($temp);
+//   for($ii=0;$ii<strlen($temp);$ii++)
+//     {
+//       if($temp[$ii]=='-')$pinModeD[$ii] = VOID;
+//       if($temp[$ii]=='O')$pinModeD[$ii] = OUTPUT;
+//       if($temp[$ii]=='I')$pinModeD[$ii] = INPUT;
+//       if($temp[$ii]=='X')$pinModeD[$ii] = TX;
+//       if($temp[$ii]=='Y')$pinModeD[$ii] = RX;
+//       if($temp[$ii]=='C')$pinModeD[$ii] = I_CHANGE;
+//       if($temp[$ii]=='R')$pinModeD[$ii] = I_RISING;
+//       if($temp[$ii]=='F')$pinModeD[$ii] = I_FALLING;
+//     }
+
+  // Status Analog Pin
+  $tempA = $xpar[2]; // Number of Analog Values
+  if($tempA > 0)
+    {
+      for($ii=0;$ii<$tempA;$ii++)
+	{
+	  $ix = 4+$ii*2;
+	  //$pinValueA[$xpar[$ix]] = $xpar[$ix+1];
+	  $aw = $xpar[$ix]; 
+          $qq = $xpar[$ix+1];
+	  //if($pinValueA[$xpar[$ix]]> 0)$pinStatusA[$xpar[$ix]] = READ;
+	  //echo("$tempA Analog $ii $aw $qq<br>");
+	  $valueInPinA[$aw][$step] = $qq;
+	}
+    }
+  $tempD = $xpar[3]; // Number of Digital Values
+  if($tempD > 0)
+    {
+      for($ii=0;$ii<$tempD;$ii++)
+	{
+	  $ix = 4+$ii*2+2*$tempA;
+	  //$pinValueD[$xpar[$ix]] = $xpar[$ix+1];
+	  $aw = $xpar[$ix]; 
+          $qq = $xpar[$ix+1];
+	  if($qq == 0)$tmp = LOW;
+	  if($qq == 1)$tmp = HIGH;
+	  if($qq  > 1)$tmp = PWM;
+
+	  $valueOutPinD[$aw][$step] = $tmp;
+
+	  //$temp = $valueOutPinD[$aw][$step];
+	  //echo("Value=$temp Digital $ii $aw $qq step=$step<br>");
+	}
+    }
+}
+
+//==========================================
 function decodeStatus($code)
 //==========================================
 {
   global $par;
   $user = $par['user'];
   global $pinValueA,$pinValueD,$pinStatusA,$pinStatusD,$pinModeD;
-
+  global $valueInPinA,$valueOutPinD;
 
   $curStep = $par['a7_cur_step'];
 
@@ -600,13 +704,13 @@ function decodeStatus($code)
 	  $pinValueD[$xpar[$ix]] = $xpar[$ix+1];
 	  $aw = $xpar[$ix]; 
           $qq = $xpar[$ix+1];
-	  if($pinValueD[$xpar[$ix]] == 0)$pinStatusD[$aw] = LOW;
-	  if($pinValueD[$xpar[$ix]] == 1)$pinStatusD[$aw] = HIGH;
-	  if($pinValueD[$xpar[$ix]]  > 1)$pinStatusD[$aw] = PWM;
-	  //echo("$tempD Digital $ii $aw $qq<br>");
+	  if($pinValueD[$aw] == 0)$pinStatusD[$aw] = LOW;
+	  if($pinValueD[$aw] == 1)$pinStatusD[$aw] = HIGH;
+	  if($pinValueD[$aw]  > 1)$pinStatusD[$aw] = PWM;
 	}
     }
 }
+
 
 //==========================================
 function init($steps)
@@ -806,7 +910,7 @@ function readSimulation($file)
 function readArduino()
 //==========================================
 {
-  global $par,$fn;
+  global $par,$fn,$g_tok,$g_readValue,$g_readPin,$g_readType;
   $user  = $par['user'];
   //global $simulation,$servuino,
   global $loopStep,$stepLoop,$readStep,$stepRead;
@@ -838,6 +942,17 @@ function readArduino()
 		{
 		  $read++;
 		  $readStep[$read] = $step;
+		  if(strstr($row,"gRead"))$type = 1;//Analog
+		  if(strstr($row,"lRead"))$type = 2;//Digital
+		  $pp = strstr($row,"Read");
+		  $pp = strstr($pp," ");
+		  tokString($pp," ");
+		  $pin   = $g_tok[1];
+		  $value = $g_tok[2];
+		  $g_readType[$step]  = $type;
+                  $g_readPin[$step]   = $pin;
+		  $g_readValue[$step] = $value;
+		  //echo("$step pin=$pin value=$value type=$type<br>");
 		}
               $stepRead[$step] = $read;
               if(strstr($row,"servuinoLoop "))
@@ -932,6 +1047,7 @@ function readStatus()
 	  $step++;
 	  $row = trim($row);
 	  $status[$step] = $row;
+          decodeAllStatus($step,$status[$step]);
 	}
       fclose($in);
     }
@@ -948,7 +1064,9 @@ function readStatus()
 function readScenario()
 //==========================================
 {
-  global $par,$fn;
+  global $par,$fn,$g_tok,$valueInPinA,$valueInPinD;
+  $apin = array();
+  $dpin = array();
   $user  = $par['user'];
   global $scenario,$servuino;
 
@@ -968,11 +1086,33 @@ function readScenario()
       if(strstr($row,"Digital:"))
 	{
 	  $temp = $row;
+	  $pp = strstr($row,":");
+	  $pp = strstr($pp," ");
+	  tokString($pp," ");
+	  $Dpins = $g_tok[0];
+	  if($Dpins > 0)
+	    {
+	      for($ii=1;$ii<=$Dpins;$ii++)
+		{
+		  $dpin[$ii] = $g_tok[$ii];
+		  $tmp = $dpin[$ii];
+		  //echo("($row)PinNo $ii=($tmp)<br>");
+		}
+	    }
 	}
       $row  = fgets($in);
       if(strstr($row,"Analog:"))
 	{
 	  $temp = $temp.$row;
+	  $pp = strstr($row,":");
+	  $pp = strstr($pp," ");
+	  tokString($pp," ");
+	  $Apins = $g_tok[0];
+	  if($Apins > 0)
+	    {
+	      for($ii=1;$ii<=$Apins;$ii++)
+		$apin[$ii] = $g_tok[$ii];
+	    }
 	}
       $scenario[0] = $temp;
 
@@ -983,6 +1123,29 @@ function readScenario()
 	    {
 	      $step++;
 	      $scenario[$step] = $row;
+	      tokString($row," ");
+	      $temp1 = $g_tok[0];
+	      $ix = 0;
+	      //echo("$Dpins+$Apins+1 == $temp1<br>");
+	      if($Dpins+$Apins+1 == $temp1)
+		{
+		  for($ii=1;$ii<=$Dpins;$ii++)
+		    {
+		      $ix++;
+		      $pin = $dpin[$ii];
+		      $valueInPinD[$pin][$step] = $g_tok[$ix+1];
+		      $val = $g_tok[$ix+1];
+		      //echo("Dig $step pin=$pin value=$val ix=$ix<br>");
+		    }
+		  for($ii=1;$ii<=$Apins;$ii++)
+		    {
+		      $ix++;
+		      $pin = $apin[$ii];
+		      $valueInPinA[$pin][$step] = $g_tok[$ix+1];
+		      $val = $g_tok[$ix+1];
+		      //echo("Ana $step pin=$pin value=$val<br>");
+		    }
+		}
 	    }
 	}
       fclose($in);
