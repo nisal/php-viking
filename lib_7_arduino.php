@@ -45,7 +45,7 @@ function tokString($str,$delimiter)
   }
   $g_tok[0] = $ix;
   //echo("toklen: $ix<br>");
-  return;
+  return($ix);
 }
 //==========================================
 function accessControlFile($file,$rw)
@@ -93,7 +93,7 @@ function accessControl()
   $res = accessControlFile($file,"r");
   if($res == NO)vikingError("Read Access: $file"); 
 
-  $file = $fn['arduino'];
+  $file = $fn['event'];
   $res = accessControlFile($file,"r");
   if($res == NO)vikingError("Read Access: $file"); 
 
@@ -658,7 +658,7 @@ function decodeStatus($code)
   $xpar[0] = $tok;
   if($tok != $curStep)
     {
-      vikingError("Sync Error Step: $step - $curStep");
+      vikingError("Sync Error Step: $tok - $curStep");
       return;
     }
   $ix = 0;
@@ -859,18 +859,21 @@ function showAnyFile($target)
 }
 
 //==========================================
-function readSimulation($file)
+function readSimulation()
 //==========================================
 {
-  global $par;
+  global $par,$fn;
   $user  = $par['user'];
   global $simulation;
+  global $loopStep,$stepLoop,$readStep,$stepRead;
   //$servuino,$loopStep,$stepLoop,$readStep,$stepRead;
 
   //$file = $servuino.$file;
   $step = 0;
   $loop = 0;
   $read = 0;
+
+  $file = $fn['event'];
   if(!$file)
     {
       vikingWarning("readSimulation: no file ($file)");
@@ -893,8 +896,17 @@ function readSimulation($file)
 	      $step++;
               $row[0] = ' ';
 	      $simulation[$step] = $row;
+
+              if(strstr($row,"servuinoLoop "))
+		{
+		  $loop++;
+		  $loopStep[$loop] = $step;
+		}
+              $stepLoop[$step] = $loop;
 	    }
 	}
+      $par['a7_cur_sim_len']  = $step;
+      $par['a7_cur_loop_len'] = $loop;
       fclose($in);
     }
   else
@@ -903,7 +915,7 @@ function readSimulation($file)
       vikingError($temp);
     }
 
-  readArduino();
+  //readArduino();
 
   return($step);
 }
@@ -921,7 +933,7 @@ function readArduino()
   $step = 0;
   $loop = 0;
   $read = 0;
-  $file = $fn['arduino'];
+  $file = $fn['event'];
   if(!$file)
     {
       vikingWarning("readArduino: no file ($file)");
@@ -1022,11 +1034,11 @@ function readSerial()
 }
 
 //==========================================
-function readStatus()
+function readxStatus()
 //==========================================
 {
   global $par,$fn;
-  $user       = $par['user'];
+  $user = $par['user'];
   global $status,$servuino;
 
   $file = $fn['status'];
@@ -1049,7 +1061,178 @@ function readStatus()
 	  $step++;
 	  $row = trim($row);
 	  $status[$step] = $row;
-          decodeAllStatus($step,$status[$step]);
+          //decodeStatus($status[$step]);
+	}
+      fclose($in);
+    }
+  else
+    {
+      $temp = "readStatus: Fail to open ($file)";
+      vikingError($temp);
+    }
+
+  return($step);
+}
+
+//==========================================
+function readStatus()
+//==========================================
+{
+// int x_pinMode[MAX_TOTAL_PINS];
+// int x_pinScenario[MAX_TOTAL_PINS][SCEN_MAX];
+// int x_pinDigValue[MAX_TOTAL_PINS];
+// int x_pinAnaValue[MAX_TOTAL_PINS];
+// int x_pinRW[MAX_TOTAL_PINS];
+
+  global $par,$fn;
+  //$user = $par['user'];
+  //global $status,$servuino;
+  global $x_pinMode,$x_pinDigValue,$x_pinAnaValue,$x_pinRW;
+  global $g_tok;
+
+  // ========= Read Pin Mode
+  $file = $fn['pinmod'];
+  $step = 0;
+  if(!$file)
+    {
+      vikingWarning("readStatus: no file ($file)");
+      return;
+    }
+  $in = fopen($file,"r");
+  if($in)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  if($row[0] == '+')
+	    {
+	      sscanf($row,"%s %d",$junk,$step);
+	      $pp = strstr($row,"? ");
+	      $qq = strstr($pp," ");
+	      $nn = tokString($qq,",");
+	      //echo("$nn benny: ($qq) <br>");
+	      for($ii=1;$ii<=$nn;$ii++)
+		{
+		  $pin = $ii-1;
+		  $x_pinMode[$pin][$step] = $g_tok[$ii];
+		  //$temp = $x_pinMode[$pin][$step];
+		  //echo("benny step=$step pin=$pin mode=$temp<br>");
+		}
+	    }
+	}
+      fclose($in);
+    }
+  else
+    {
+      $temp = "readStatus: Fail to open ($file)";
+      vikingError($temp);
+    }
+
+  // ========= Read Dig Pin Value
+  $file = $fn['digval'];
+  $step = 0;
+  if(!$file)
+    {
+      vikingWarning("readStatus: no file ($file)");
+      return;
+    }
+  $in = fopen($file,"r");
+  if($in)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  if($row[0] == '+')
+	    {
+	      sscanf($row,"%s %d",$junk,$step);
+	      $pp = strstr($row,"? ");
+	      $qq = strstr($pp," ");
+	      $nn = tokString($qq,",");
+	      //echo("$nn benny: ($qq) <br>");
+	      for($ii=1;$ii<=$nn;$ii++)
+		{
+		  $pin = $ii-1;
+		  $x_pinDigValue[$pin][$step] = $g_tok[$ii];
+		  //$temp = $x_pinMode[$pin][$step];
+		  //echo("benny step=$step pin=$pin mode=$temp<br>");
+		}
+	    }
+	}
+      fclose($in);
+    }
+  else
+    {
+      $temp = "readStatus: Fail to open ($file)";
+      vikingError($temp);
+    }
+
+  // ========= Read Ana Pin Value
+  $file = $fn['anaval'];
+  $step = 0;
+  if(!$file)
+    {
+      vikingWarning("readStatus: no file ($file)");
+      return;
+    }
+  $in = fopen($file,"r");
+  if($in)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  if($row[0] == '+')
+	    {
+	      sscanf($row,"%s %d",$junk,$step);
+	      $pp = strstr($row,"? ");
+	      $qq = strstr($pp," ");
+	      $nn = tokString($qq,",");
+	      //echo("$nn benny: ($qq) <br>");
+	      for($ii=1;$ii<=$nn;$ii++)
+		{
+		  $pin = $ii-1;
+		  $x_pinAnaValue[$pin][$step] = $g_tok[$ii];
+		  //$temp = $x_pinAnaValue[$pin][$step];
+		  //echo("benny step=$step pin=$pin val=$temp<br>");
+		}
+	    }
+	}
+      fclose($in);
+    }
+  else
+    {
+      $temp = "readStatus: Fail to open ($file)";
+      vikingError($temp);
+    }
+
+  // ========= Read pin RW
+  $file = $fn['pinrw'];
+  $step = 0;
+  if(!$file)
+    {
+      vikingWarning("readStatus: no file ($file)");
+      return;
+    }
+  $in = fopen($file,"r");
+  if($in)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  if($row[0] == '+')
+	    {
+	      sscanf($row,"%s %d",$junk,$step);
+	      $pp = strstr($row,"? ");
+	      $qq = strstr($pp," ");
+	      $nn = tokString($qq,",");
+	      //echo("$nn $step benny: ($qq) <br>");
+	      for($ii=1;$ii<=$nn;$ii++)
+		{
+		  $pin = $ii-1;
+		  $x_pinRW[$pin][$step] = $g_tok[$ii];
+		  //$temp = $x_pinRW[$pin][$step];
+		  //echo("benny step=$step pin=$pin val=$temp<br>");
+		}
+	    }
 	}
       fclose($in);
     }
@@ -1359,9 +1542,11 @@ function readSketchInfo()
   //global $curSketchName;
 
 
-
+  // Default Values
   $name    = 'No_Sketch_Name';
   $boardId = 'boardUno';
+  $boardDigPins = $UNO_DIG_PINS;
+  $boardAnaPins = $UNO_ANA_PINS;
 
   $user = $par['user'];
 
