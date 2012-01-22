@@ -526,6 +526,8 @@ function copySketch($sketch)
 	    vikingError("Failed to copy ($sketch)");
 	  }
 	}
+      else
+	vikingError("Failed to copy ($sketch) due to sketch check");
     }
   else
     {
@@ -1356,8 +1358,10 @@ function readSketchInfo()
   global $UNO_DIG_PINS,$UNO_ANA_PINS,$MEGA_DIG_PINS,$MEGA_ANA_PINS;
   //global $curSketchName;
 
-  $name    = 'unknown';
-  $boardId = 'unknown';
+
+
+  $name    = 'No_Sketch_Name';
+  $boardId = 'boardUno';
 
   $user = $par['user'];
 
@@ -1594,17 +1598,26 @@ function checkSketch($sketch)
         }
       fclose($in);
 
-      if($sketch_name_ok  == NO){vikingWarning("No name in sketch")      ;$res = 1;}
-      if($board_type_ok   == NO){vikingWarning("No board type in sketch");$res = 1;}
-      if($no_system_calls == NO){vikingWarning("No system calls allowed");$res = 1;}
-      if($no_script       == NO){vikingWarning("No script allowed")      ;$res = 1;}
-      if($no_php          == NO){vikingWarning("No php allowed")         ;$res = 1;}
+      if($sketch_name_ok  == NO)
+	{
+	  vikingWarning("Add to sketch: // SKETCH_NAME: your_name");
+	  $res = 0;
+	}
+      if($board_type_ok   == NO)
+	{
+	  vikingWarning("Default Board Type is UNO. Add to sketch: // BOARD_TYPE: UNO");
+	  $res = 0;
+	}
+      if($no_system_calls == NO){vikingError("No system calls allowed");$res = 1;}
+      if($no_script       == NO){vikingError("No script allowed")      ;$res = 1;}
+      if($no_php          == NO){vikingError("No php allowed")         ;$res = 1;}
     }
   else
     {
       vikingError("checkSketch: Fail to open $file");
       $res = 1;
     }
+
   return($res);
 
 }

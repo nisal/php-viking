@@ -1450,7 +1450,7 @@ function viking_7_applyAccount($sys_id)
     }
   else if($application == 1)
     {
-      echo("<b>Thank you for your interest!<br>Your account information will be sent to you within 24 hours.</b>");  
+      echo("<h2>Thank you for your interest!<br>Your account information will be sent to you within 24 hours.</h2>");  
     }
       
   echo("</div>");
