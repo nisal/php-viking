@@ -897,6 +897,24 @@ function readSimulation()
               $row[0] = ' ';
 	      $simulation[$step] = $row;
 
+              if(strstr($row,"digitalRead ") || strstr($row,"analogRead ") && !strstr($row,"Serial:"))
+		{
+		  $read++;
+		  $readStep[$read] = $step;
+		  if(strstr($row,"gRead"))$type = 1;//Analog
+		  if(strstr($row,"lRead"))$type = 2;//Digital
+		  $pp = strstr($row,"Read");
+		  $pp = strstr($pp," ");
+		  tokString($pp," ");
+		  $pin   = $g_tok[1];
+		  $value = $g_tok[2];
+		  $g_readType[$step]  = $type;
+                  $g_readPin[$step]   = $pin;
+		  $g_readValue[$step] = $value;
+		  //echo("$step pin=$pin value=$value type=$type<br>");
+		}
+              $stepRead[$step] = $read;
+
               if(strstr($row,"servuinoLoop "))
 		{
 		  $loop++;
@@ -907,6 +925,7 @@ function readSimulation()
 	}
       $par['a7_cur_sim_len']  = $step;
       $par['a7_cur_loop_len'] = $loop;
+      $par['a7_cur_read_len'] = $read;
       fclose($in);
     }
   else
@@ -1368,11 +1387,13 @@ function readAnyFile($check,$file)
       while (!feof($in))
 	{
 	  $row = fgets($in);
+	  //echo("($row)");
 	  $row = trim($row);
 	  //$row = str_replace(" ","&nbsp;",$row);
 	  $step++;
 	  $content[$step] = $row;
 	  $content[0] = $step;
+	  //echo("$step($row)");
 	}
       fclose($in);
     }
@@ -1381,6 +1402,7 @@ function readAnyFile($check,$file)
       $temp = "readAnyFile: Fail to open ($file)";
       vikingError($temp);
     }
+  if($step==1)$step = strlen($content[1]); // return zero if line empty
   return($step);
 }
 
