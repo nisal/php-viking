@@ -27,9 +27,12 @@ define('T_APPLY', 'Send Application');
 // Analog Pins
 define('READ',   '1');
 
+define('S_READ',   '1');
+define('S_WRITE',  '2');
+
 // Digital Pins
-define('LOW',    '1');
-define('HIGH',   '2');
+define('LOW',    '0');
+define('HIGH',   '1');
 define('PWM',    '3');
 
 // Digital Pins Mode
@@ -149,18 +152,25 @@ if($user)
     $upload   = $tDir.'/upload/';
 
 
-    $fn['serial']      = 'account/'.$account.'/data.serial';
-    $fn['custom']      = 'account/'.$account.'/data.custom';
-    $fn['arduino']     = 'account/'.$account.'/data.arduino';
-    $fn['error']       = 'account/'.$account.'/data.error';
+    $fn['serial']      = 'account/'.$account.'/serv.serial';
+    $fn['custom']      = 'account/'.$account.'/serv.cust';
+    $fn['event']       = 'account/'.$account.'/serv.event';
+    $fn['error']       = 'account/'.$account.'/serv.error';
     $fn['exec']        = 'account/'.$account.'/exec.error';
     $fn['g++']         = 'account/'.$account.'/g++.error';
+
     $fn['status']      = 'account/'.$account.'/data.status';
+
+    $fn['pinmod']      = 'account/'.$account.'/serv.pinmod';
+    $fn['pinrw']       = 'account/'.$account.'/serv.pinrw';
+    $fn['digval']      = 'account/'.$account.'/serv.digval';
+    $fn['anaval']      = 'account/'.$account.'/serv.anaval';
+
     $fn['code']        = 'account/'.$account.'/data.code';
     $fn['sketch']      = 'account/'.$account.'/sketch.pde';
     $fn['scenario']    = 'account/'.$account.'/data.scen';
     $fn['scenexp']     = 'account/'.$account.'/data.scenario';
-    $fn['time']        = 'account/'.$account.'/data.time';
+    $fn['time']        = 'account/'.$account.'/serv.time';
     $fn['list']        = 'account/'.$account.'/list.txt';
 
 
@@ -205,8 +215,8 @@ if($user)
     readSketchInfo();
     canvasPos();
 
-    $tFile = $fn['custom'];
-    readSimulation($tFile);
+    //$tFile = $fn['custom'];
+    readSimulation();
 
     $curSimLen  = $par['a7_cur_sim_len'] ;
     $curLoopLen = $par['a7_cur_loop_len'] ;
@@ -317,8 +327,8 @@ if($user)
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
-	    $tFile = $fn['custom'];
-	    readSimulation($tFile);
+	    //$tFile = $fn['arduino'];
+	    readSimulation();
 	    readStatus();
 	  }	
       }
@@ -387,8 +397,8 @@ if($user)
 		    $par['a7_cur_read'] = 1;
 		    init($curSimLen);
 		    readSketchInfo();
-		    $tFile = $fn['custom'];
-		    readSimulation($tFile);
+		    //$tFile = $fn['arduino'];
+		    readSimulation();
 		    readStatus();
 		    //readSerial();
 		    $par['a7_ready'] = "Sketch loaded!";
@@ -401,8 +411,8 @@ if($user)
 		    $par['a7_cur_read'] = 1;
 		    init($curSimLen);
 		    readSketchInfo();
-		    $tFile = $fn['custom'];
-		    readSimulation($tFile);
+		    //$tFile = $fn['arduino'];
+		    readSimulation();
 		    readStatus();
 		    //readSerial();
 		    $par['a7_ready'] = "Sketch Executed!";
@@ -500,8 +510,8 @@ if($user)
 		$par['a7_cur_read'] = 1;
 		init($curSimLen);
 		readSketchInfo();
-		$tFile = $fn['custom'];
-		readSimulation($tFile);
+		//$tFile = $fn['arduino'];
+		readSimulation();
 		readStatus();
 		//readSerial();
 		//writeUserSetting();
@@ -539,8 +549,8 @@ if($user)
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
-	    $tFile = $fn['custom'];
-	    readSimulation($tFile);
+	    //$tFile = $fn['custom'];
+	    readSimulation();
 	    readStatus();
 	  }
       }
@@ -560,8 +570,8 @@ if($user)
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
-	    $tFile = $fn['custom'];
-	    readSimulation($tFile);
+	    //$tFile = $fn['custom'];
+	    readSimulation();
 	    readStatus();
 	  }
       }
@@ -1462,11 +1472,13 @@ function viking_7_script($sys_id)
 {
   global $par,$coords;
   global $wBoard,$hBoard;
-  global $boardId,$boardDigPins,$boardAnaPins;
+  global $boardId,$boardDigPins,$boardAnaPins,$boardTotPins;
   global $digX,$digY,$anaX,$anaY,$resetX,$resetY;
   global $TXledX,$TXledY,$onOffX,$onOffY,$led13X,$led13Y;
   global $sketchNameX,$sketchNameY,$helpX,$helpY,$help2X,$help2Y;
   global $pinModeD,$pinStatusD,$pinStatusA,$serial;
+
+  global $x_pinMode,$x_pinDigValue,$x_pinAnaValue,$x_pinRW;
 
   $path   = $par['path'];
   $sid        = $par['a7_sid'];
@@ -1478,6 +1490,7 @@ function viking_7_script($sys_id)
   $board         = $par['a7_cur_board_type'];
   $boardDigPins  = $par['a7_cur_board_digpins'];
   $boardAnaPins  = $par['a7_cur_board_anapins'];
+  $boardTotPins  = $boardAnaPins + $boardDigPins;
 
   $image = 'no image';
   if($board == 'boardUno')$image  = 'arduino_uno.jpg';
@@ -1500,6 +1513,13 @@ function viking_7_script($sys_id)
   $aqua   = "ctx.fillStyle = \"#00FFFF\";";
   $grey   = "ctx.fillStyle = \"grey\";";
       
+
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      $pinModeD[$ii]   = $x_pinMode[$ii][$curStep];
+      $pinStatusD[$ii] = $x_pinDigValue[$ii][$curStep];
+      $pinStatusA[$ii] = $x_pinAnaValue[$ii][$curStep];
+    }
 
   // Test position
   $xx = $coords[0];  $yy = $coords[1];
@@ -1530,14 +1550,14 @@ function viking_7_script($sys_id)
     }
 
   // Digital Pins Mode
-  for($ii=0; $ii<$boardDigPins; $ii++)
+  for($ii=0; $ii<$boardTotPins; $ii++)
     {
       if($pinModeD[$ii]!=0)
 	{
 	  if($pinModeD[$ii]==OUTPUT)print($green);  //OUTPUT
-	  if($pinModeD[$ii]==INPUT)print($red);   //INPUT
-	  if($pinModeD[$ii]==RX)print($white);     // RX
-	  if($pinModeD[$ii]==TX)print($grey);   // TX
+	  if($pinModeD[$ii]==INPUT)print($red);     //INPUT
+	  if($pinModeD[$ii]==RX)print($white);      // RX
+	  if($pinModeD[$ii]==TX)print($grey);       // TX
 	  if($pinModeD[$ii]==I_CHANGE)print($blue);    // CHANGE
 	  if($pinModeD[$ii]==I_FALLING)print($orange); // RISING
 	  if($pinModeD[$ii]==I_RISING)print($yellow);    // FALLING
@@ -1555,15 +1575,18 @@ function viking_7_script($sys_id)
     }
 
   // Digital Pins Status
-  for($ii=0; $ii<$boardDigPins; $ii++)
+  for($ii=0; $ii<$boardTotPins; $ii++)
     {
       if($pinStatusD[$ii]!=0)
 	{
+	  $dotSize = 4;
+// 	  if($x_pinRW[$ii][$curStep] == S_READ)$dotSize = 2;
+// 	  if($x_pinRW[$ii][$curStep] == S_WRITE)$dotSize = 6;
 	  if($pinStatusD[$ii]==HIGH)print($yellow);  // HIGH
 	  if($pinStatusD[$ii]==LOW)print($black);
 	  if($pinStatusD[$ii]==PWM)print($green);
 	  print("ctx.beginPath();");
-	  print("ctx.arc($digY[$ii], $digX[$ii], 4, 0, Math.PI*2, true);");
+	  print("ctx.arc($digY[$ii], $digX[$ii], $dotSize, 0, Math.PI*2, true);");
 	  if($ii == 13 && $pinStatusD[13]>0)
 	    print("ctx.rect($led13Y-4, $led13X-3,8, 5);");
 	  print("ctx.closePath();");
@@ -1572,13 +1595,40 @@ function viking_7_script($sys_id)
     }
 
   // Analog Pins Status
-  for($ii=0; $ii<$boardAnaPins; $ii++)
+  for($ii=0; $ii<$boardTotPins; $ii++)
     {
       if($pinStatusA[$ii]!=0)
 	{
-	  if($pinStatusA[$ii]==READ)print($red); // reading
+	  $dotSize = 4;
+// 	  if($x_pinRW[$ii][$curStep] == S_READ)$dotSize = 2;
+// 	  if($x_pinRW[$ii][$curStep] == S_WRITE)$dotSize = 6;
+	  $jj = $ii-$boardDigPins;
+	  print($red); // reading
 	  print("ctx.beginPath();");
-	  print("ctx.arc($anaY[$ii], $anaX[$ii], 4, 0, Math.PI*2, true);");
+	  print("ctx.arc($anaY[$jj], $anaX[$jj], $dotSize, 0, Math.PI*2, true);");
+	  print("ctx.closePath();");
+	  print("ctx.fill();");
+	}
+    }
+
+  // RW Pins Status
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      if($x_pinRW[$ii][$curStep]!=0)
+	{
+	  $dotSize = 4;
+	  if($x_pinRW[$ii][$curStep] == S_READ)$dotSize = 2;
+	  if($x_pinRW[$ii][$curStep] == S_WRITE)$dotSize = 6;
+	  print($green); // reading
+	  print("ctx.beginPath();");
+	  if($ii < $boardDigPins)
+	    print("ctx.arc($digY[$ii], $digX[$ii], $dotSize, 0, Math.PI*2, true);");
+	  else
+	    {
+	      $jj = $ii-$boardDigPins;
+	      print("ctx.arc($anaY[$jj], $anaX[$jj], $dotSize, 0, Math.PI*2, true);");
+	    }
+
 	  print("ctx.closePath();");
 	  print("ctx.fill();");
 	}
