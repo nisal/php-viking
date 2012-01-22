@@ -35,16 +35,19 @@ define('LOW',    '0');
 define('HIGH',   '1');
 define('PWM',    '3');
 
+#define CHANGE  11
+#define RISING  12
+#define FALLING 13
 // Digital Pins Mode
 define('VOID',     '0');
-define('I_LOW',    '5');
-define('I_RISING', '6');
-define('I_FALLING','7');
-define('I_CHANGE', '8');
-define('TX',       '9');
-define('RX',       '10');
-define('INPUT' ,   '11');
-define('OUTPUT' ,  '12');
+define('I_LOW',    '0');
+define('I_RISING', '12');
+define('I_FALLING','13');
+define('I_CHANGE', '11');
+define('TX',       '5');
+define('RX',       '4');
+define('INPUT' ,   '0');
+define('OUTPUT' ,  '1');
 
 define('YES' , '1');
 define('NO' ,  '2');
@@ -83,6 +86,7 @@ if($userEvent == 2) // user logged out!
   }
 
 $application = 0;
+
 
 readLoginCounter();
 
@@ -135,6 +139,7 @@ if($user)
     $par['a7_ser_log']           = $_SESSION['a7_ser_log'];
     $par['a7_row_number']        = $_SESSION['a7_row_number'];
     $par['a7_cur_file']          = $_SESSION['a7_cur_file'];
+    $par['a7_submenu']           = $_SESSION['a7_submenu'];
 
 
     if($userEvent == 1) // user logged in!
@@ -229,6 +234,7 @@ if($user)
     $curLoop    = $par['a7_cur_loop'] ;
     $curRead    = $par['a7_cur_read'] ;
     $curStep    = $par['a7_cur_step'];
+    $submenu    = $par['a7_submenu'];
 
     // GET ==============================================
 
@@ -331,6 +337,16 @@ if($user)
 	    readSimulation();
 	    readStatus();
 	  }	
+      }
+    if($action == 'design')
+      {
+	$submenu = 2;
+	$par['a7_submenu'] = 2;
+      }
+    if($action == 'simulate')
+      {
+	$submenu = 1;
+	$par['a7_submenu'] = 1;
       }
 
     // POST =============================================
@@ -599,6 +615,7 @@ if($user)
     $_SESSION['a7_ser_log']            = $par['a7_ser_log'];
     $_SESSION['a7_row_number']         = $par['a7_row_number'];
     $_SESSION['a7_cur_file']           = $par['a7_cur_file'];
+    $_SESSION['a7_submenu']            = $par['a7_submenu'];
     
   } // end if user
 
@@ -629,26 +646,39 @@ if($user)
 function viking_7_mainmenu($sys_id)
 {
   global $par;
-  $path = $par['path'];
-  $user = $par['user'];
+  $path    = $par['path'];
+  $user    = $par['user'];
+  $submenu = $par['a7_submenu'];
+
+  if(!$submenu) $submenu = 1;
 
   echo("<ul>");
-  echo("<li><a href=\"index.php?pv=start\" >Start</a></li>");
   //echo("<li><a href=\"index.php?pv=lib\"   >Library</a></li>");
-  if($user)
+  if($user && $submenu == 1)
     {
-      echo("<li><a href=\"index.php?pv=load\"  >Load</a></li>");
-      echo("<li><a href=\"index.php?pv=board\" >Board</a></li>");
-      echo("<li><a href=\"index.php?pv=sketch\">Scenario</a></li>");
-      echo("<li><a href=\"index.php?pv=log\">Serial</a></li>");
-      echo("<li><a href=\"index.php?pv=advanced\">Advanced</a></li>");
+      echo("<li><a href=\"index.php?pv=load&ac=design\" >Design</a></li>");
+      echo("<li><a href=\"index.php?pv=board\"          >Board</a></li>");
+      echo("<li><a href=\"index.php?pv=sketch\"         >Scenario</a></li>");
+      echo("<li><a href=\"index.php?pv=log\"            >Serial</a></li>");
+      echo("<li><a href=\"index.php?pv=advanced\"       >Advanced</a></li>");
     }
+  if($user && $submenu == 2)
+    {
+      echo("<li><a href=\"index.php?pv=board&ac=simulate\" >Simulate</a></li>");
+      echo("<li><a href=\"index.php?pv=library\"           >Library</a></li>");
+      echo("<li><a href=\"index.php?pv=load\"              >Load</a></li>");
+    }
+
   if($user == 'admin')echo("<li><a href=\"index.php?pv=admin\" >Admin</a></li>");
-  echo("<li><a href=\"index.php?pv=help\"  >Help</a></li>");
-  echo("<li><a href=\"index.php?pv=faq\"  >FAQ</a></li>");
-  echo("<li><a href=\"index.php?pv=about\" >About</a></li>");
+
   if(!$user)
-    echo("<li><a href=\"index.php?pv=register\">Register</a></li>");
+    {
+      echo("<li><a href=\"index.php?pv=start\"   >Start</a></li>");
+      echo("<li><a href=\"index.php?pv=help\"    >Help</a></li>");
+      echo("<li><a href=\"index.php?pv=faq\"     >FAQ</a></li>");
+      echo("<li><a href=\"index.php?pv=about\"   >About</a></li>");
+      echo("<li><a href=\"index.php?pv=register\">Register</a></li>");
+    }
   echo("</ul>");
 }
 
@@ -1011,17 +1041,31 @@ function viking_7_error($sys_id)
   //if($user)echo("[Webuino Version 2011-12-22] Any errors (compile,exec and servuino) will be shown here<br>");
   if($user)
     {
+      echo("<div id=\"anyFile\" style=\"font-family:Courier,monospace; font-size:11px;float:left; border : solid 1px #000000; background : #F3F781; color : #000000;  text-align:left; padding : 3px; width :100%; height:250px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
+
       $par['a7_row_number'] = 0;
+
       $file = $fn['g++'];
       $len = readAnyFile(2,$file);
-      showAnyFile($len);
+      if($len)showAnyFile($len);
+      else
+	echo("No compilation errors<br>");
+
       $file = $fn['exec'];
       $len = readAnyFile(2,$file);
-      showAnyFile($len);
+      if($len)showAnyFile($len);
+      else
+	echo("No execution errors<br>");
+
       $file = $fn['error'];
       $len = readAnyFile(2,$file);
-      showAnyFile($len);
+      if($len)showAnyFile($len);
+      else
+	echo("No servuino errors<br>");
+
       $par['a7_row_number'] = $rowNumber;
+
+      echo("</div>\n");
     }
 }
 
@@ -1102,8 +1146,47 @@ function viking_7_data($sys_id)
   echo("</form></td>");
   echo("</table></div>");
 }
+function viking_7_only_load($sys_id)
+{
+  global $par,$fn,$upload, $editSFlag,$curEditFlag;
+  $path      = $par['path'];
+  $sid       = $par['a7_sid'];
+  $user      = $par['user'];
+  $curSource = $par['a7_cur_source'];
+  $selSource = $par['a7_sel_source'];
+  $curSimLen = $par['a7_cur_sim_len'];
+  $ready     = $par['a7_ready'];
+  
+  echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
+  if($user)
+    {
+      $fTemp = basename($curSource);
+      echo("<hr><b>Loaded Sketch:</b> $fTemp<br>");
+      $fTemp = basename($selSource);
+      echo("<b>Selected Sketch:</b> $fTemp");
+      //if($selSource && $selSource!='-')echo("<a href=\"$path&ac=delete_sketch\" onclick=\"return confirm('Are you sure you want to delete: $fTemp ?');\"> (delete)</a>");
+      echo("<hr><table border=\"0\"><tr>");      
+      echo("<form name=\"f_load\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
+      echo("<input type=\"hidden\" name=\"action\" value=\"set_load\">\n");
+      echo("<td>Simulation Length</td><td><input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td>");
+      $tFile = $fn['list'];
+      $syscom = "ls $upload > $tFile;";
+      system($syscom);
+      echo("<td>");
+      $nSketches = formSelectFile("Account Sketches ","source",$tFile,$selSource,$upload);
+      echo("</td></tr></table><br>");
 
-function viking_7_load($sys_id)
+      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
+      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_SELECT."\">");
+      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_EDIT."\">");
+      
+      echo("</form>");
+    }
+  echo("</div>");
+}
+
+
+function viking_7_library($sys_id)
 {
   global $par,$fn,$upload, $editSFlag,$curEditFlag;
   $path      = $par['path'];
@@ -1125,7 +1208,7 @@ function viking_7_load($sys_id)
       echo("<hr><table border=\"0\"><tr>");      
       echo("<form name=\"f_load\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
       echo("<input type=\"hidden\" name=\"action\" value=\"set_load\">\n");
-      echo("<td>Simulation Length</td><td><input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td>");
+      //echo("<td>Simulation Length</td><td><input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td>");
       $tFile = $fn['list'];
       $syscom = "ls $upload > $tFile;";
       system($syscom);
@@ -1133,7 +1216,7 @@ function viking_7_load($sys_id)
       $nSketches = formSelectFile("Account Sketches ","source",$tFile,$selSource,$upload);
       echo("</td></tr></table><br>");
 
-      echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
+      //echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_SELECT."\">");
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_EDIT."\">");
       
@@ -1276,6 +1359,7 @@ function viking_7_graph($sys_id)
 {
   global $par,$scenario,$g_readValue,$g_readPin,$g_readType;
   global $valueInPinD, $valueOutPinD, $valueInPinA,$pinModeD,$stepRead, $stepLoop;
+  global $x_pinMode,$x_pinDigValue,$x_pinAnaValue,$x_pinRW;
 
   $path       = $par['path'];
   $curStep    = $par['a7_cur_step'];
@@ -1288,6 +1372,7 @@ function viking_7_graph($sys_id)
 
   $dPins      = $par['a7_cur_board_digpins'];
   $aPins      = $par['a7_cur_board_anapins'];
+  $tPins      = $dPins + $aPins;
 
   $x_max = $curSimLen;
 
@@ -1337,13 +1422,27 @@ function viking_7_graph($sys_id)
   echo("&nbsp;&nbsp;&nbsp;&nbsp;");
   for($xx=$x_min;$xx<=$x_max;$xx++)
     {
-      if($stepRead[$xx] != $stepRead[$xx-1])
-	echo("<a href=$path&ac=step&x=$xx>R</a>");
-      else if($stepLoop[$xx] != $stepLoop[$xx-1])
-	echo("<a href=$path&ac=step&x=$xx>+</a>");
+      $done = 0;
+      for($pin = 0;$pin < $tPins; $pin++)
+	{
+	  if($x_pinRW[$pin][$xx]==S_READ)
+	    {
+	      echo("<a href=$path&ac=step&x=$xx>R</a>");
+	      $done = 1;
+	    }
+	  if($x_pinRW[$pin][$xx]==S_WRITE)
+	    {
+	      echo("<a href=$path&ac=step&x=$xx>W</a>");
+	      $done = 1;
+	    }
+	}
 
-      else
-	echo("&nbsp;");
+       if($stepLoop[$xx] != $stepLoop[$xx-1])
+	 {
+	   echo("<a href=$path&ac=step&x=$xx>+</a>");
+	   $done = 1;
+	 }
+       if($done == 0)echo("&nbsp;");
     }
   echo("<br>");
   
@@ -1373,12 +1472,12 @@ function viking_7_graph($sys_id)
   // Digital Pins
   for($yy=$y_maxD-1;$yy>=$y_minD;$yy--)
     {
-      if($pinModeD[$yy]      == INPUT)    $star = "I";
-      else if($pinModeD[$yy] == OUTPUT)   $star = "O";
-      else if($pinModeD[$yy] == I_FALLING)$star = "F";
-      else if($pinModeD[$yy] == I_RISING) $star = "R";
-      else if($pinModeD[$yy] == I_CHANGE) $star = "C";
-      else if($pinModeD[$yy] == I_LOW)    $star = "L";
+      if($x_pinMode[$yy][$curStep]      == INPUT)    $star = "I";
+      else if($x_pinMode[$yy][$curStep] == OUTPUT)   $star = "O";
+      else if($x_pinMode[$yy][$curStep] == I_FALLING)$star = "F";
+      else if($x_pinMode[$yy][$curStep] == I_RISING) $star = "R";
+      else if($x_pinMode[$yy][$curStep] == I_CHANGE) $star = "C";
+      else if($x_pinMode[$yy][$curStep] == I_LOW)    $star = "L";
       else
 	$star = "&nbsp;";
 
@@ -1393,10 +1492,16 @@ function viking_7_graph($sys_id)
 	{
 	  if($xx==$curStep)
 	    echo($star);
-	  else if($valueInPinD[$yy][$xx] == 1)
+	  else if($x_pinDigValue[$yy][$xx] == HIGH)
 	    echo("o");
-	  else if($valueOutPinD[$yy][$xx] == HIGH)
+	  else if($x_pinDigValue[$yy][$xx] == LOW)
 	    echo(".");
+
+
+// 	  else if($valueInPinD[$yy][$xx] == 1)
+// 	    echo("o");
+// 	  else if($valueOutPinD[$yy][$xx] == HIGH)
+// 	    echo(".");
 	  else
 	    {
 	      if($xx%10 == 0)echo("|");
@@ -1422,7 +1527,7 @@ function viking_7_graph($sys_id)
   echo("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
   for($xx=$x_min;$xx<=$x_max;$xx++)
     {
-      if($xx%10 == 0)
+      if($xx%10 == 0 && $xx-$x_min > 2)
 	vprintf("<a href=$path&ac=step&x=$xx>%04s</a>",$xx);
       else if($xx%10 < 7)
 	echo("&nbsp;");
