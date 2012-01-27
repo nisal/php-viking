@@ -1100,17 +1100,23 @@ function viking_7_data($sys_id)
       $selected = "";$temp = $fn['faq'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>FAQ</option>");
 
-      $selected = "";$temp = $fn['register'];if($curFile == $temp)$selected = 'selected';
-      echo("<option value=\"$temp\"   $selected>Register</option>");
+      $selected = "";$temp = $fn['pinmod'];if($curFile == $temp)$selected = 'selected';
+      echo("<option value=\"$temp\"   $selected>Pin Mode</option>");
 
       $selected = "";$temp = $fn['custom'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>Custom Log</option>");
 
-      $selected = "";$temp = $fn['arduino'];if($curFile == $temp)$selected = 'selected';
-      echo("<option value=\"$temp\"  $selected>Arduino Log</option>");
+      $selected = "";$temp = $fn['event'];if($curFile == $temp)$selected = 'selected';
+      echo("<option value=\"$temp\"  $selected>Event Log</option>");
 
-      $selected = "";$temp = $fn['status'];if($curFile == $temp)$selected = 'selected';
-      echo("<option value=\"$temp\"   $selected>Status Log</option>");
+      $selected = "";$temp = $fn['pinrw'];if($curFile == $temp)$selected = 'selected';
+      echo("<option value=\"$temp\"   $selected>Pin RW</option>");
+
+      $selected = "";$temp = $fn['digval'];if($curFile == $temp)$selected = 'selected';
+      echo("<option value=\"$temp\"   $selected>Digital Value</option>");
+
+      $selected = "";$temp = $fn['anaval'];if($curFile == $temp)$selected = 'selected';
+      echo("<option value=\"$temp\"   $selected>Analog Value</option>");
 
       $selected = "";$temp = $fn['serial'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>Serial Log</option>");
@@ -1657,8 +1663,8 @@ function viking_7_script($sys_id)
   // Digital Pins Mode
   for($ii=0; $ii<$boardTotPins; $ii++)
     {
-      if($pinModeD[$ii]!=0)
-	{
+      //if($pinModeD[$ii]!=0)
+      //{
 	  if($pinModeD[$ii]==OUTPUT)print($green);  //OUTPUT
 	  if($pinModeD[$ii]==INPUT)print($red);     //INPUT
 	  if($pinModeD[$ii]==RX)print($white);      // RX
@@ -1676,7 +1682,7 @@ function viking_7_script($sys_id)
 	    print("ctx.rect($digY[$ii]-5, $digX[$ii]+5,8, 4);");
 	  print("ctx.closePath();");
 	  print("ctx.fill();");
-	}
+	  //}
     }
 
   // Digital Pins Status
