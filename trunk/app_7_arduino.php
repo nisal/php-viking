@@ -18,6 +18,8 @@ define('T_SELECT','Select');
 define('T_LOAD','Load');
 define('T_VIEW','View');
 define('T_RUN', 'Run');
+define('T_EXAMPLE', 'Example');
+define('T_TEMPLATE', 'Template');
 define('T_SET', 'Set');
 define('T_SET_DIG_PIN_VALUE', 'Set Digital Pin Value');
 define('T_SET_ANA_PIN_VALUE', 'Set Analog Pin Value');
@@ -72,7 +74,8 @@ $fn['about']       = 'about.htm';
 $fn['register']    = 'register.htm';
 $fn['help']        = 'help.htm';
 $fn['faq']         = 'faq.htm';
-$fn['new_sketch']  = 'new_sketch.pde';
+$fn['template']    = 'new_sketch.pde';
+$fn['example']     = 'ref_UNO.pde';
 $fn['setting']     = 'account/'.$user.'/setting.txt';
 
 
@@ -472,9 +475,11 @@ if($user)
 	$curSource = $par['a7_cur_source'];
       }
 
-    if($action == 'set_load_new_sketch' && $user != 'guest' )
+    if($action == 'set_new_sketch' && $user != 'guest' )
       {
-	$temp = $fn['new_sketch'];
+	$what = $_POST['submit_new_sketch'];
+	if($what==T_TEMPLATE)$temp = $fn['template'];
+	if($what==T_EXAMPLE)$temp = $fn['example'];
 	$newSketchName = $_POST['new_sketch_name'];
 	$dest = $upload.$newSketchName;
 	if (!copy($temp,$dest)) {
@@ -1241,12 +1246,13 @@ function viking_7_library($sys_id)
 
 
       echo("<hr>");
-      echo("<h4>Create a new sketch from template</h4>");
+      echo("<h4>Create a new empty sketch from template</h4>");
       echo("<table border=\"0\"><tr>");      
       echo("<form name=\"f_load_new_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
-      echo("<input type=\"hidden\" name=\"action\" value=\"set_load_new_sketch\">");
+      echo("<input type=\"hidden\" name=\"action\" value=\"set_new_sketch\">");
       echo("<td>New Sketch Name</td><td><input type=\"text\" name=\"new sketch_name\" value=\"$user.pde\" size=\"20\"></td>");
-      echo("<td><input type =\"submit\" name=\"submit_load_new_sketch\" value=\"".T_CREATE."\"></td>");
+      echo("<td><input type =\"submit\" name=\"submit_new_sketch\" value=\"".T_TEMPLATE."\"></td>");
+      echo("<td><input type =\"submit\" name=\"submit_new_sketch\" value=\"".T_EXAMPLE."\"></td>");
       echo("</tr></table><br>");
       echo("</form>");
 
