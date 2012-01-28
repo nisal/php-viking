@@ -76,6 +76,7 @@ $fn['help']        = 'help.htm';
 $fn['faq']         = 'faq.htm';
 $fn['template']    = 'new_sketch.pde';
 $fn['example']     = 'ref_UNO.pde';
+$fn['tutorial']    = 'tutorial.htm';
 $fn['setting']     = 'account/'.$user.'/setting.txt';
 
 
@@ -365,7 +366,7 @@ if($user)
 	$curFile = $par['a7_cur_file'];
 	if($user == 'admin')
 	  {
-	    if($curFile == 'faq.htm' || $curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm' || $curFile == 'register.htm')$par['tinyMCE'] = 1;
+	    if($curFile == $fn['faq'] || $curFile == $fn['tutorial'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'])$par['tinyMCE'] = 1;
 	    else
 	      $par['tinyMCE'] = 0;
 	  }
@@ -400,7 +401,7 @@ if($user)
 		$par['a7_cur_file'] = $tempFile;
 		$curFile = $par['a7_cur_file'];
 		$curEditFlag = 1;
-		if($curFile == 'faq.htm' || $curFile == 'start.htm' || $curFile == 'help.htm' || $curFile == 'about.htm' || $curFile == 'register.htm')$par['tinyMCE'] = 1;
+		if($curFile == $fn['faq'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] || $curFile == $fn['tutorial'])$par['tinyMCE'] = 1;
 		else
 		  $par['tinyMCE'] = 0;
 	      }
@@ -670,6 +671,7 @@ function viking_7_mainmenu($sys_id)
   if($user && $submenu == 2)
     {
       echo("<li><a href=\"index.php?pv=board&ac=simulate\" >Simulate</a></li>");
+      echo("<li><a href=\"index.php?pv=tutorial\"          >Tutorial</a></li>");
       echo("<li><a href=\"index.php?pv=library\"           >Library</a></li>");
       echo("<li><a href=\"index.php?pv=load\"              >Load</a></li>");
     }
@@ -679,6 +681,7 @@ function viking_7_mainmenu($sys_id)
   if(!$user)
     {
       echo("<li><a href=\"index.php?pv=start\"   >Start</a></li>");
+      echo("<li><a href=\"index.php?pv=tutorial\">Tutorial</a></li>");
       echo("<li><a href=\"index.php?pv=help\"    >Help</a></li>");
       echo("<li><a href=\"index.php?pv=faq\"     >FAQ</a></li>");
       echo("<li><a href=\"index.php?pv=about\"   >About</a></li>");
@@ -823,7 +826,7 @@ function viking_7_editFile($sys_id)
       if($file == $fn['scenario'])echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
       if($user == 'admin')
 	{
-	  if($file == $fn['faq'] || $file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
+	  if($file == $fn['tutorial'] || $file == $fn['faq'] || $file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
 	}
       echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
       echo("</form><br>");
@@ -1019,6 +1022,15 @@ function viking_7_start($sys_id)
   showAnyFile($len);
 }
 
+function viking_7_tutorial($sys_id)
+{
+  global $par,$fn;
+  $tFile = $fn['tutorial'];
+
+  $len = readAnyFile(1,$tFile);
+  showAnyFile($len);
+}
+
 function viking_7_loginCounter($sys_id)
 {
   global $par;
@@ -1102,6 +1114,9 @@ function viking_7_data($sys_id)
       $selected = "";$temp = $fn['about'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>About</option>");
 
+      $selected = "";$temp = $fn['tutorial'];if($curFile == $temp)$selected = 'selected';
+      echo("<option value=\"$temp\"   $selected>Tutorial</option>");
+
       $selected = "";$temp = $fn['faq'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>FAQ</option>");
 
@@ -1151,7 +1166,7 @@ function viking_7_data($sys_id)
 
   if($user == 'admin')
     {
-      if($curFile == $fn['faq'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] )echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
+      if($curFile == $fn['tutorial'] || $curFile == $fn['faq'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] )echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
     }
 
   echo("</form></td>");
