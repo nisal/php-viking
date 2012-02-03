@@ -139,7 +139,9 @@ function getExtension($str)
   return $ext;
 }
 
+//=======================================
 function safeText($text)
+//=======================================
 {
    $text = str_replace("#", "No.", $text); 
    $text = str_replace("$", "Dollar", $text); 
