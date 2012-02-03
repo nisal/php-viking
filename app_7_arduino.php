@@ -639,7 +639,9 @@ if($user)
        {
 	 $username = $_POST['username'];
 	 $email    = $_POST['email'];
-	 createApplication($username,$email);
+	 $letter   = $_POST['letter'];
+	 $letter = safeText3($letter);
+	 createApplication($username,$email,$letter);
        }
 
    }
@@ -1587,6 +1589,7 @@ function viking_7_applyAccount($sys_id)
       echo("<td><input type=\"text\" name=\"email\" value=\"\" size=\"30\"></td>\n");
       echo("<td>");
       echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_APPLY."\"></td>\n");
+      echo("How are you going to use Simuino?<br><textarea name=\"letter\" cols=50 rows=3>(Very short description here)</textarea>");
       echo("</form></tr>");
       echo("</table>");
     }

@@ -287,7 +287,7 @@ function check_email_address($email)
 }
 
 //==========================================
-function createApplication($username,$email)
+function createApplication($username,$email,$letter)
 //==========================================
 {
   global $application,$fn;
@@ -305,7 +305,7 @@ function createApplication($username,$email)
 	      if($out)
 		{
 		  $date = date("Y-m-d H:i:s");
-		  $temp = $date." ".$username."   ".$email."\n";
+		  $temp = $date." ".$username."   ".$email." [".$letter."]"."\n";
 		  fwrite($out,$temp);
 		  $application = 1;
 		}
@@ -1647,6 +1647,23 @@ function safeText2($text)
   //$text = str_replace("?", "", $text); 
   $text = str_replace("<", "R", $text); 
   //$text = str_replace(">", "T", $text); 
+  $text = str_replace(" ", "&nbsp;", $text); 
+  return($text);
+}
+
+//==========================================
+function safeText3($text)
+//==========================================
+{
+  $text = str_replace("#", "No.", $text); 
+  $text = str_replace("$", "Dollar", $text); 
+  $text = str_replace("%", "Percent", $text); 
+  $text = str_replace("^", "HAT", $text); 
+  $text = str_replace("&", "AND", $text); 
+  $text = str_replace("*", "STAR", $text); 
+  $text = str_replace("?", "QM", $text); 
+  $text = str_replace("<", "LEFT", $text); 
+  $text = str_replace(">", "RIGHT", $text); 
   $text = str_replace(" ", "&nbsp;", $text); 
   return($text);
 }
