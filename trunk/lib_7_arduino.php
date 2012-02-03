@@ -182,6 +182,8 @@ function writeUserSetting()
       fwrite($out,$temp);
       $temp = "SEL_SOURCE: ".$par['a7_sel_source']."\n";
       fwrite($out,$temp);
+      $temp = "SEL_SCENARIO: ".$par['a7_sel_scenario']."\n";
+      fwrite($out,$temp);
     }
   else
     vikingError("Not able to open user setting file write ($file)");  
@@ -233,6 +235,15 @@ function readUserSetting()
 		  sscanf($pp,"%s%s",$junk,$selSource);
 		  $par['a7_sel_source'] = $selSource;
 		  $_SESSION['a7_sel_source'] = $selSource;
+		}
+	    }
+	  if(strstr($row,"SEL_SCENARIO"))
+	    {
+	      if($pp = strstr($row,":"))
+		{
+		  sscanf($pp,"%s%s",$junk,$selScenario);
+		  $par['a7_sel_scenario'] = $selScenario;
+		  $_SESSION['a7_sel_scenario'] = $selScenario;
 		}
 	    }
 	}
@@ -506,33 +517,42 @@ function canvasPos()
 
 
 //==========================================
-function copySketch($sketch)
+function copySketchScenario($sketch,$scenario)
 //==========================================
 {
   global $par,$fn;
   $user = $par['user'];
   global $upload;
 
-  //$sketch = $upload.$sketch;
-  
-  $fTemp = $fn['sketch'];
-  
+
+  // Sketch
+  $fTemp = $fn['sketch']; 
   if($sketch && $fTemp)
     {
-      $res = checkSketch($sketch);
-      if($res == 0)
+      if (!copy($sketch,$fTemp)) 
 	{
-	  if (!copy($sketch,$fTemp)) {
-	    vikingError("Failed to copy ($sketch)");
-	  }
+	  vikingError("Failed to copy ($sketch)");
 	}
-      else
-	vikingError("Failed to copy ($sketch) due to sketch check");
     }
   else
     {
       $res = 1;
       vikingError("Unable to copy sketch: ($sketch) to ($fTemp)");
+    }
+
+// Scenario
+  $fTemp = $fn['scenario'];
+  if($sketch && $fTemp)
+    {
+      if (!copy($scenario,$fTemp)) 
+	{
+	  vikingError("Failed to copy ($scenario)");
+	}
+    }
+  else
+    {
+      $res = 1;
+      vikingError("Unable to copy sketch: ($scenario) to ($fTemp)");
     }
   return($res);
 }
@@ -1347,7 +1367,7 @@ function readScenario()
 		      $pin = $apin[$ii];
 		      $valueInPinA[$pin][$step] = $g_tok[$ix+1];
 		      $val = $g_tok[$ix+1];
-		      //echo("Ana $step pin=$pin value=$val<br>");
+		      //echo("Ana $step pin=$pin,$ii value=$val<br>");
 		    }
 		}
 	    }
@@ -1490,7 +1510,7 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
   $in = fopen($file,"r");
   if($in)
     {
-      echo("$name <select name=\"$fname\">");
+      echo("<td><select name=\"$fname\">");
       while (!feof($in))
 	{
 	  $row = fgets($in);
@@ -1498,18 +1518,104 @@ function formSelectFile($name,$fname,$file,$sel,$dir)
 	  //$row = safeText($row);
 	  if($row)
 	    {
-	      $dirrow = $dir.$row;
-	      $selected = "";if($sel == $dirrow)$selected = 'selected';
-	      echo("<option value=\"$dirrow\" $selected>$row</option>");
+	      //$dirrow = $dir.$row;
+	      $brow = basename($row);
+	      $selected = "";if($sel == $row)$selected = 'selected';
+	      echo("<option value=\"$row\" $selected>$brow</option>");
               $res++;
 	    }
 	}
-      echo("</select>");
+      echo("</select></td>");
       fclose($in);
     }
   else
     {
       $temp = "formSelectFile:Fail to open ($file)";
+      vikingError($temp);
+    }
+  return($res);
+}
+
+
+//==========================================
+function listFiles($text,$file)
+//==========================================
+{
+  global $par;
+  $user = $par['user'];
+
+  $res = 0;
+  if(!$file)
+    {
+      vikingWarning("listFiles: no file ($file)");
+      return;
+    }
+
+  $in = fopen($file,"r");
+  if($in)
+    {
+      echo("<hr><b>$text</b><hr>");
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  $row = trim($row);
+	  //$row = safeText($row);
+	  if($row)
+	    {
+	      $row = basename($row);
+	      $res++;
+	      echo("$res $row<br>");
+	    }
+	}
+      fclose($in);
+      if($res == 0)echo("<i>No files found</i><br>");
+    }
+  else
+    {
+      $temp = "listFiles:Fail to open ($file)";
+      vikingError($temp);
+    }
+  return($res);
+}
+
+//==========================================
+function deleteFiles($text,$file)
+//==========================================
+{
+  global $par;
+  $user = $par['user'];
+  $path = $par['path'];
+
+  $res = 0;
+  if(!$file)
+    {
+      vikingWarning("deleteFiles: no file ($file)");
+      return;
+    }
+
+  $in = fopen($file,"r");
+  if($in)
+    {
+      echo("<hr>$text<hr>");
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  $row = trim($row);
+	  //$row = safeText($row);
+	  if($row)
+	    {
+	      $row = basename($row);
+	      $res++;
+	      echo("$res <a href=\"$path&ac=delete_file&x=$row\" onclick=\"return confirm('Are you sure you want to delete: $row ?');\"> (delete)</a> $row <br>");
+
+	    }
+	}
+      fclose($in);
+      if($res == 0)echo("<i>No files found</i><br>");
+    }
+  else
+    {
+      $temp = "deleteFiles:Fail to open ($file)";
       vikingError($temp);
     }
   return($res);
@@ -1734,7 +1840,7 @@ function uploadFile2()
           //$file_name = safeText($file_name);
           $extension = getExtension($file_name);
           $extension = strtolower($extension);
-          if (($extension != "txt") && ($extension != "pde") && ($extension != "c"))
+          if (($extension != "scn") && ($extension != "pde"))
             {
               vikingError("Unknown Import file Extension: $extension");
               $errors=1;
