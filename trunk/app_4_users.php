@@ -63,6 +63,7 @@ if($temp)
 // Logout
 if($par['p1'] == 'a4_logout')
   {
+    loginGlobalLog('logout');
     $par['user'] ='';
     $par['user_event'] = 2;
   }
@@ -87,7 +88,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 	      {
 		$par['user'] = $user_name;
 		$par['user_event'] = 1;
-		loginCounter();
+		loginGlobalCounter();
+		loginGlobalLog('login');
 	      }
 	  }
 	else 
@@ -155,7 +157,7 @@ $_SESSION['user'] = $par['user'];
 //====================================================
 
 //=======================================
-function loginCounter()
+function loginGlobalCounter()
 //=======================================
 {
   $file = 'login.counter';
@@ -174,6 +176,30 @@ function loginCounter()
 
   return($id);
 }
+
+//==========================================
+function loginGlobalLog($action)
+//==========================================
+{
+  global $par;
+
+  $user = $par['user'];  
+
+  if($user)
+    {
+      $out = fopen('login.log',"a");
+      if($out)
+	{
+	  $date = date("Y-m-d H:i:s");
+	  $temp = $date." ".$user." ".$action."\n";
+	  fwrite($out,$temp);
+	}
+      fclose($out);
+    }
+  else
+    vikingError("Login logg entry without username");  
+}
+
 //====================================================
 //  HTML functions
 //====================================================
