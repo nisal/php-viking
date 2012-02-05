@@ -2445,38 +2445,6 @@ function viking_7_pinScenario($sys_id)
 
   readScenario();
 
-  // Digital Pins Status
-  for($ii=0; $ii<$boardTotPins; $ii++)
-    {
-      echo("<b>");
-      if($ii < $boardDigPins)
-	vprintf("D%02s ",$ii);
-      else
-	vprintf("A%02s ",$ii-$boardDigPins);
-      echo("</b>");
-    }
-  echo("<hr>");
-  // Digital Pins Status
-  for($ii=0; $ii<$boardTotPins; $ii++)
-    {
-      $temp = $valueInPinD[$ii][$curStep];
-      if($temp)
-	echo("$temp ");
-      else
-	echo(" . ");
-    }
-  echo("<hr>");
-  // Digital Pins Status
-  for($ii=0; $ii<$boardTotPins; $ii++)
-    {
-      $temp = $valueInPinA[$ii][$curStep];
-      if($temp)
-	echo("$temp ");
-      else
-	echo(" . ");
-    }
-  echo("<hr>");
-
   echo("<table border=1>");
   echo("<tr><td>Pin</td>");
   // Digital Pins Status
