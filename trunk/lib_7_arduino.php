@@ -11,6 +11,8 @@ function resetSession()
   $_SESSION['a7_cur_sketch']        = ""; 
   $_SESSION['a7_cur_source']        = ""; 
   $_SESSION['a7_sel_source']        = ""; 
+  $_SESSION['a7_cur_scenario']      = ""; 
+  $_SESSION['a7_sel_scenario']      = ""; 
   $_SESSION['a7_cur_step']          = 0; 
   $_SESSION['a7_cur_loop']          = 0; 
   $_SESSION['a7_cur_read']          = 0; 
@@ -176,11 +178,13 @@ function writeUserSetting()
   $out = fopen($file,"w");
   if($out)
     {
-      $temp = "CUR_SOURCE: ".$par['a7_cur_source']."\n";
+      $temp = "CUR_SOURCE:   ".$par['a7_cur_source']."\n";
       fwrite($out,$temp);
-      $temp = "CUR_FILE: ".$par['a7_cur_file']."\n";
+      $temp = "CUR_SCENARIO: ".$par['a7_cur_scenario']."\n";
       fwrite($out,$temp);
-      $temp = "SEL_SOURCE: ".$par['a7_sel_source']."\n";
+      $temp = "CUR_FILE:     ".$par['a7_cur_file']."\n";
+      fwrite($out,$temp);
+      $temp = "SEL_SOURCE:   ".$par['a7_sel_source']."\n";
       fwrite($out,$temp);
       $temp = "SEL_SCENARIO: ".$par['a7_sel_scenario']."\n";
       fwrite($out,$temp);
@@ -217,6 +221,15 @@ function readUserSetting()
 		  sscanf($pp,"%s%s",$junk,$curSource);
 		  $par['a7_cur_source'] = $curSource;
 		  $_SESSION['a7_cur_source'] = $curSource;
+		}
+	    }
+	  if(strstr($row,"CUR_SCENARIO"))
+	    {
+	      if($pp = strstr($row,":"))
+		{
+		  sscanf($pp,"%s%s",$junk,$curScenario);
+		  $par['a7_cur_scenario'] = $curScenario;
+		  $_SESSION['a7_cur_scenario'] = $curScenario;
 		}
 	    }
 	  if(strstr($row,"CUR_FILE"))
