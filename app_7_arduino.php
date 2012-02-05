@@ -14,6 +14,8 @@ define('T_STEP_B','Prev Step');
 define('T_CREATE','Create');
 define('T_COPY','Copy');
 define('T_EDIT','Edit');
+define('T_EDIT_SKETCH','Edit Sketch');
+define('T_EDIT_SCENARIO','Edit Scenario');
 define('T_SAVE','Save');
 define('T_SELECT','Select');
 define('T_LOAD','Load');
@@ -38,9 +40,9 @@ define('LOW',    '0');
 define('HIGH',   '1');
 define('PWM',    '3');
 
-#define CHANGE  11
-#define RISING  12
-#define FALLING 13
+//#define CHANGE  11
+//#define RISING  12
+//#define FALLING 13
 // Digital Pins Mode
 define('VOID',     '0');
 define('I_LOW',    '0');
@@ -150,8 +152,6 @@ if($user)
     $par['a7_ser_log']           = $_SESSION['a7_ser_log'];
     $par['a7_row_number']        = $_SESSION['a7_row_number'];
     $par['a7_cur_file']          = $_SESSION['a7_cur_file'];
-    //$par['a7_submenu']           = $_SESSION['a7_submenu'];
-
 
     if($userEvent == 1) // user logged in!
       {
@@ -190,7 +190,7 @@ if($user)
     $fn['list']        = 'account/'.$account.'/list.txt';
 
 
-    accessControl(); // Benny. Keep this until debugged
+    //accessControl(); // Benny. Keep this until debugged
 
     
     if($tDir && !is_dir($tDir))
@@ -405,39 +405,6 @@ if($user)
 		else
 		  $par['tinyMCE'] = 0;
 	      }
-	    
-// 	    if($res == 0)
-// 	      {
-// 		if($what == T_LOAD)
-// 		  {
-// 		    compileSketch();
-// 		    execSketch($curSimLen,1);
-// 		    $par['a7_cur_step'] = 1;
-// 		    $par['a7_cur_loop'] = 0;
-// 		    $par['a7_cur_read'] = 1;
-// 		    init($curSimLen);
-// 		    readSketchInfo();
-// 		    //$tFile = $fn['arduino'];
-// 		    readSimulation();
-// 		    readStatus();
-// 		    //readSerial();
-// 		    $par['a7_ready'] = "Sketch loaded!";
-// 		  }
-// 		if($what == T_RUN)
-// 		  {
-// 		    execSketch($curSimLen,1);
-// 		    $par['a7_cur_step'] = 1;
-// 		    $par['a7_cur_loop'] = 0;
-// 		    $par['a7_cur_read'] = 1;
-// 		    init($curSimLen);
-// 		    readSketchInfo();
-// 		    //$tFile = $fn['arduino'];
-// 		    readSimulation();
-// 		    readStatus();
-// 		    //readSerial();
-// 		    $par['a7_ready'] = "Sketch Executed!";
-// 		  }
-// 	      }
 	  }
 	
       }
@@ -504,8 +471,7 @@ if($user)
 
     if($action == 'upload_source' && $user != 'guest')
       {
-	$par['a7_cur_source'] = uploadFile2();
-	$curSource = $par['a7_cur_source'];
+	$dummy = uploadFile2();
       }
 
     if($action == 'set_new_sketch' && $user != 'guest' )
@@ -551,31 +517,20 @@ if($user)
 	if (!copy($temp,$dest)) {
 	  vikingError("Failed to copy ($temp -> $dest)");
 	}
-// 	else
-// 	  {
-// 	    $par['a7_sel_source'] = $dest;
-// 	    $selSource = $par['a7_sel_source'];
-// 	  }
       }
 
     if($action == 'manage_sketch' )
       {
 	$selSource   = $_POST['sketch'];
 	$par['a7_sel_source']   =  $selSource;
-	$what = $_POST['submit_order'];
-	if($what == T_EDIT) $curEditFlag = 1;
-	else
-	  vikingWarning("No sketch selected !");
+	$curEditFlag = 1;
       }
 
     if($action == 'manage_scenario' )
       {
 	$selScenario = $_POST['scenario'];
 	$par['a7_sel_scenario']   =  $selScenario;
-	$what = $_POST['submit_order'];
-	if($what == T_EDIT) $curEditFlag = 1;
-	else
-	  vikingWarning("No scenario selected !");
+	$curEditFlag = 1;
       }
 
     if($action == 'set_load' )
@@ -615,11 +570,8 @@ if($user)
 		$par['a7_cur_read'] = 1;
 		init($curSimLen);
 		readSketchInfo();
-		//$tFile = $fn['arduino'];
 		readSimulation();
 		readStatus();
-		//readSerial();
-		//writeUserSetting();
 		$par['a7_ready'] = "Sketch loaded!";
 	      }
 	    else
@@ -650,7 +602,6 @@ if($user)
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
-	    //$tFile = $fn['custom'];
 	    readSimulation();
 	    readStatus();
 	  }
@@ -671,7 +622,6 @@ if($user)
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
-	    //$tFile = $fn['custom'];
 	    readSimulation();
 	    readStatus();
 	  }
@@ -1628,11 +1578,9 @@ function viking_7_edit_sketch($sys_id)
       system($syscom);
       echo("<td>");
       $nSketches = formSelectFile("Sketches ","sketch",$tFile,$selSource,$upload);
-      echo("</td></tr></table><br>");
-
       //echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_SELECT."\">");
-      echo("<input type =\"submit\" name=\"submit_order\" value=\"".T_EDIT."\">");
-      
+      echo("</td><td><input type =\"submit\" name=\"submit_order\" value=\"".T_EDIT_SKETCH."\">");
+      echo("</td></tr></table><br>");
       echo("</form>");
 
     }  
@@ -1673,11 +1621,9 @@ function viking_7_edit_scenario($sys_id)
       system($syscom);
       echo("<td>");
       $nFiles = formSelectFile("Scenarios ","scenario",$tFile,$selScenario,$upload);
-      echo("</td></tr></table><br>");
-
       //echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_SELECT."\">");
-      echo("<input type =\"submit\" name=\"submit_order\" value=\"".T_EDIT."\">");
-      
+      echo("</td><td><input type =\"submit\" name=\"submit_order\" value=\"".T_EDIT_SCENARIO."\">");
+      echo("</td></tr></table><br>");
       echo("</form>");
 
     }  
@@ -1782,6 +1728,7 @@ function viking_7_graph_status($sys_id)
   global $par,$scenario,$g_readValue,$g_readPin,$g_readType;
   global $valueInPinD, $valueOutPinD, $valueInPinA,$pinModeD,$stepRead, $stepLoop;
   global $x_pinMode,$x_pinDigValue,$x_pinAnaValue,$x_pinRW;
+  global $simulation;
 
   $path       = $par['path'];
   $curStep    = $par['a7_cur_step'];
@@ -1834,6 +1781,8 @@ function viking_7_graph_status($sys_id)
 
   echo("<div id=\"graph\" style=\"font-family:Courier,monospace; font-size:11px;float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:$winSize; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">");
   
+  $event = $simulation[$curStep];
+  echo("<b>Status Graph </b>Step: $event<br><br>");
   $pin   = $g_readPin[$curStep];
   $value = $g_readValue[$curStep];
   $type  = $g_readType[$curStep];
@@ -1956,7 +1905,7 @@ function viking_7_graph_status($sys_id)
 	echo("&nbsp;");
     }
   echo("<br>");
-  echo("Status Graph");
+
   echo("</div>");
 }
 //********************************************
@@ -1965,6 +1914,7 @@ function viking_7_graph_scenario($sys_id)
   global $par,$scenario,$g_readValue,$g_readPin,$g_readType;
   global $valueInPinD, $valueOutPinD, $valueInPinA,$pinModeD,$stepRead, $stepLoop;
   global $x_pinMode,$x_pinDigValue,$x_pinAnaValue,$x_pinRW;
+  global $simulation;
 
   $path       = $par['path'];
   $curStep    = $par['a7_cur_step'];
@@ -2014,6 +1964,8 @@ function viking_7_graph_scenario($sys_id)
 
   echo("<div id=\"graph\" style=\"font-family:Courier,monospace; font-size:11px;float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:$winSize; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">");
   
+  $event = $simulation[$curStep];
+  echo("<b>Scenario Graph </b>Step:$event<br><br>");
   $pin   = $g_readPin[$curStep];
   $value = $g_readValue[$curStep];
   $type  = $g_readType[$curStep];
@@ -2116,7 +2068,7 @@ function viking_7_graph_scenario($sys_id)
 	echo("&nbsp;");
     }
   echo("<br>");
-  echo("Scenario Graph");
+
   echo("</div>");
 }
 
@@ -2171,9 +2123,9 @@ function viking_7_script($sys_id)
   global $x_pinMode,$x_pinDigValue,$x_pinAnaValue,$x_pinRW;
 
   $path   = $par['path'];
-  $sid        = $par['a7_sid'];
+  $sid    = $par['a7_sid'];
   //if($sid != $sys_id) return;
-  $user       = $par['user'];
+  $user   = $par['user'];
 
   $curSketchName = $par['a7_cur_sketch_name'];
   $curStep       = $par['a7_cur_step'];
@@ -2470,6 +2422,154 @@ function viking_7_script($sys_id)
 
   //Ajax: <span id="ajax_7"></span>
 }
+//********************************************
+function viking_7_pinScenario($sys_id)
+{
+  global $par;
+  global $boardId,$boardDigPins,$boardAnaPins,$boardTotPins;
+  global $pinModeD,$pinStatusD,$pinStatusA,$serial;
+  global $x_pinMode,$x_pinDigValue,$x_pinAnaValue,$x_pinRW;
+  global $valueInPinD, $valueOutPinD, $valueInPinA,$pinModeD,$stepRead, $stepLoop;
+
+  $path   = $par['path'];
+  $sid    = $par['a7_sid'];
+  //if($sid != $sys_id) return;
+  $user   = $par['user'];
+
+  $curSketchName = $par['a7_cur_sketch_name'];
+  $curStep       = $par['a7_cur_step'];
+  $board         = $par['a7_cur_board_type'];
+  $boardDigPins  = $par['a7_cur_board_digpins'];
+  $boardAnaPins  = $par['a7_cur_board_anapins'];
+  $boardTotPins  = $boardAnaPins + $boardDigPins;
+
+  readScenario();
+
+  // Digital Pins Status
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      echo("<b>");
+      if($ii < $boardDigPins)
+	vprintf("D%02s ",$ii);
+      else
+	vprintf("A%02s ",$ii-$boardDigPins);
+      echo("</b>");
+    }
+  echo("<hr>");
+  // Digital Pins Status
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      $temp = $valueInPinD[$ii][$curStep];
+      if($temp)
+	echo("$temp ");
+      else
+	echo(" . ");
+    }
+  echo("<hr>");
+  // Digital Pins Status
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      $temp = $valueInPinA[$ii][$curStep];
+      if($temp)
+	echo("$temp ");
+      else
+	echo(" . ");
+    }
+  echo("<hr>");
+
+  echo("<table border=1>");
+  echo("<tr><td>Pin</td>");
+  // Digital Pins Status
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      echo("<td><b>");
+      if($ii < $boardDigPins)
+	vprintf("D%02s ",$ii);
+      else
+	vprintf("A%02s ",$ii-$boardDigPins);
+      echo("</b></td>");
+    }
+  echo("</tr>");
+
+  echo("<tr><td>Digital</td>");
+  // Pins Status
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      echo("<td>");
+      if($ii < $boardDigPins)
+	$status = $valueInPinD[$ii][$curStep];
+      else
+	$status = $valueInPinA[$ii-$boardDigPins][$curStep];
+      echo("$status");
+      echo("</td>");
+    }
+
+  echo("</tr>");
+  echo("</table>");
+
+}
+//********************************************
+function viking_7_pinStatus($sys_id)
+{
+  global $par;
+  global $boardId,$boardDigPins,$boardAnaPins,$boardTotPins;
+  global $pinModeD,$pinStatusD,$pinStatusA,$serial;
+  global $x_pinMode,$x_pinDigValue,$x_pinAnaValue,$x_pinRW;
+
+  $path   = $par['path'];
+  $sid    = $par['a7_sid'];
+  //if($sid != $sys_id) return;
+  $user   = $par['user'];
+
+  $curSketchName = $par['a7_cur_sketch_name'];
+  $curStep       = $par['a7_cur_step'];
+  $board         = $par['a7_cur_board_type'];
+  $boardDigPins  = $par['a7_cur_board_digpins'];
+  $boardAnaPins  = $par['a7_cur_board_anapins'];
+  $boardTotPins  = $boardAnaPins + $boardDigPins;
+
+  readScenario();
+
+  echo("<table border=1>");
+  echo("<tr><td>Pin</td>");
+  // Digital Pins Status
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      echo("<td><b>");
+      if($ii < $boardDigPins)
+	vprintf("D%02s ",$ii);
+      else
+	vprintf("A%02s ",$ii-$boardDigPins);
+      echo("</b></td>");
+    }
+  echo("</tr>");
+
+  echo("<tr><td>Digital</td>");
+  // Digital Pins Status
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      echo("<td>");
+      $status = $x_pinDigValue[$ii][$curStep];
+      //echo("$status ");
+      //echo("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+      echo("$status");
+      echo("</td>");
+    }
+  echo("</tr>");
+
+  echo("<tr><td>Analog</td>");
+  // Analog Pins Status
+  for($ii=0; $ii<$boardTotPins; $ii++)
+    {
+      echo("<td>");
+      $status = $x_pinAnaValue[$ii][$curStep];
+      echo("$status ");
+      echo("</td>");
+    }
+  echo("</tr>");
+  echo("</table>");
+}
+
 //********************************************
 function viking_7_isMap($sys_id)
 {
