@@ -903,7 +903,7 @@ function viking_7_editFile($sys_id)
 	  if($file == $fn['tutorial'] || $file == $fn['faq'] || $file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
 	}
       echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
-      echo("</form><br>");
+      echo("</form><br/>");
     }
   echo("$ready");
 }
@@ -969,7 +969,7 @@ function viking_7_editSketch($sys_id)
       echo("<table><tr><td>");
       echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
       echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
-      echo("</form><br>");
+      echo("</form><br/>");
     }
   echo("$ready");
 }
@@ -1035,7 +1035,7 @@ function viking_7_editScenario($sys_id)
       echo("<table><tr><td>");
       echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
       echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
-      echo("</form><br>");
+      echo("</form><br/>");
     }
   echo("$ready");
 }
@@ -1216,19 +1216,19 @@ function viking_7_error($sys_id)
       $len = readAnyFile(2,$file);
       if($len)showAnyFile($len);
       else
-	echo("No compilation errors<br>");
+	echo("No compilation errors<br/>");
 
       $file = $fn['exec'];
       $len = readAnyFile(2,$file);
       if($len)showAnyFile($len);
       else
-	echo("No execution errors<br>");
+	echo("No execution errors<br/>");
 
       $file = $fn['error'];
       $len = readAnyFile(2,$file);
       if($len)showAnyFile($len);
       else
-	echo("No servuino errors<br>");
+	echo("No servuino errors<br/>");
 
       $par['a7_row_number'] = $rowNumber;
 
@@ -1347,13 +1347,13 @@ function viking_7_only_load($sys_id)
   if($user)
     {
       $fTemp = basename($curSource);
-      echo("<hr><b>Loaded Sketch:</b> $fTemp<br>");
+      echo("<hr><b>Loaded Sketch:</b> $fTemp<br/>");
       $fTemp = basename($curScenario);
-      echo("<b>Loaded Scenario:</b> $fTemp<br>");
+      echo("<b>Loaded Scenario:</b> $fTemp<br/>");
 
 
       $fTemp = basename($selSource);
-      echo("<b>Selected Sketch:</b> $fTemp<br>");
+      echo("<b>Selected Sketch:</b> $fTemp<br/>");
       $fTemp = basename($selScenario);
       echo("<b>Selected Scenario:</b> $fTemp<hr>");
 
@@ -1375,10 +1375,10 @@ function viking_7_only_load($sys_id)
       $nSketches = formSelectFile("Scenario File ","scenario",$tFile,$selSource,$upload);
       echo("</tr>");
       echo("<input type=\"radio\" name=\"scenario_source\" value=\"internal\" /> Scenario from Sketch");
-      echo("<br><input type=\"radio\" name=\"scenario_source\" value=\"external\" checked /> Scenario from Scenario File");
+      echo("<br/><input type=\"radio\" name=\"scenario_source\" value=\"external\" checked /> Scenario from Scenario File");
       echo("<tr><td>Simulation Length</td><td><input type=\"text\" name=\"sim_len\" value=\"$curSimLen\" size=\"5\"></td></tr>");
 
-      echo("</table><br>");
+      echo("</table><br/>");
 
       echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_LOAD."\">");
       //echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_SELECT."\">");
@@ -1417,7 +1417,7 @@ function viking_7_create($sys_id)
       echo("<td>New Sketch Name</td><td><input type=\"text\" name=\"new sketch_name\" value=\"$user.pde\" size=\"20\"></td>");
       echo("<td><input type =\"submit\" name=\"submit_new_sketch\" value=\"".T_TEMPLATE."\"></td>");
       echo("<td><input type =\"submit\" name=\"submit_new_sketch\" value=\"".T_EXAMPLE."\"></td>");
-      echo("</tr></table><br>");
+      echo("</tr></table><br/>");
       echo("</form>");
 
 
@@ -1434,7 +1434,7 @@ function viking_7_create($sys_id)
       echo("<td>New Scenario Name</td><td><input type=\"text\" name=\"new scenario_name\" value=\"$user.scn\" size=\"20\"></td>");
       echo("<td><input type =\"submit\" name=\"submit_new_scenario\" value=\"".T_TEMPLATE."\"></td>");
       echo("<td><input type =\"submit\" name=\"submit_new_scenario\" value=\"".T_EXAMPLE."\"></td>");
-      echo("</tr></table><br>");
+      echo("</tr></table><br/>");
       echo("</form>");
 
       //echo("<hr>");
@@ -1468,7 +1468,7 @@ function viking_7_copy($sys_id)
       echo("</td></tr><tr>");
       echo("<td>New File Name(.pde or .scn) </td><td><input type=\"text\" name=\"copy_file_name\" value=\"$user.pde\" size=\"20\"></td>");
       echo("<tr><td><input type =\"submit\" name=\"submit_copy_sketch\" value=\"".T_COPY."\"></td>");
-      echo("</tr></table><br>");
+      echo("</tr></table><br/>");
       echo("</form>");
 
 
@@ -1533,11 +1533,11 @@ function viking_7_upload($sys_id)
 	}
       else
 	{
-	  echo("<hr><h4>You have $nSketches sketches and $nScenarios scenarios stored. Limit is 10 + 10.</h4><br><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
+	  echo("<hr><h4>You have $nSketches sketches and $nScenarios scenarios stored. Limit is 10 + 10.</h4><br/><form name=\"f_upload_source\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\"> ");
 	  echo("<input type=\"hidden\" name=\"action\" value=\"upload_source\">");
 	  echo("<input type=\"file\" name=\"import_file\" value=\"\">\n");
 	  echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_UPLOAD_FILE."\">");
-	  echo("</form><br>");
+	  echo("</form><br/>");
 	}
       
 
@@ -1561,12 +1561,12 @@ function viking_7_edit_sketch($sys_id)
   if($user)
     {
       $fTemp = basename($curSource);
-      echo("<hr><b>Loaded Sketch:</b> $fTemp<br>");
+      echo("<hr><b>Loaded Sketch:</b> $fTemp<br/>");
       $fTemp = basename($curScenario);
       echo("<b>Loaded Scenario:</b> $fTemp<hr>");
 
       $fTemp = basename($selSource);
-      echo("<b>Selected Sketch:</b> $fTemp<br>");
+      echo("<b>Selected Sketch:</b> $fTemp<br/>");
       $fTemp = basename($selScenario);
       echo("<b>Selected Scenario:</b> $fTemp<hr>");
       
@@ -1581,7 +1581,7 @@ function viking_7_edit_sketch($sys_id)
       $nSketches = formSelectFile("Sketches ","sketch",$tFile,$selSource,$upload);
       //echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_SELECT."\">");
       echo("</td><td><input type =\"submit\" name=\"submit_order\" value=\"".T_EDIT_SKETCH."\">");
-      echo("</td></tr></table><br>");
+      echo("</td></tr></table><br/>");
       echo("</form>");
 
     }  
@@ -1604,12 +1604,12 @@ function viking_7_edit_scenario($sys_id)
   if($user)
     {
       $fTemp = basename($curSource);
-      echo("<hr><b>Loaded Sketch:</b> $fTemp<br>");
+      echo("<hr><b>Loaded Sketch:</b> $fTemp<br/>");
       $fTemp = basename($curScenario);
       echo("<b>Loaded Scenario:</b> $fTemp<hr>");
 
       $fTemp = basename($selSource);
-      echo("<b>Selected Sketch:</b> $fTemp<br>");
+      echo("<b>Selected Sketch:</b> $fTemp<br/>");
       $fTemp = basename($selScenario);
       echo("<b>Selected Scenario:</b> $fTemp<hr>");
       
@@ -1624,7 +1624,7 @@ function viking_7_edit_scenario($sys_id)
       $nFiles = formSelectFile("Scenarios ","scenario",$tFile,$selScenario,$upload);
       //echo("<input type =\"submit\" name=\"submit_load_del\" value=\"".T_SELECT."\">");
       echo("</td><td><input type =\"submit\" name=\"submit_order\" value=\"".T_EDIT_SCENARIO."\">");
-      echo("</td></tr></table><br>");
+      echo("</td></tr></table><br/>");
       echo("</form>");
 
     }  
@@ -1647,7 +1647,7 @@ function viking_7_pinValues($sys_id)
 
   echo("<div style=\"font-size:12px;float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
 
-  echo("<br>Set Scenario Breakpoints at step: $curStep<br><br>");
+  echo("<br/>Set Scenario Breakpoints at step: $curStep<br/><br/>");
   echo("<form name=\"f_set_dig_scenario\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
   echo("<input type=\"hidden\" name=\"action\" value=\"set_dig_scenario\">");
   echo("<select name=\"pin_value\">");
@@ -1676,7 +1676,7 @@ function viking_7_pinValues($sys_id)
   echo("<input type=\"text\" name=\"dvalue\" value=\"\" size=\"4\">");
   echo("<input type =\"submit\" name=\"submit_ana_scenario\" value=\"".T_SET_ANA_PIN_VALUE."\">");
   echo("</form>");
-  //echo("The value is valid from step $curStep to next breakpoint<br>"); 
+  //echo("The value is valid from step $curStep to next breakpoint<br/>"); 
 
 //   echo("<hr><b>Analog Pin Values at step $curStep</b>");
 //   echo("<table border=0><tr>");
@@ -1693,7 +1693,7 @@ function viking_7_pinValues($sys_id)
 //     }
 //   echo("</tr></table>");
     
-//   echo("<br><b>Digital Pin Values at step $curStep</b>");
+//   echo("<br/><b>Digital Pin Values at step $curStep</b>");
 //   echo("<table border=0><tr>");
 //   $count = 0;
 //   for($ii=0;$ii<$dPins;$ii++)
@@ -1783,14 +1783,14 @@ function viking_7_graph_status($sys_id)
   echo("<div id=\"graph\" style=\"font-family:Courier,monospace; font-size:11px;float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:$winSize; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">");
   
   $event = $simulation[$curStep];
-  echo("<b>Status Graph </b>Step: $event<br><br>");
+  echo("<b>Status Graph </b>Step: $event<br/><br/>");
   $pin   = $g_readPin[$curStep];
   $value = $g_readValue[$curStep];
   $type  = $g_readType[$curStep];
   if($type==1)$anadig = "Analog";
   else
     $anadig = "Digital";
-  if($pin || $value)echo("Step:$curStep $anadig Pin:$pin Value:$value<br>");
+  if($pin || $value)echo("Step:$curStep $anadig Pin:$pin Value:$value<br/>");
   echo("&nbsp;&nbsp;&nbsp;&nbsp;");
   for($xx=$x_min;$xx<=$x_max;$xx++)
     {
@@ -1816,7 +1816,7 @@ function viking_7_graph_status($sys_id)
 	 }
        if($done == 0)echo("&nbsp;");
     }
-  echo("<br>");
+  echo("<br/>");
   
   // Analog Pins
   for($yy=$y_maxA-1;$yy>=$y_minA;$yy--)
@@ -1839,9 +1839,9 @@ function viking_7_graph_status($sys_id)
 	      echo("&nbsp;");
 	    }
 	}
-      echo("<br>");
+      echo("<br/>");
     }
-  for($xx=$x_min;$xx<=$x_max;$xx++)echo("_");echo("<br>");
+  for($xx=$x_min;$xx<=$x_max;$xx++)echo("_");echo("<br/>");
   // Digital Pins
   for($yy=$y_maxD-1;$yy>=$y_minD;$yy--)
     {
@@ -1882,7 +1882,7 @@ function viking_7_graph_status($sys_id)
 		echo("&nbsp;");
 	    }
 	}
-      echo("<br>");
+      echo("<br/>");
     }
 
   echo("&nbsp;&nbsp;&nbsp;&nbsp;");
@@ -1896,7 +1896,7 @@ function viking_7_graph_status($sys_id)
 	//echo("_");
 	vprintf("<a href=$path&ac=step&x=$xx>=</a>",$xx);
     }
-  echo("<br>");
+  echo("<br/>");
   echo("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
   for($xx=$x_min;$xx<=$x_max;$xx++)
     {
@@ -1905,7 +1905,7 @@ function viking_7_graph_status($sys_id)
       else if($xx%10 < 7)
 	echo("&nbsp;");
     }
-  echo("<br>");
+  echo("<br/>");
 
   echo("</div>");
 }
@@ -1966,14 +1966,14 @@ function viking_7_graph_scenario($sys_id)
   echo("<div id=\"graph\" style=\"font-family:Courier,monospace; font-size:11px;float:left; border : solid 1px #000000; background : #A9BCF5; color : #000000;  text-align:left; padding : 3px; width :100%; height:$winSize; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">");
   
   $event = $simulation[$curStep];
-  echo("<b>Scenario Graph </b>Step:$event<br><br>");
+  echo("<b>Scenario Graph </b>Step:$event<br/><br/>");
   $pin   = $g_readPin[$curStep];
   $value = $g_readValue[$curStep];
   $type  = $g_readType[$curStep];
   if($type==1)$anadig = "Analog";
   else
     $anadig = "Digital";
-  if($pin || $value)echo("Step:$curStep $anadig Pin:$pin Value:$value<br>");
+  if($pin || $value)echo("Step:$curStep $anadig Pin:$pin Value:$value<br/>");
   echo("&nbsp;&nbsp;&nbsp;&nbsp;");
   for($xx=$x_min;$xx<=$x_max;$xx++)
     {
@@ -1999,7 +1999,7 @@ function viking_7_graph_scenario($sys_id)
 	 }
        if($done == 0)echo("&nbsp;");
     }
-  echo("<br>");
+  echo("<br/>");
   
   // Analog Pins
   for($yy=$y_maxA-1;$yy>=$y_minA;$yy--)
@@ -2019,7 +2019,7 @@ function viking_7_graph_scenario($sys_id)
 	      echo("&nbsp;");
 	    }
 	}
-      echo("<br>");
+      echo("<br/>");
     }
   for($xx=$x_min;$xx<=$x_max;$xx++)
     {
@@ -2028,7 +2028,7 @@ function viking_7_graph_scenario($sys_id)
       else
 	echo("_");
     }
-  echo("<br>");
+  echo("<br/>");
 
   // Digital Pins
   for($yy=$y_maxD-1;$yy>=$y_minD;$yy--)
@@ -2046,7 +2046,7 @@ function viking_7_graph_scenario($sys_id)
 		echo("&nbsp;");
 	    }
 	}
-      echo("<br>");
+      echo("<br/>");
     }
 
   echo("&nbsp;&nbsp;&nbsp;&nbsp;");
@@ -2059,7 +2059,7 @@ function viking_7_graph_scenario($sys_id)
       else
 	vprintf("<a href=$path&ac=step&x=$xx>=</a>",$xx);
     }
-  echo("<br>");
+  echo("<br/>");
   echo("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
   for($xx=$x_min;$xx<=$x_max;$xx++)
     {
@@ -2068,7 +2068,7 @@ function viking_7_graph_scenario($sys_id)
       else if($xx%10 < 7)
 	echo("&nbsp;");
     }
-  echo("<br>");
+  echo("<br/>");
 
   echo("</div>");
 }
@@ -2097,13 +2097,13 @@ function viking_7_applyAccount($sys_id)
       echo("<td><input type=\"text\" name=\"email\" value=\"\" size=\"30\"></td>\n");
       echo("<td>");
       echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_APPLY."\"></td>\n");
-      echo("How are you going to use Simuino?<br><textarea name=\"letter\" cols=50 rows=3>(Very short description here)</textarea>");
+      echo("How are you going to use Simuino?<br/><textarea name=\"letter\" cols=50 rows=3>(Very short description here)</textarea>");
       echo("</form></tr>");
       echo("</table>");
     }
   else if($application == 1)
     {
-      echo("<h2>Thank you for your interest!<br>Your account information will be sent to you within 24 hours.</h2>");  
+      echo("<h2>Thank you for your interest!<br/>Your account information will be sent to you within 24 hours.</h2>");  
     }
       
   echo("</div>");
