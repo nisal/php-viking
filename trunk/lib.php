@@ -1,8 +1,3 @@
-<style type="text/css">
-   z1 {text-decoration:overline;}
-   z2 {color:red;}
-</style>
-
 <?
 
 $info    = '';
