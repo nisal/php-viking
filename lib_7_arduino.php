@@ -1495,7 +1495,8 @@ function readLoginCounter()
   if($in)
     {
       $row = fgets($in);
-      $par['login_counter'] = $row;
+      sscanf($row,"%d",$temp);
+      $par['login_counter'] = $temp;
       fclose($in);
     }
   else

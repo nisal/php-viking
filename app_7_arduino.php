@@ -714,7 +714,7 @@ function viking_7_mainmenu($sys_id)
   echo("<ul>");
   echo("   <li><a href=\"index.php?pv=load\">Load</a></li>");
   echo("   <li><a href=\"index.php?pv=board\">Board</a></li>");
-  echo("   <li><a href=\"index.php?pv=log\">Event&Serial</a></li>");
+  echo("   <li><a href=\"index.php?pv=log\">Event Serial</a></li>");
   //echo("   <li><a href=\"index.php?pv=log\">SerialOut</a></li>");
   echo("   <li><a href=\"index.php?pv=graph_status\">Status</a></li>");
   echo("   <li><a href=\"index.php?pv=graph_scenario\">Scenario</a></li>");
@@ -795,7 +795,8 @@ function viking_7_menu($sys_id)
 
   $temp = $curRead + 1;
   if($temp > $curReadLen)$temp = $curReadLen;
-  echo("         <li><a href=$path&ac=read&x=$temp>read+</a></li></ul>");
+  echo("         <li><a href=$path&ac=read&x=$temp>read+</a></li>");
+
   $temp = $curRead - 1;
   if($temp < 1)$temp = 0;
   echo("         <li><a href=$path&ac=read&x=$temp>read-</a></li>");
