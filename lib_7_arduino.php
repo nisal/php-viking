@@ -33,7 +33,7 @@ function tokString($str,$delimiter)
  
   $str = trim($str);
 
-  //echo("====== tokstr: ($str)<br>");
+  //echo("====== tokstr: ($str)<br/>");
 
   $tok = strtok($str, $delimiter);
   //$g_tok[1] = $tok;
@@ -42,11 +42,11 @@ function tokString($str,$delimiter)
   while ($tok !== false) {
     $ix++;
     $g_tok[$ix] = $tok;
-    //echo("tok: $ix ($tok)<br>");
+    //echo("tok: $ix ($tok)<br/>");
     $tok = strtok($delimiter);
   }
   $g_tok[0] = $ix;
-  //echo("toklen: $ix<br>");
+  //echo("toklen: $ix<br/>");
   return($ix);
 }
 //==========================================
@@ -74,7 +74,7 @@ function accessControlFile($file,$rw)
 //   $res = "";
 //   while ($tok !== false) {
 //     $ix++;
-//     echo "$tok<br>";
+//     echo "$tok<br/>";
 //     $tok = strtok("\n");
 //     $row[$ix] = $tok;
 //   }
@@ -1578,11 +1578,11 @@ function listFiles($text,$file)
 	    {
 	      $row = basename($row);
 	      $res++;
-	      echo("$res $row<br>");
+	      echo("$res $row<br/>");
 	    }
 	}
       fclose($in);
-      if($res == 0)echo("<i>No files found</i><br>");
+      if($res == 0)echo("<i>No files found</i><br/>");
     }
   else
     {
@@ -1625,7 +1625,7 @@ function deleteFiles($text,$file)
 	    }
 	}
       fclose($in);
-      if($res == 0)echo("<i>No files found</i><br>");
+      if($res == 0)echo("<i>No files found</i><br/>");
     }
   else
     {
@@ -1652,7 +1652,7 @@ function linkFile($file,$sel,$dir)
   $in = fopen($file,"r");
   if($in)
     {
-      echo("<hr>Download Area<br>");
+      echo("<hr>Download Area<br/>");
       while (!feof($in))
 	{
 	  $row = fgets($in);
@@ -1821,7 +1821,7 @@ function showFile($title,$file)
 	{
 	  $row = fgets($in);
 	  echo($row);
-	  echo("<br>");
+	  echo("<br/>");
 	}
       fclose($in);
     }
