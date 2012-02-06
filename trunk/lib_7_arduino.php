@@ -577,7 +577,7 @@ function compileSketch()
   global $par;
   $user = $par['user'];
   $syscom ="cd account/$user;g++ -o servuino servuino.c > g++.error 2>&1;";
-  //echo("$syscom<br>");
+  //echo("$syscom<br/>");
   system($syscom);
 }
 
@@ -590,7 +590,7 @@ function execSketch($steps,$source)
   if($steps < 1)vikingWarning("Simulation length < 0");
 
   $syscom = "cd account/$user;./servuino $steps $source >exec.error 2>&1;chmod 777 data.*;";
-  //echo("$syscom<br>");
+  //echo("$syscom<br/>");
   system($syscom);
 }
 
@@ -648,7 +648,7 @@ function decodeAllStatus($step,$code)
 	  $aw = $xpar[$ix]; 
           $qq = $xpar[$ix+1];
 	  //if($pinValueA[$xpar[$ix]]> 0)$pinStatusA[$xpar[$ix]] = READ;
-	  //echo("$tempA Analog $ii $aw $qq<br>");
+	  //echo("$tempA Analog $ii $aw $qq<br/>");
 	  $valueInPinA[$aw][$step] = $qq;
 	}
     }
@@ -668,7 +668,7 @@ function decodeAllStatus($step,$code)
 	  $valueOutPinD[$aw][$step] = $tmp;
 
 	  //$temp = $valueOutPinD[$aw][$step];
-	  //echo("Value=$temp Digital $ii $aw $qq step=$step<br>");
+	  //echo("Value=$temp Digital $ii $aw $qq step=$step<br/>");
 	}
     }
 }
@@ -727,7 +727,7 @@ function decodeStatus($code)
 	  $aw = $xpar[$ix]; 
           $qq = $xpar[$ix+1];
 	  if($pinValueA[$xpar[$ix]]> 0)$pinStatusA[$xpar[$ix]] = READ;
-	  //echo("$tempA Analog $ii $aw $qq<br>");
+	  //echo("$tempA Analog $ii $aw $qq<br/>");
 	}
     }
   $tempD = $xpar[3]; // Number of Digital Values
@@ -776,11 +776,11 @@ function showStep($target)
   for($ii=$target+1;$ii>0;$ii--)
     {
       if($ii==$target+1)
-	echo("next> $simulation[$ii]<br>");
+	echo("next> $simulation[$ii]<br/>");
       else if($ii==$target)
-	echo("now> $simulation[$ii]<br>");
+	echo("now> $simulation[$ii]<br/>");
       else
-	echo("<a href=\"$path&ac=step&x=$ii\">$simulation[$ii]</a><br>");
+	echo("<a href=\"$path&ac=step&x=$ii\">$simulation[$ii]</a><br/>");
     }
 }
 
@@ -793,15 +793,15 @@ function showScenario($target)
   $user   = $par['user'];
   global $scenario;
 
-  echo("$scenario[0]<br>");
+  echo("$scenario[0]<br/>");
   for($ii=$target+1;$ii>0;$ii--)
     {
       if($ii==$target+1)
-	echo("next> $scenario[$ii]<br>");
+	echo("next> $scenario[$ii]<br/>");
       else if($ii==$target)
-	echo("now> $scenario[$ii]<br>");
+	echo("now> $scenario[$ii]<br/>");
       else
-	echo("<a href=\"$path&ac=step&x=$ii\">$scenario[$ii]</a><br>");
+	echo("<a href=\"$path&ac=step&x=$ii\">$scenario[$ii]</a><br/>");
     }
 }
 
@@ -825,10 +825,10 @@ function showSerial($target)
       $temp = $serial[$ii];
       if($serialL[$ii] == 'NL')
 	{
-	  $stemp[$jj] = $stemp[$jj]."<a href=\"$path&ac=step&x=$ii\">$temp</a><br>";
+	  $stemp[$jj] = $stemp[$jj]."<a href=\"$path&ac=step&x=$ii\">$temp</a><br/>";
 	  $jj++;
 	  $flag = 0;
-	  //echo("<a href=\"index.php?ac=step&x=$ii\">$temp</a><br>");
+	  //echo("<a href=\"index.php?ac=step&x=$ii\">$temp</a><br/>");
 	}
       if($serialL[$ii] == 'SL')
 	{
@@ -845,7 +845,7 @@ function showSerial($target)
     {
       $temp = $stemp[$ii];
       echo("$temp");
-      if($flag==1 && $ii == $jj)echo("<br>");
+      if($flag==1 && $ii == $jj)echo("<br/>");
     }
 
 }
@@ -866,9 +866,9 @@ function showSimulation($target)
   for($ii=1;$ii<=$curSimLen;$ii++)
     {
       if($ii==$target)
-	echo("now> $simulation[$ii]<br>");
+	echo("now> $simulation[$ii]<br/>");
       else
-	echo("<a href=\"$path&ac=step&x=$ii\">$simulation[$ii]</a><br>");
+	echo("<a href=\"$path&ac=step&x=$ii\">$simulation[$ii]</a><br/>");
     }
 }
 
@@ -885,9 +885,9 @@ function showAnyFile($target)
   for($ii=1;$ii<=$target;$ii++)
     {
       if($rowNumber == 1)
-	echo("$ii: $content[$ii]<br>");
+	echo("$ii: $content[$ii]<br/>");
       else
-	echo("$content[$ii]<br>");
+	echo("$content[$ii]<br/>");
     }
 }
 
@@ -921,7 +921,7 @@ function readSimulation()
 	  $row = fgets($in);
 	  //$row = trim($row);
 	  //$row = safeText($row);
-	  //echo("$row<br>");
+	  //echo("$row<br/>");
 	  if($row[0]=='+')
 	    {
 	      $pp = strpos($row,"?");
@@ -944,7 +944,7 @@ function readSimulation()
 		  $g_readType[$step]  = $type;
                   $g_readPin[$step]   = $pin;
 		  $g_readValue[$step] = $value;
-		  //echo("$step pin=$pin value=$value type=$type<br>");
+		  //echo("$step pin=$pin value=$value type=$type<br/>");
 		}
               $stepRead[$step] = $read;
 
@@ -1000,7 +1000,7 @@ function readArduino()
 	  $row = fgets($in);
 	  //$row = trim($row);
 	  //$row = safeText($row);
-	  //echo("$row<br>");
+	  //echo("$row<br/>");
 	  if($row[0]=='+')
 	    {
 	      $step++;
@@ -1018,7 +1018,7 @@ function readArduino()
 		  $g_readType[$step]  = $type;
                   $g_readPin[$step]   = $pin;
 		  $g_readValue[$step] = $value;
-		  //echo("$step pin=$pin value=$value type=$type<br>");
+		  //echo("$step pin=$pin value=$value type=$type<br/>");
 		}
               $stepRead[$step] = $read;
               if(strstr($row,"servuinoLoop "))
@@ -1072,7 +1072,7 @@ function readSerial()
 	  $right = strpos($row,"]");
 	  if($right && $left){$left++;$value = substr($row,$left,$right-$left);}
 	  $value = safeText2($value);
-	  //echo("$step $line $value<br>");
+	  //echo("$step $line $value<br/>");
 	  $serial[$step] = $value;
 	}
       fclose($in);
@@ -1162,13 +1162,13 @@ function readStatus()
 	      $pp = strstr($row,"? ");
 	      $qq = strstr($pp," ");
 	      $nn = tokString($qq,",");
-	      //echo("$nn benny: ($qq) <br>");
+	      //echo("$nn benny: ($qq) <br/>");
 	      for($ii=1;$ii<=$nn;$ii++)
 		{
 		  $pin = $ii-1;
 		  $x_pinMode[$pin][$step] = $g_tok[$ii];
 		  //$temp = $x_pinMode[$pin][$step];
-		  //echo("benny step=$step pin=$pin mode=$temp<br>");
+		  //echo("benny step=$step pin=$pin mode=$temp<br/>");
 		}
 	    }
 	}
@@ -1200,13 +1200,13 @@ function readStatus()
 	      $pp = strstr($row,"? ");
 	      $qq = strstr($pp," ");
 	      $nn = tokString($qq,",");
-	      //echo("$nn benny: ($qq) <br>");
+	      //echo("$nn benny: ($qq) <br/>");
 	      for($ii=1;$ii<=$nn;$ii++)
 		{
 		  $pin = $ii-1;
 		  $x_pinDigValue[$pin][$step] = $g_tok[$ii];
 		  //$temp = $x_pinMode[$pin][$step];
-		  //echo("benny step=$step pin=$pin mode=$temp<br>");
+		  //echo("benny step=$step pin=$pin mode=$temp<br/>");
 		}
 	    }
 	}
@@ -1238,13 +1238,13 @@ function readStatus()
 	      $pp = strstr($row,"? ");
 	      $qq = strstr($pp," ");
 	      $nn = tokString($qq,",");
-	      //echo("$nn benny: ($qq) <br>");
+	      //echo("$nn benny: ($qq) <br/>");
 	      for($ii=1;$ii<=$nn;$ii++)
 		{
 		  $pin = $ii-1;
 		  $x_pinAnaValue[$pin][$step] = $g_tok[$ii];
 		  //$temp = $x_pinAnaValue[$pin][$step];
-		  //echo("benny step=$step pin=$pin val=$temp<br>");
+		  //echo("benny step=$step pin=$pin val=$temp<br/>");
 		}
 	    }
 	}
@@ -1276,13 +1276,13 @@ function readStatus()
 	      $pp = strstr($row,"? ");
 	      $qq = strstr($pp," ");
 	      $nn = tokString($qq,",");
-	      //echo("$nn $step benny: ($qq) <br>");
+	      //echo("$nn $step benny: ($qq) <br/>");
 	      for($ii=1;$ii<=$nn;$ii++)
 		{
 		  $pin = $ii-1;
 		  $x_pinRW[$pin][$step] = $g_tok[$ii];
 		  //$temp = $x_pinRW[$pin][$step];
-		  //echo("benny step=$step pin=$pin val=$temp<br>");
+		  //echo("benny step=$step pin=$pin val=$temp<br/>");
 		}
 	    }
 	}
@@ -1333,7 +1333,7 @@ function readScenario()
 		{
 		  $dpin[$ii] = $g_tok[$ii];
 		  $tmp = $dpin[$ii];
-		  //echo("($row)PinNo $ii=($tmp)<br>");
+		  //echo("($row)PinNo $ii=($tmp)<br/>");
 		}
 	    }
 	}
@@ -1363,7 +1363,7 @@ function readScenario()
 	      tokString($row," ");
 	      $temp1 = $g_tok[0];
 	      $ix = 0;
-	      //echo("$Dpins+$Apins+1 == $temp1<br>");
+	      //echo("$Dpins+$Apins+1 == $temp1<br/>");
 	      if($Dpins+$Apins+1 == $temp1)
 		{
 		  for($ii=1;$ii<=$Dpins;$ii++)
@@ -1372,7 +1372,7 @@ function readScenario()
 		      $pin = $dpin[$ii];
 		      $valueInPinD[$pin][$step] = $g_tok[$ix+1];
 		      $val = $g_tok[$ix+1];
-		      //echo("Dig $step pin=$pin value=$val ix=$ix<br>");
+		      //echo("Dig $step pin=$pin value=$val ix=$ix<br/>");
 		    }
 		  for($ii=1;$ii<=$Apins;$ii++)
 		    {
@@ -1380,7 +1380,7 @@ function readScenario()
 		      $pin = $apin[$ii];
 		      $valueInPinA[$pin][$step] = $g_tok[$ix+1];
 		      $val = $g_tok[$ix+1];
-		      //echo("Ana $step pin=$pin,$ii value=$val<br>");
+		      //echo("Ana $step pin=$pin,$ii value=$val<br/>");
 		    }
 		}
 	    }
@@ -1620,7 +1620,7 @@ function deleteFiles($text,$file)
 	    {
 	      $row = basename($row);
 	      $res++;
-	      echo("$res <a href=\"$path&ac=delete_file&x=$row\" onclick=\"return confirm('Are you sure you want to delete: $row ?');\"> (delete)</a> $row <br>");
+	      echo("$res <a href=\"$path&ac=delete_file&x=$row\" onclick=\"return confirm('Are you sure you want to delete: $row ?');\"> (delete)</a> $row <br/>");
 
 	    }
 	}
