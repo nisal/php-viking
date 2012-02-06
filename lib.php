@@ -74,7 +74,7 @@ function displayLinkIn($app,$structFromName,$objectFromId,$structToName,$objectT
   global $par;
 
   $app_sid = $app.'_sid';
-  echo("<br><a href=index.php?a=b&$app_sid=$structToSid&a3_object_id=$objectToId> in </a>");
+  echo("<br/><a href=index.php?a=b&$app_sid=$structToSid&a3_object_id=$objectToId> in </a>");
   echo("<z2>$objectToName ($structToName)</z2>");
   if($par['user'])echo("<a href=index.php?p1=delete_link_in&p2=$structFromName&p3=$objectFromId&p4=$structToName&p5=$objectToId> D </a>");
 
@@ -87,7 +87,7 @@ function displayLinkOut($app,$structFromName,$objectFromId,$structToName,$object
   global $par;
 
   $app_sid = $app.'_sid';
-  echo("<br><a href=index.php?a=b&$app_sid=$structToSid&a3_object_id=$objectToId> out </a>");
+  echo("<br/><a href=index.php?a=b&$app_sid=$structToSid&a3_object_id=$objectToId> out </a>");
   echo("<z2>$objectToName ($structToName)</z2>");
   if($par['user'])echo("<a href=index.php?p1=delete_link_out&p2=$structFromName&p3=$objectFromId&p4=$structToName&p5=$objectToId> D </a>");
 
@@ -97,27 +97,27 @@ function displayLinkOut($app,$structFromName,$objectFromId,$structToName,$object
 function displayObjectText($objectText)
 //=======================================
 {
-  echo("$objectText<br>");
+  echo("$objectText<br/>");
 }
 
 //=======================================
 function displayObjectImage($imageName)
 //=======================================
 {
-  echo("<br><img src=\"$imageName\" height=\"200\" alt=\"no image available\"/><br>");
+  echo("<br/><img src=\"$imageName\" height=\"200\" alt=\"no image available\"/><br/>");
 }
 
 //=======================================
 function displayObjectFile($fileName)
 //=======================================
 {
-  // echo("$fileName<br>");
+  // echo("$fileName<br/>");
   
   $in = fopen($fileName, "r") or die("can't open file r: $fileName");
   while (!feof($in)) 
     {
       $row = fgets($in);
-      echo("$row<br>");
+      echo("$row<br/>");
     }
   fclose($in);
 }
@@ -267,7 +267,7 @@ function viking_lib_showError()
   for ($ii=1; $ii<=$vikingError[0];$ii++)
   {
     $temp = $vikingError[$ii];
-    echo("<br>$ii Error: $temp <br>");
+    echo("<br/>$ii Error: $temp <br/>");
   }
 }
 
@@ -279,7 +279,7 @@ function viking_lib_showWarning()
   for ($ii=1; $ii<=$vikingWarning[0];$ii++)
   {
     $temp = $vikingWarning[$ii];
-    echo("<br>$ii Warning: $temp <br>");
+    echo("<br/>$ii Warning: $temp <br/>");
   }
 }
 

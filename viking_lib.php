@@ -159,13 +159,13 @@ function createDb($db_name,$app)
 //========================
 {
   $db_name = str_replace(" ", "-", $db_name);
-  echo("createDb $db_name app=$app<br>");
+  echo("createDb $db_name app=$app<br/>");
   global $g_db_dir;
   $file_tmp =$g_db_dir.'ids.template';
   $file_db = getXmlFileName($db_name);
   $file_ids = getIdsFileName($db_name);
   //$file_link = getLinkFileName($db_name);
-  echo("createDb $file_tmp $file_db $file_ids<br>");
+  echo("createDb $file_tmp $file_db $file_ids<br/>");
   if(!copy($file_tmp,$file_ids)) echo("Copy failed=copy($file_tmp,$file_ids)");
   //if(!copy($file_tmp,$file_link)) echo("Copy failed=copy($file_tmp,$file_link)");
   addDbList($db_name,$app);
@@ -283,10 +283,10 @@ function createNode($db_name,$father_id,$node_name,$node_id,$node_type)
       $f_id   = $object->getAttribute('id'); 
       $f_type = $object->getAttribute('type'); 
 
-      //echo("  $f_id == $father_id type=$f_type<br>");
+      //echo("  $f_id == $father_id type=$f_type<br/>");
       if($f_id == $father_id && $f_type == 'node')
 	{
-	  //echo("Match  $f_id == $father_id type=$f_type<br>");
+	  //echo("Match  $f_id == $father_id type=$f_type<br/>");
 	  // Create the node
 	  $child = $dom->createElement("object","");
 	  $new_object = $object->appendChild($child);
@@ -412,11 +412,11 @@ function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)
     {
       $id = $object->getAttribute('id'); 
       $type = $object->getAttribute($attr_name); 
-      //echo("$db_name,a1 ($id) == ($father_id) && ($type) == ($attr_value) <br>");
+      //echo("$db_name,a1 ($id) == ($father_id) && ($type) == ($attr_value) <br/>");
       //if($id == $father_id && $type == $attr_value)
       if($id == $father_id)
 	{  
-	  //echo("a2 $id == $father_id && $type == $attr_value <br>");   
+	  //echo("a2 $id == $father_id && $type == $attr_value <br/>");   
 	  $h_father = $object;
 	  if($object->hasChildNodes())
 	    {
@@ -425,7 +425,7 @@ function deleteNode($db_name,$father_id,$object_id,$attr_name,$attr_value)
 		{
 		  $id   = $child->getAttribute('id'); 
 		  $type = $child->getAttribute($attr_name);
-		  //echo("a3 $type == $attr_value<br>");
+		  //echo("a3 $type == $attr_value<br/>");
 		  if($id == $object_id && $type == $attr_value)
 		    {     
 		     // echo("xxxdelete node: struct=$db_name, father=$father_id,object=$object_id,attr=$attr_name,attr_value=$attr_value");
@@ -454,7 +454,7 @@ function setNodeValue($db_name,$object_id,$attr_name,$attr_value,$new_value)
     {
       $id = $object->getAttribute('id'); 
       $type = $object->getAttribute($attr_name); 
-      //echo("$id == $object_id && $type == $attr_value<br>");
+      //echo("$id == $object_id && $type == $attr_value<br/>");
       if($id == $object_id && $type == $attr_value)
 	{     
 	  $object->nodeValue = $new_value;
@@ -489,7 +489,7 @@ function getNodeValue($db_name,$node_id,$attr_name,$attr_value)
 	  // 	  $res2 = $object->nodeName;
 	  // 	  $res3 = $object->nodeType;
 	  // 	  $res4 = $object->textContent;
-	  // echo("value=$res Name=$res2 Type=$res3 text=$res4<br>");
+	  // echo("value=$res Name=$res2 Type=$res3 text=$res4<br/>");
 	}
     }
   return($res);
@@ -598,11 +598,11 @@ function getNodeIdbyAttr($db_name,$attribute_name,$attribute_value)
       $temp = $object->getAttribute($attribute_name);
       $string1 = implode(str_split($temp));
       $string2 = implode(str_split($attribute_value));
-//echo("($temp) == ($attribute_value) && ($type) <br> ");
+//echo("($temp) == ($attribute_value) && ($type) <br/> ");
       if($temp == $attribute_value && $type == "node")
 	{
           $nn++;
-//echo("***hit $nn<br>");
+//echo("***hit $nn<br/>");
 	  $res = $object->getAttribute('id');	  
 	}
     }
@@ -753,8 +753,8 @@ function showObject($app,$db_name,$object_id)
   global $par;
   $path        = $par['path'];
   $open_file   = $par['p1'];
-  //echo("showObject: $db_name,$object_id<br>");
-  //if($object_id == 1)echo("$db_name<br>");
+  //echo("showObject: $db_name,$object_id<br/>");
+  //if($object_id == 1)echo("$db_name<br/>");
   $file = getXmlFileName($db_name);
   $dom = new DOMDocument();
   $dom->load($file);
@@ -766,10 +766,10 @@ function showObject($app,$db_name,$object_id)
       $id = $object->getAttribute('id'); 
       $name = $object->getAttribute('name'); 
       $type = $object->getAttribute('type'); 
-      //echo("Aid= $id $object_id<br>");
+      //echo("Aid= $id $object_id<br/>");
       if($id == $object_id && $type == 'node')
 	{
-	  echo("<b>$name $id</b><br>");
+	  echo("<b>$name $id</b><br/>");
 	  $childs = $object->childNodes;
 	  foreach($childs as $child)
 	    {
@@ -777,7 +777,7 @@ function showObject($app,$db_name,$object_id)
 	      $attr_id   = $child->attributes->getNamedItem("id")->nodeValue;
 	      $attr_type = $child->attributes->getNamedItem("type")->nodeValue;
               //$attr_lid  = $child->attributes->getNamedItem("lid")->nodeValue;
-	      //if($attr_type != 'node')echo("Show: $attr_name $attr_id $attr_type<br>");
+	      //if($attr_type != 'node')echo("Show: $attr_name $attr_id $attr_type<br/>");
 	      
               if($attr_type == 'linkOut')
                 {
@@ -809,7 +809,7 @@ function showObject($app,$db_name,$object_id)
 	      if($attr_type == 'image')
 	      	{
 		  $temp = getNodeValue($db_name,$attr_id,'type','image');
-		  //if($temp)echo("Image: $temp<br>");
+		  //if($temp)echo("Image: $temp<br/>");
 		  //$image_name = getObjectImageName($db_name,$object_id);
 		  //if($temp == $image_name)
 		  $image_name = $temp;
@@ -824,11 +824,11 @@ function showObject($app,$db_name,$object_id)
 		    {
 		      if($open_file == "open_file")
 			{
-			  echo("<a href=$path&a3_sid=$sys_id&p1=close_file>".FILE_CLOSE."</a><br>");
+			  echo("<a href=$path&a3_sid=$sys_id&p1=close_file>".FILE_CLOSE."</a><br/>");
 			  displayObjectFile($file_name);
 			}
 		      else
-			echo("<a href=$path&a3_sid=$sys_id&p1=open_file>".FILE_OPEN."</a><br>");
+			echo("<a href=$path&a3_sid=$sys_id&p1=open_file>".FILE_OPEN."</a><br/>");
 		    }
 		}
 	    }  

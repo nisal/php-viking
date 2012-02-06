@@ -253,7 +253,7 @@ if($user)
 
     //$input  = array_keys($_GET); 
     //$coords = explode(',', $input[0]); 
-    //print("X coordinate : ".$coords[0]."<br> Y Coordinate : ".$coords[1]); 
+    //print("X coordinate : ".$coords[0]."<br/> Y Coordinate : ".$coords[1]); 
 
     $action  = $_GET['ac'];
     $alt     = $_GET['x'];
@@ -343,7 +343,7 @@ if($user)
 	    $pinType = 2;//DIG
 	    $do = 10; // ADD=10, DELETE = 20
 	    $syscom = "cd account/$user;./servuino $curSimLen 1 $pinType $pin $value $curStep $do >exec.error 2>&1;chmod 777 data.*;";
-	    //echo("$syscom<br>");
+	    //echo("$syscom<br/>");
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
@@ -598,7 +598,7 @@ if($user)
 	    $pinType = 2;//DIG
 	    $do = 10; // ADD=10, DELETE = 20
 	    $syscom = "cd account/$user;./servuino $curSimLen 1 $pinType $pin $value $curStep $do >exec.error 2>&1;chmod 777 data.*;";
-	    //echo("$syscom<br>");
+	    //echo("$syscom<br/>");
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
@@ -618,7 +618,7 @@ if($user)
 	    $pinType = 1;//DIG=2 ANA=1
 	    $do = 10;    // ADD=10, DELETE=20
 	    $syscom = "cd account/$user;./servuino $curSimLen 1 $pinType $pin $value $curStep $do >exec.error 2>&1;chmod 777 data.*;";
-	    //echo("$syscom<br>");
+	    //echo("$syscom<br/>");
 	    system($syscom);
 	    init($curSimLen);
 	    readSketchInfo();
@@ -924,7 +924,7 @@ function viking_7_editSketch($sys_id)
 
   $file = $selSource;
 
-  //echo("file=$file<br> curpv=$curPV<br> mempv=$memPV<br>");
+  //echo("file=$file<br/> curpv=$curPV<br/> mempv=$memPV<br/>");
 
   if(!$file)vikingWarning("editSketch: No file specified");;
   
@@ -990,7 +990,7 @@ function viking_7_editScenario($sys_id)
 
   $file = $selScenario;
 
-  //echo("file=$file<br> curpv=$curPV<br> mempv=$memPV<br>");
+  //echo("file=$file<br/> curpv=$curPV<br/> mempv=$memPV<br/>");
 
   if(!$file)vikingWarning("editScenario: No file specified");;
   
@@ -1205,7 +1205,7 @@ function viking_7_error($sys_id)
   $user   = $par['user'];
   $rowNumber = $par['a7_row_number'];
 
-  //if($user)echo("[Webuino Version 2011-12-22] Any errors (compile,exec and servuino) will be shown here<br>");
+  //if($user)echo("[Webuino Version 2011-12-22] Any errors (compile,exec and servuino) will be shown here<br/>");
   if($user)
     {
       echo("<div id=\"anyFile\" style=\"font-family:Courier,monospace; font-size:11px;float:left; border : solid 1px #000000; background : #F3F781; color : #000000;  text-align:left; padding : 3px; width :100%; height:250px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
