@@ -2110,7 +2110,14 @@ function viking_7_applyAccount($sys_id)
 }
 
 //********************************************
-function viking_7_script($sys_id)
+function viking_7_draw_void($sys_id)
+{
+  echo("<script type= \"text/javascript\">");
+  echo("function draw(){}");
+  echo("</script>");
+}
+//********************************************
+function viking_7_draw($sys_id)
 {
   global $par,$coords;
   global $wBoard,$hBoard;
