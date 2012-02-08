@@ -4,7 +4,7 @@ include("lib_7_arduino.php");
 // PHP-VIKING APP 7: Arduino Simulator
 //========================================
 define('T_UPLOAD_SKETCH','Upload sketch to account');
-define('T_UPLOAD_FILE','Upload file (.pde or .scn) to your account');
+define('T_UPLOAD_FILE','Upload file (.ino or .scn) to your account');
 define('T_DELETE','Delete');
 define('T_CONFIG','Configuration');
 define('T_LOOP_F','Next Loop');
@@ -366,7 +366,7 @@ if($user)
 	$curFile = $par['a7_cur_file'];
 	if($user == 'admin')
 	  {
-	    if($curFile == $fn['faq'] || $curFile == $fn['tutorial'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'])$par['tinyMCE'] = 1;
+	    if($curFile == $fn['news'] || $curFile == $fn['faq'] || $curFile == $fn['tutorial'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'])$par['tinyMCE'] = 1;
 	    else
 	      $par['tinyMCE'] = 0;
 	  }
@@ -401,7 +401,7 @@ if($user)
 		$par['a7_cur_file'] = $tempFile;
 		$curFile = $par['a7_cur_file'];
 		$curEditFlag = 1;
-		if($curFile == $fn['faq'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] || $curFile == $fn['tutorial'])$par['tinyMCE'] = 1;
+		if($curFile == $fn['news'] || $curFile == $fn['faq'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] || $curFile == $fn['tutorial'])$par['tinyMCE'] = 1;
 		else
 		  $par['tinyMCE'] = 0;
 	      }
@@ -801,9 +801,9 @@ function viking_7_menu($sys_id)
   if($temp < 1)$temp = 0;
   echo("         <li><a href=$path&ac=read&x=$temp>read-</a></li>");
 
-  echo("         <ul><li><a href=$path&ac=step&x=1>first</a></li>");
   $temp = $curSimLen;
   echo("         <li><a href=$path&ac=step&x=$temp>last</a></li>");
+  echo("         <ul><li><a href=$path&ac=step&x=1>first</a></li>");
 
   echo("</ul>");
 }
@@ -900,7 +900,7 @@ function viking_7_editFile($sys_id)
       if($file == $fn['scenario'])echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_RUN."\">\n");
       if($user == 'admin')
 	{
-	  if($file == $fn['tutorial'] || $file == $fn['faq'] || $file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
+	  if($file == $fn['news'] || $file == $fn['tutorial'] || $file == $fn['faq'] || $file == $fn['start'] || $file == $fn['help'] || $file == $fn['about'] || $file == $fn['register'] )echo("<input type =\"submit\" name=\"submit_edit\" value=\"".T_SAVE."\">\n");
 	}
       echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
       echo("</form><br/>");
@@ -971,7 +971,7 @@ function viking_7_editSketch($sys_id)
       echo("</td></tr><tr><td><textarea style=\"color: #0000FF; font-size: 8pt;\" name=\"file_data\" cols=$ncols rows=36>$data</textarea></td></tr></table>");  
       echo("</form><br/>");
     }
-  echo("$ready");
+  //echo("$ready");
 }
 //********************************************
 function viking_7_editScenario($sys_id)
@@ -1232,6 +1232,8 @@ function viking_7_error($sys_id)
 
       $par['a7_row_number'] = $rowNumber;
 
+      $temp = $par['a7_ready'];
+      echo($temp);
       echo("</div>\n");
     }
 }
@@ -1263,6 +1265,9 @@ function viking_7_data($sys_id)
 
       $selected = "";$temp = $fn['help'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>Help</option>");
+
+      $selected = "";$temp = $fn['news'];if($curFile == $temp)$selected = 'selected';
+      echo("<option value=\"$temp\"   $selected>News</option>");
 
       $selected = "";$temp = $fn['about'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>About</option>");
@@ -1319,7 +1324,7 @@ function viking_7_data($sys_id)
 
   if($user == 'admin')
     {
-      if($curFile == $fn['tutorial'] || $curFile == $fn['faq'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] )echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
+      if($curFile == $fn['news'] || $curFile == $fn['tutorial'] || $curFile == $fn['faq'] || $curFile == $fn['start'] || $curFile == $fn['help'] || $curFile == $fn['about'] || $curFile == $fn['register'] )echo("<input type =\"submit\" name=\"submit_select\" value=\"".T_EDIT."\">\n");
     }
 
   echo("</form></td>");
@@ -1362,7 +1367,7 @@ function viking_7_only_load($sys_id)
       echo("<input type=\"hidden\" name=\"action\" value=\"set_load\">\n");
 
       $tFile = $fn['list'];
-      $syscom = "ls $upload/*pde > $tFile;";
+      $syscom = "ls $upload/*pde $upload/*ino> $tFile;";
       system($syscom);
       echo("<td>Sketch</td>");
       $nSketches = formSelectFile("Sketch ","sketch",$tFile,$selSource,$upload);
@@ -1407,14 +1412,14 @@ function viking_7_create($sys_id)
       $tFile = $fn['list'];
       echo("<h4>Create new sketch</h4>");
 
-      $syscom = "ls $upload/*.pde > $tFile;";
+      $syscom = "ls $upload/*.pde $upload/*.ino  > $tFile;";
       system($syscom);
       $nSketches = listFiles("Sketches ",$tFile);
       echo("<hr>");
       echo("<table border=\"0\"><tr>");      
       echo("<form name=\"f_load_new_sketch\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
       echo("<input type=\"hidden\" name=\"action\" value=\"set_new_sketch\">");
-      echo("<td>New Sketch Name</td><td><input type=\"text\" name=\"new sketch_name\" value=\"$user.pde\" size=\"20\"></td>");
+      echo("<td>New Sketch Name</td><td><input type=\"text\" name=\"new sketch_name\" value=\"$user.ino\" size=\"20\"></td>");
       echo("<td><input type =\"submit\" name=\"submit_new_sketch\" value=\"".T_TEMPLATE."\"></td>");
       echo("<td><input type =\"submit\" name=\"submit_new_sketch\" value=\"".T_EXAMPLE."\"></td>");
       echo("</tr></table><br/>");
@@ -1466,7 +1471,7 @@ function viking_7_copy($sys_id)
       echo("<td>Source File");
       $nSketches = formSelectFile("Source File","copy_source",$tFile,$selSource,$upload);
       echo("</td></tr><tr>");
-      echo("<td>New File Name(.pde or .scn) </td><td><input type=\"text\" name=\"copy_file_name\" value=\"$user.pde\" size=\"20\"></td>");
+      echo("<td>New File Name(.ino or .scn) </td><td><input type=\"text\" name=\"copy_file_name\" value=\"$user.ino\" size=\"20\"></td>");
       echo("<tr><td><input type =\"submit\" name=\"submit_copy_sketch\" value=\"".T_COPY."\"></td>");
       echo("</tr></table><br/>");
       echo("</form>");
@@ -1492,7 +1497,7 @@ function viking_7_delete($sys_id)
   if($user)
     {
       $tFile = $fn['list'];
-      $syscom = "ls $upload/*.pde > $tFile;";
+      $syscom = "ls $upload/*.pde  $upload/*.ino > $tFile;";
       system($syscom);
       deleteFiles("Sketches:",$tFile);
 
@@ -1519,7 +1524,7 @@ function viking_7_upload($sys_id)
   if($user)
     {
       $tFile = $fn['list'];
-      $syscom = "ls $upload/*.pde > $tFile;";
+      $syscom = "ls $upload/*.pde  $upload/*.ino> $tFile;";
       system($syscom);
       $nSketches = listFiles("Account Sketches ",$tFile);
 
@@ -1575,7 +1580,7 @@ function viking_7_edit_sketch($sys_id)
       echo("<input type=\"hidden\" name=\"action\" value=\"manage_sketch\">\n");
 
       $tFile = $fn['list'];
-      $syscom = "ls $upload/*.pde > $tFile;";
+      $syscom = "ls $upload/*.pde  $upload/*.ino> $tFile;";
       system($syscom);
       echo("<td>");
       $nSketches = formSelectFile("Sketches ","sketch",$tFile,$selSource,$upload);

@@ -751,12 +751,13 @@ function decodeStatus($code)
 function init($steps)
 //==========================================
 {
-  global $par,$simulation,$serial,$serialL;
+  global $par,$simulation,$serial,$serialL,$custom;
 
   $user  = $par['user'];
   for($ii=0;$ii<=$steps;$ii++)
     {
       $simulation[$ii] = "";
+      $custom[$ii] = 'void';
       $scenario[$ii] = "";
       $serial[$ii] = "";
       $serialL[$ii] = "";
@@ -770,17 +771,22 @@ function showStep($target)
   global $par;
   $path   = $par['path'];
   $user   = $par['user'];
-  global $curStep,$simulation,$curSimLen;
+  global $curStep,$simulation,$curSimLen,$custom;
 
-
+  readCustom();
   for($ii=$target+1;$ii>0;$ii--)
     {
-      if($ii==$target+1)
-	echo("next> $simulation[$ii]<br/>");
-      else if($ii==$target)
-	echo("now> $simulation[$ii]<br/>");
+      if($custom[$ii] != 'void')
+	$temp = $custom[$ii];
       else
-	echo("<a href=\"$path&ac=step&x=$ii\">$simulation[$ii]</a><br/>");
+	$temp =  $simulation[$ii];
+
+      if($ii==$target+1)
+	echo("next> $temp<br/>");
+      else if($ii==$target)
+	echo("now> $temp<br/>");
+      else
+	echo("<a href=\"$path&ac=step&x=$ii\">$temp</a><br/>");
     }
 }
 
@@ -1083,6 +1089,43 @@ function readSerial()
       vikingError($temp);
     }
   return($step);
+}
+
+//==========================================
+function readCustom()
+//==========================================
+{
+  global $par,$fn;
+  global $custom;
+
+  $file = $fn['custom'];
+  $step = 0;
+  if(!$file)
+    {
+      vikingWarning("readCustom: no file ($file)");
+      return;
+    }
+
+  $in = fopen($file,"r");
+  if($in)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  $row = trim($row);
+	  $row = safeText2($row);
+	  sscanf($row,"%d",$step);
+	  $custom[$step] = $row;
+	  //echo("$step $row<br>");
+	}
+      fclose($in);
+    }
+  else
+    {
+      $temp = "readCsutom: Fail to open ($file)";
+      vikingError($temp);
+    }
+  return;
 }
 
 //==========================================
@@ -1854,7 +1897,7 @@ function uploadFile2()
           //$file_name = safeText($file_name);
           $extension = getExtension($file_name);
           $extension = strtolower($extension);
-          if (($extension != "scn") && ($extension != "pde"))
+          if (($extension != "scn") && ($extension != "ino"))
             {
               vikingError("Unknown Import file Extension: $extension");
               $errors=1;
