@@ -176,6 +176,7 @@ if($user)
     $fn['g++']         = 'account/'.$account.'/g++.error';
 
     $fn['status']      = 'account/'.$account.'/data.status';
+    $fn['debug_ino']   = 'account/'.$account.'/ino.debug';
 
     $fn['pinmod']      = 'account/'.$account.'/serv.pinmod';
     $fn['pinrw']       = 'account/'.$account.'/serv.pinrw';
@@ -183,14 +184,14 @@ if($user)
     $fn['anaval']      = 'account/'.$account.'/serv.anaval';
 
     $fn['code']        = 'account/'.$account.'/data.code';
-    $fn['sketch']      = 'account/'.$account.'/sketch.pde';
+    $fn['sketch']      = 'account/'.$account.'/sketch.ino';
     $fn['scenario']    = 'account/'.$account.'/data.scen';
     $fn['scenexp']     = 'account/'.$account.'/data.scenario';
     $fn['time']        = 'account/'.$account.'/serv.time';
     $fn['list']        = 'account/'.$account.'/list.txt';
 
 
-    //accessControl(); // Benny. Keep this until debugged
+    //accessControl(); // Keep this until debugged
 
     
     if($tDir && !is_dir($tDir))
@@ -219,7 +220,7 @@ if($user)
 	
 	$syscom = "cd $tDir;touch g++.error exec.error setting.txt;";
 	system($syscom);
-	$syscom = "cd $tDir;touch data.serial data.custom data.arduino data.error data.time data.status data.code data.scen data.scenario sketch.pde;";
+	$syscom = "cd $tDir;touch data.serial data.custom data.arduino data.error data.time data.status data.code data.scen data.scenario sketch.ino;";
 	system($syscom);
 	resetSession();
       }
@@ -718,6 +719,7 @@ function viking_7_mainmenu($sys_id)
   //echo("   <li><a href=\"index.php?pv=log\">SerialOut</a></li>");
   echo("   <li><a href=\"index.php?pv=graph_status\">Status</a></li>");
   echo("   <li><a href=\"index.php?pv=graph_scenario\">Scenario</a></li>");
+  echo("   <li><a href=\"index.php?pv=source\">Source</a></li>");
   echo("</ul>");
   echo("</li>");
 
@@ -1239,6 +1241,44 @@ function viking_7_error($sys_id)
 }
 
 //********************************************
+function viking_7_source($sys_id)
+{
+  global $par,$fn,$content,$stepLine;
+  $path   = $par['path'];
+  $user   = $par['user'];
+
+  $curSketch = $par['a7_cur_source'];
+  $curStep   = $par['a7_cur_step'];
+  //$curSimLength = $par['a7_cur_sim_len'];
+
+  if($user)
+    {
+      $nrows = readAnyFile(1,$curSketch);
+      readSourceLine();
+      $curLine = $stepLine[$curStep];
+
+      $from = $curLine-12;
+      $to = $curLine+12;
+      if($from < 0)$from = 1;
+      if($to > $nrows) $to = $nrows;
+
+      echo("<b>Source Debug Information ($curLine)</b>");
+      echo("<div id=\"anyFile\" style=\"font-family:Courier,monospace; font-size:11px;float:left; border : solid 1px #000000; background : #F3F781; color : #000000;  text-align:left; padding : 3px; width :100%; height:280px; overflow : auto; margin-left:0px; margin-bottom:10px;line-height:1.0em; \">\n");
+
+      for($ii=$from;$ii<=$to;$ii++)
+	{
+	  if($ii==$curLine)echo("<b>");
+	  echo("$ii $content[$ii]<br/>");
+	  if($ii==$curLine)echo("</b>");
+	}
+      
+      echo("</div>\n");
+    }
+  else
+    echo("$notLoggedIn");
+}
+
+//********************************************
 function viking_7_data($sys_id)
 {
   global $par,$fn;
@@ -1301,6 +1341,9 @@ function viking_7_data($sys_id)
 
       $selected = "";$temp = $fn['code'];if($curFile == $temp)$selected = 'selected';
       echo("<option value=\"$temp\"   $selected>Code Log</option>");
+
+      $selected = "";$temp = $fn['debug_ino'];if($curFile == $temp)$selected = 'selected';
+      echo("<option value=\"$temp\"   $selected>Debug Ino</option>");
     }
   $selected = "";$temp = $fn['error'];if($curFile == $temp)$selected = 'selected';
   echo("<option value=\"$temp\"   $selected>Error Log</option>");

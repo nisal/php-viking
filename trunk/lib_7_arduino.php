@@ -574,8 +574,12 @@ function copySketchScenario($sketch,$scenario)
 function compileSketch()
 //==========================================
 {
-  global $par;
-  $user = $par['user'];
+  global $par,$fn;
+  $fFrom = $par['a7_sel_source']; 
+  $fTo   = $fn['sketch']; 
+  $user  = $par['user'];
+
+  instrument($fFrom,$fTo);
   $syscom ="cd account/$user;g++ -o servuino servuino.c > g++.error 2>&1;";
   //echo("$syscom<br/>");
   system($syscom);
@@ -1089,6 +1093,104 @@ function readSerial()
       vikingError($temp);
     }
   return($step);
+}
+
+//==========================================
+function readSourceLine()
+//==========================================
+{
+  global $par,$fn;
+  $user  = $par['user'];
+  global $stepLine;
+
+  $file = $fn['debug_ino'];
+  $step = 0;
+  if(!$file)
+    {
+      vikingWarning("readSourceLine: no file ($file)");
+      return;
+    }
+
+  $in = fopen($file,"r");
+  if($in)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+	  if($row[0] != '#')
+	    {
+	      sscanf($row,"%d %d",$step,$line);
+	      $stepLine[$step] = $line;
+	    }
+	}
+      fclose($in);
+    }
+  else
+    {
+      $temp = "readSourceLine: Fail to open ($file)";
+      vikingError($temp);
+    }
+  return($step);
+}
+
+//==========================================
+function instrument($fFrom,$fTo)
+//==========================================
+{
+
+  if(!$fFrom)
+    {
+      vikingWarning("instrument: no file ($fFrom)");
+      return;
+    }
+  if(!$fTo)
+    {
+      vikingWarning("instrument: no file ($fTo)");
+      return;
+    }
+
+  $in  = fopen($fFrom,"r");
+  $out = fopen($fTo,"w");
+  $pos = 0;
+  if($in && $out)
+    {
+      while (!feof($in))
+	{
+	  $row = fgets($in);
+
+	  $pos++;
+	  //if(strstr($row,"setup("))$g_row_setup = $pos;
+	  //if(strstr($row,"loop("))$g_row_loop = $pos;
+	  $row = str_replace("pinMode(","pinModeX($pos,",$row);
+	  $row = str_replace("digitalWrite(","digitalWriteX($pos,",$row);
+	  $row = str_replace("digitalRead(","digitalReadX($pos,",$row);
+	  $row = str_replace("analogWrite(","analogWriteX($pos,",$row);
+	  $row = str_replace("analogRead(","analogReadX($pos,",$row);
+	  $row = str_replace("delay(","delayX($pos,",$row);
+	  $row = str_replace("delayMicroseconds(","delayMicrosecondsX($pos,",$row);
+	  $row = str_replace("Serial.print(","Serial.printX($pos,",$row);
+	  $row = str_replace("Serial.println(","Serial.printlnX($pos,",$row);
+	  $row = str_replace("Serial.read(","Serial.readX($pos",$row);
+	  $row = str_replace("Serial.write(","Serial.writeX($pos,",$row);
+	  $row = str_replace("Serial.peek(","Serial.peekX($pos",$row);
+	  $row = str_replace("Serial.flush(","Serial.flushX($pos",$row);
+	  $row = str_replace("Serial.begin(","Serial.beginX($pos,",$row);
+	  $row = str_replace("Serial.end(","Serial.endX($pos",$row);
+	  $row = str_replace("Serial.available(","Serial.availableX($pos",$row);
+	  $row = str_replace("attachInterrupt(","attachInterruptX($pos,",$row);
+	  $row = str_replace("detachInterrupt(","detachInterruptX($pos,",$row);
+	  fwrite($out,$row);
+
+	}
+      fclose($in);
+      fclose($out);
+    }
+  else
+    {
+      $temp = "instrument: Fail to open ($fFrom or $fTo)";
+      vikingError($temp);
+    }
+  return;
 }
 
 //==========================================

@@ -50,6 +50,7 @@ function vikingError($msg)
 {
   global $vikingError,$errIx;
   $errIx++;
+  //echo("Error found: ($errIx) $msg");
   $vikingError[0] = $errIx;
   $vikingError[$errIx] = $msg;
   return;
@@ -61,6 +62,7 @@ function vikingWarning($msg)
 {
   global $vikingWarning,$warIx;
   $warIx++;
+  //echo("Warning found: ($warIx) $msg");
   $vikingWarning[0] = $warIx;
   $vikingWarning[$warIx] = $msg;
   return;
@@ -263,6 +265,8 @@ function viking_lib_showError()
 {
   global $vikingError;
   
+  $temp = $vikingError[0];
+  echo("Errors:$temp ");
   if($vikingError[0] < 1)return;
   for ($ii=1; $ii<=$vikingError[0];$ii++)
   {
@@ -275,6 +279,8 @@ function viking_lib_showWarning()
 {
   global $vikingWarning;
 
+  $temp = $vikingWarning[0];
+  echo("Warnings: $temp");
   if($vikingWarning[0] < 1)return;
   for ($ii=1; $ii<=$vikingWarning[0];$ii++)
   {
