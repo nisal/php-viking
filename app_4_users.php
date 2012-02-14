@@ -35,7 +35,8 @@ $_SESSION['a4_db'] = 'users';
 $sel_db     = $_SESSION['a4_db'];
 $sel_object = $_SESSION['a4_object_id'];
 $sel_name   = $_SESSION['a4_object_name'];
-
+$super      = $_SESSION['super'];
+$par['super']  = $super;
 // Initiate database if necessary
 $file = getXmlFileName($sel_db);
 if(!file_exists($file))
@@ -60,12 +61,21 @@ if($temp)
     $sel_name   = getObjectName($sel_db,$sel_object);
   }
 
+
 // Logout
 if($par['p1'] == 'a4_logout')
   {
     loginGlobalLog('logout');
+    if($par['user'] == 'admin')$super = 0;
     $par['user'] ='';
     $par['user_event'] = 2;
+  }
+
+// Super Logout
+if($par['p1'] == 'superzero')
+  {
+    $par['user'] ='admin';
+    $par['user_event'] = 1;
   }
 // POST =============================================
 if ($_SERVER['REQUEST_METHOD'] == "POST")
@@ -90,6 +100,26 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 		$par['user_event'] = 1;
 		loginGlobalCounter();
 		loginGlobalLog('login');
+                if($user_name == 'admin')$super = 1;
+	      }
+	  }
+	else 
+	  vikingError("User does not exist");	
+      }
+
+    if($post_action == 'post_login_super' && $super == 1)
+      {
+	$user_name  = $_POST['a4_user_name'];
+
+	$id = getObjectIdbyName($sel_db,$user_name);
+	if($id)
+	  {
+	    $temp_name = getObjectName($sel_db,$id);
+
+	    if($temp_name = $user_name)
+	      {
+		$par['user'] = $user_name;
+		$par['user_event'] = 1;
 	      }
 	  }
 	else 
@@ -143,12 +173,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 $par['a4_db']     = $sel_db;
 $par['a4_object'] = $sel_object;
 $par['a4_name']   = $sel_name;
-
+$par['super']     = $super;
 
 // set SESSION parameters ===============================
 $_SESSION['a4_db']          = $sel_db;
 $_SESSION['a4_object_id']   = $sel_object;
 $_SESSION['a4_object_name'] = $sel_name;
+$_SESSION['super']          = $super;
 
 $_SESSION['user'] = $par['user'];
 
@@ -208,11 +239,14 @@ function viking_4_showUserLoggedIn()
   global $par;
   $path  = $par['path'];
   $user  = $par['user'];
-  
+  $super = $par['super'];
+
   if($user)
     {
       if($user=='admin')
 	echo("<a href=$path&pv=pv>$user</a>");
+      else if($super == 1)
+	echo("<a href=$path&p1=superzero>$user</a>");
       else
 	echo("$user");
     }
@@ -312,6 +346,26 @@ function viking_4_login_Form()
       echo("<input type=\"hidden\" name=\"a4_post_action\" value=\"post_login_user\">");
       echo("<td>".T_4_USER."</td><td><input type=\"text\" name=\"a4_user_name\" value=\"\" size=\"14\"></td></tr>");
       echo("<tr><td>".T_4_PSWD."</td><td><input type=\"password\" name=\"a4_user_pswd\" value=\"\" size=\"14\"></td>");
+      echo("<td><input type =\"submit\" name=\"form_submit\" value=\"".T_4_LOGIN_USER."\"></td>");
+      echo("</form>");
+      echo("</tr></table>");
+    }
+}
+
+function viking_4_super_Form()
+{  
+  global $par;
+  $path       = $par['path'];
+  $sel_name   = $par['a4_name'];
+  $app_open   = $par['p1'];
+  $sel_db     = $par['a4_db'];
+
+  if($sel_db)
+    {
+      echo("<table><tr>");
+      echo("<form name=\"form_login_user\" action=\"$path\" method=\"post\"> ");
+      echo("<input type=\"hidden\" name=\"a4_post_action\" value=\"post_login_super\">");
+      echo("<td>".T_4_USER."</td><td><input type=\"text\" name=\"a4_user_name\" value=\"\" size=\"14\"></td></tr>");
       echo("<td><input type =\"submit\" name=\"form_submit\" value=\"".T_4_LOGIN_USER."\"></td>");
       echo("</form>");
       echo("</tr></table>");
