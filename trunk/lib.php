@@ -266,7 +266,7 @@ function viking_lib_showError()
   global $vikingError;
   
   $temp = $vikingError[0];
-  echo("Errors:$temp ");
+  //echo("Errors:$temp ");
   if($vikingError[0] < 1)return;
   for ($ii=1; $ii<=$vikingError[0];$ii++)
   {
@@ -280,7 +280,7 @@ function viking_lib_showWarning()
   global $vikingWarning;
 
   $temp = $vikingWarning[0];
-  echo("Warnings: $temp");
+  //echo("Warnings: $temp");
   if($vikingWarning[0] < 1)return;
   for ($ii=1; $ii<=$vikingWarning[0];$ii++)
   {
