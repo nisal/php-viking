@@ -159,6 +159,16 @@ if($user)
 	resetSession();
 	readUserSetting();
 	$par['user_event'] = 0;
+
+	// New Servuino File
+	$temp = 'account/'.$user.'/arduino.h';
+	if(!file_exists($temp))
+	  {
+	    $tDir = 'account/'.$user;
+	    $syscom = "cd $tDir;ln -s ../../servuino/arduino.h arduino.h;";
+	    system($syscom);
+	    vikingWarning("create softlink arduino.h");
+	  }
       }
 
     $account = $par['user'];
@@ -210,6 +220,8 @@ if($user)
 	$syscom = "cd $tDir;ln -s ../../servuino/servuino.h servuino.h;";
 	system($syscom);
 	$syscom = "cd $tDir;ln -s ../../servuino/arduino_lib.c arduino_lib.c;";
+	system($syscom);
+	$syscom = "cd $tDir;ln -s ../../servuino/arduino.h arduino.h;";
 	system($syscom);
 	$syscom = "cd $tDir;ln -s ../../servuino/common.h common.h;";
 	system($syscom);
