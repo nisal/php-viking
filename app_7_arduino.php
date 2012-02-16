@@ -1611,8 +1611,9 @@ function viking_7_edit_sketch($sys_id)
   $path      = $par['path'];
   $sid       = $par['a7_sid'];
   $user      = $par['user'];
-  $curSource = $par['a7_cur_source'];
-  $selSource = $par['a7_sel_source'];
+  $curSource   = $par['a7_cur_source'];
+  $curScenario = $par['a7_cur_scenario'];
+  $selSource   = $par['a7_sel_source'];
   $selScenario = $par['a7_sel_scenario'];
   $curSimLen = $par['a7_cur_sim_len'];
   $ready     = $par['a7_ready'];
@@ -1654,8 +1655,9 @@ function viking_7_edit_scenario($sys_id)
   $path      = $par['path'];
   $sid       = $par['a7_sid'];
   $user      = $par['user'];
-  $curSource = $par['a7_cur_source'];
-  $selSource = $par['a7_sel_source'];
+  $curSource   = $par['a7_cur_source'];
+  $curScenario = $par['a7_cur_scenario'];
+  $selSource   = $par['a7_sel_source'];
   $selScenario = $par['a7_sel_scenario'];
   $curSimLen = $par['a7_cur_sim_len'];
   $ready     = $par['a7_ready'];
@@ -1824,19 +1826,19 @@ function viking_7_graph_status($sys_id)
   $winSize = "300px";
   
 
-  echo("<div>");
-  //echo("$curPV  && $curBoardType");
-  if($curPV != 'large_graph' && $curBoardType=="boardMega")
-    {
-      echo(" (<a href=$path&pv=large_graph&pv_mem=$curPV>Large Window</a>)");
-      $winSize = "300px";
-    }
-  else if($curBoardType=="boardMega")
-    {
-      echo("<a href=$path&pv=$memPV>Small Window</a>");
-      $winSize = "600px";
-    }
-   echo("</div>");
+//   echo("<div>");
+//   //echo("$curPV  && $curBoardType");
+//   if($curPV != 'large_graph' && $curBoardType=="boardMega")
+//     {
+//       echo(" (<a href=$path&pv=large_graph&pv_mem=$curPV>Large Window</a>)");
+//       $winSize = "300px";
+//     }
+//   else if($curBoardType=="boardMega")
+//     {
+//       echo("<a href=$path&pv=$memPV>Small Window</a>");
+//       $winSize = "600px";
+//     }
+//    echo("</div>");
 
   //echo("<a href=\"JavaScript:newPopup($path);\">Open a popup window</a>");
 
@@ -2007,19 +2009,19 @@ function viking_7_graph_scenario($sys_id)
   $winSize = "300px";
   
 
-  echo("<div>");
-  //echo("$curPV  && $curBoardType");
-  if($curPV != 'large_graph' && $curBoardType=="boardMega")
-    {
-      echo(" (<a href=$path&pv=large_graph&pv_mem=$curPV>Large Window</a>)");
-      $winSize = "300px";
-    }
-  else if($curBoardType=="boardMega")
-    {
-      echo("<a href=$path&pv=$memPV>Small Window</a>");
-      $winSize = "600px";
-    }
-   echo("</div>");
+//   echo("<div>");
+//   //echo("$curPV  && $curBoardType");
+//   if($curPV != 'large_graph' && $curBoardType=="boardMega")
+//     {
+//       echo(" (<a href=$path&pv=large_graph&pv_mem=$curPV>Large Window</a>)");
+//       $winSize = "300px";
+//     }
+//   else if($curBoardType=="boardMega")
+//     {
+//       echo("<a href=$path&pv=$memPV>Small Window</a>");
+//       $winSize = "600px";
+//     }
+//    echo("</div>");
 
   //echo("<a href=\"JavaScript:newPopup($path);\">Open a popup window</a>");
 

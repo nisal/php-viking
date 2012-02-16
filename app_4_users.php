@@ -109,6 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
 
     if($post_action == 'post_login_super' && $super == 1)
       {
+	echo("bennny<br>");
 	$user_name  = $_POST['a4_user_name'];
 
 	$id = getObjectIdbyName($sel_db,$user_name);
