@@ -311,51 +311,69 @@ function check_email_address($email)
 }
 
 //==========================================
-function createUser($username,$pswd)
+function createAccount($username,$pswd)
 //==========================================
 {
   global $application,$fn;
 
+  $result = 0;
   // remove blank etc in username
 
-  $tDir = 'account/'.$username;
+  $user_id =  createUser($username,$pswd,$pswd);
 
-  vikingWarning("Create account");
-  if(!mkdir($tDir,0777))vikingError("Not possible to create account");
-  $tDir2 = $tDir.'/upload';
-  if(!mkdir($tDir2,0777))vikingError("Not possible to create upload in account");
-  
-  $syscom = "cd $tDir;touch index.htm;";
-  system($syscom);
-  $syscom = "cd $tDir;ln -s ../../servuino/servuino.c servuino.c;";
-  system($syscom);
-  $syscom = "cd $tDir;ln -s ../../servuino/servuino_lib.c servuino_lib.c;";
-  system($syscom);
-  $syscom = "cd $tDir;ln -s ../../servuino/servuino.h servuino.h;";
-  system($syscom);
-  $syscom = "cd $tDir;ln -s ../../servuino/arduino_lib.c arduino_lib.c;";
-  system($syscom);
-  $syscom = "cd $tDir;ln -s ../../servuino/arduino.h arduino.h;";
-  system($syscom);
-  $syscom = "cd $tDir;ln -s ../../servuino/common.h common.h;";
-  system($syscom);
-  $syscom = "cd $tDir;ln -s ../../servuino/common_lib.c common_lib.c;";
-  system($syscom);
-  $syscom = "cd $tDir;ln -s ../../servuino/code.h code.h;";
-  system($syscom);
-  
-  $syscom = "cd $tDir;touch g++.error exec.error setting.txt;";
-  system($syscom);
-  $syscom = "cd $tDir;touch data.serial data.custom data.arduino data.error data.time data.status data.code data.scen data.scenario sketch.ino;";
-  system($syscom);
-  
+  if($user_id > 0)
+    {
+
+      $tDir = 'account/'.$username;
+      
+      //vikingWarning("Create account");
+      if(!mkdir($tDir,0777))vikingError("Not possible to create account");
+      $tDir2 = $tDir.'/upload';
+      if(!mkdir($tDir2,0777))vikingError("Not possible to create upload in account");
+      
+      $syscom = "cd $tDir;touch index.htm;";
+      system($syscom);
+      $syscom = "cd $tDir;ln -s ../../servuino/servuino.c servuino.c;";
+      system($syscom);
+      $syscom = "cd $tDir;ln -s ../../servuino/servuino_lib.c servuino_lib.c;";
+      system($syscom);
+      $syscom = "cd $tDir;ln -s ../../servuino/servuino.h servuino.h;";
+      system($syscom);
+      $syscom = "cd $tDir;ln -s ../../servuino/arduino_lib.c arduino_lib.c;";
+      system($syscom);
+      $syscom = "cd $tDir;ln -s ../../servuino/arduino.h arduino.h;";
+      system($syscom);
+      $syscom = "cd $tDir;ln -s ../../servuino/common.h common.h;";
+      system($syscom);
+      $syscom = "cd $tDir;ln -s ../../servuino/common_lib.c common_lib.c;";
+      system($syscom);
+      $syscom = "cd $tDir;ln -s ../../servuino/code.h code.h;";
+      system($syscom);
+      
+      $syscom = "cd $tDir;touch g++.error exec.error setting.txt;";
+      system($syscom);
+      
+      $syscom = "cd $tDir;touch data.serial data.custom data.arduino data.error data.time data.status data.code data.scen data.scenario sketch.ino;";
+      system($syscom);
+      
+      $syscom = "cd $tDir;touch serv.event serv.pinmod serv.digval serv.anaval serv.pinrw;";
+      system($syscom);
+
+      $syscom = "cd $tDir;touch ino.debug serv.cust;";
+      system($syscom);
+
+      $result = 1;
+    }
+  return($result);
 }
 //==========================================
-function createApplication($username,$email,$letter)
+function createApplication($username,$email,$pswd)
 //==========================================
 {
   global $application,$fn;
   
+  $application = 1;
+  $result = 0;
   if($email && $username)
     {
       $res = check_email_address($email);
@@ -369,9 +387,10 @@ function createApplication($username,$email,$letter)
 	      if($out)
 		{
 		  $date = date("Y-m-d H:i:s");
-		  $temp = $date." ".$username."   ".$email." [".$letter."]"."\n";
+		  $temp = $date." ".$username."   ".$email." [".$pswd."]"."\n";
 		  fwrite($out,$temp);
-		  $application = 1;
+		  //$application = 1;
+		  $result = 1;
 		}
 	      fclose($out);
 	    }
@@ -382,7 +401,9 @@ function createApplication($username,$email,$letter)
 	vikingError("Non valid E-mail Address");
     }
   else
-    vikingError("Application rejected");  
+    vikingError("Application rejected"); 
+ 
+  return($result);
 }
 
 //==========================================
@@ -1264,7 +1285,7 @@ function readCustom()
     }
   else
     {
-      $temp = "readCsutom: Fail to open ($file)";
+      $temp = "readCustom: Fail to open ($file)";
       vikingError($temp);
     }
   return;

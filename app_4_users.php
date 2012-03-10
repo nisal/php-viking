@@ -130,28 +130,30 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
     
     if($post_action == 'post_add_user')
       {
-	$user_name  = $_POST['a4_user_name'];
-	$user_pswd1 = $_POST['a4_user_pswd1'];
-	$user_pswd2 = $_POST['a4_user_pswd2'];
+ 	$user_name  = $_POST['a4_user_name'];
+ 	$user_pswd1 = $_POST['a4_user_pswd1'];
+ 	$user_pswd2 = $_POST['a4_user_pswd2'];
+
+	$user_id =  createUser($user_name,$user_pswd1,$user_pswd2);
 	
-	$id = getObjectIdbyName($sel_db,$user_name);
-	if($id == 'void')
-	  {
-	    $father_id   = 1;
-	    if($sel_db && $father_id && $user_name && $user_pswd1)
-	      {
-		if($user_pswd1 == $user_pswd2)
-		  {
-		    $user_id = getNextNodeId($sel_db);
-		    createObject($sel_db,$father_id,$user_name,$user_id);
-		    setObjectText($sel_db,$user_id,$user_pswd1);
-		  }
-		else
-		  vikingError("Mismatch password");
-	      } 
-	  }
-	else
-	  vikingError("User name already exists");
+// 	$id = getObjectIdbyName($sel_db,$user_name);
+// 	if($id == 'void')
+// 	  {
+// 	    $father_id   = 1;
+// 	    if($sel_db && $father_id && $user_name && $user_pswd1)
+// 	      {
+// 		if($user_pswd1 == $user_pswd2)
+// 		  {
+// 		    $user_id = getNextNodeId($sel_db);
+// 		    createObject($sel_db,$father_id,$user_name,$user_id);
+// 		    setObjectText($sel_db,$user_id,$user_pswd1);
+// 		  }
+// 		else
+// 		  vikingError("Mismatch password");
+// 	      } 
+// 	  }
+// 	else
+// 	  vikingError("User name already exists");
       }
 
     if($post_action == 'post_del_user')
@@ -187,6 +189,41 @@ $_SESSION['user'] = $par['user'];
 //====================================================
 //  Internal functions
 //====================================================
+
+
+//=======================================
+function createUser($user,$pswd1,$pswd2)
+//=======================================
+{
+  global $sel_db;
+
+  $user_name  = $user;
+  $user_pswd1 = $pswd1;
+  $user_pswd2 = $pswd2;
+
+  $user_id = 0;
+  
+  $id = getObjectIdbyName($sel_db,$user_name);
+  if($id == 'void')
+    {
+      $father_id = 1;
+      if($sel_db && $user_name && $user_pswd1)
+	{
+	  if($user_pswd1 == $user_pswd2)
+	    {
+	      $user_id = getNextNodeId($sel_db);
+	      createObject($sel_db,$father_id,$user_name,$user_id);
+	      setObjectText($sel_db,$user_id,$user_pswd1);
+	    }
+	  else
+	    vikingError("Mismatch password");
+	} 
+    }
+  else
+    vikingError("User name already exists");
+
+  return($user_id);
+}
 
 //=======================================
 function loginGlobalCounter()
