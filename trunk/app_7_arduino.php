@@ -170,6 +170,7 @@ if($user)
 	    system($syscom);
 	    vikingWarning("create softlink arduino.h");
 	  }
+	$par['pv'] = 'board';
       }
 
     $account = $par['user'];
@@ -684,11 +685,12 @@ if($user)
        {
 	 $username = $_POST['username'];
 	 $email    = $_POST['email'];
-	 $letter   = $_POST['letter'];
+	 //$letter   = $_POST['letter'];
 	 $pswd     = $_POST['pswd'];
-	 $letter = safeText3($letter);
-	 createApplication($username,$email,$letter);
-	 createUser($username,$pswd);
+	 // $letter = safeText3($letter);
+         $c_a_r = 0;
+	 $c_a_r = createApplication($username,$email,$pswd);
+	 $c_a_r = $c_a_r + createAccount($username,$pswd);
        }
 
    }
@@ -2141,7 +2143,7 @@ function viking_7_graph_scenario($sys_id)
 //********************************************
 function viking_7_applyAccount($sys_id)
 {
-  global $par,$application;
+  global $par,$application,$c_a_r;
   $path   = $par['path'];
   $sid    = $par['a7_sid'];
   //if($sid != $sys_id) return;
@@ -2173,7 +2175,10 @@ function viking_7_applyAccount($sys_id)
     }
   else if($application == 1)
     {
-      echo("<h2>Thank you for your interest!<br/>Your account information will be sent to you within 24 hours.</h2>");  
+      if($c_a_r == 2)
+	echo("<h2>Your Account is ready! Questions - contact the Simuino Team.</h2>");  
+      else
+	echo("<h2>Account creation failed. Please try again!</h2>");
     }
       
   echo("</div>");
