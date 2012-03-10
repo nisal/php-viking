@@ -159,15 +159,16 @@ if ($_SERVER['REQUEST_METHOD'] == "POST")
     if($post_action == 'post_del_user')
       {
 	$user_name  = $_POST['a4_user_name'];
-	
-	$object_id = getObjectIdbyName($sel_db,$user_name);
-	if($id != 'void')
-	  {
-	    $father_id = 1;
-	    deleteObject($sel_db,$object_id,$father_id);
-	  }
-	else
-	  vikingError("User name does not exists ($user_name)");
+	deleteUser($user_name);
+
+// 	$object_id = getObjectIdbyName($sel_db,$user_name);
+// 	if($id != 'void')
+// 	  {
+// 	    $father_id = 1;
+// 	    deleteObject($sel_db,$object_id,$father_id);
+// 	  }
+// 	else
+// 	  vikingError("User name does not exists ($user_name)");
       }
   }
 
@@ -202,6 +203,8 @@ function createUser($user,$pswd1,$pswd2)
   $user_pswd2 = $pswd2;
 
   $user_id = 0;
+
+  if($user == 'admin')return($user_id);
   
   $id = getObjectIdbyName($sel_db,$user_name);
   if($id == 'void')
@@ -224,7 +227,23 @@ function createUser($user,$pswd1,$pswd2)
 
   return($user_id);
 }
+//=======================================
+function deleteUser($user)
+//=======================================
+{
+  global $sel_db;
 
+  $user_name  = $user;
+  
+  $object_id = getObjectIdbyName($sel_db,$user_name);
+  if($id != 'void')
+    {
+      $father_id = 1;
+      deleteObject($sel_db,$object_id,$father_id);
+    }
+  else
+    vikingError("User name does not exists ($user_name)");
+}
 //=======================================
 function loginGlobalCounter()
 //=======================================
