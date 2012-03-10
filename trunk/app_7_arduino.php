@@ -7,6 +7,7 @@ define('T_UPLOAD_SKETCH','Upload sketch to account');
 define('T_UPLOAD_FILE','Upload file (.ino or .scn) to your account');
 define('T_DELETE','Delete');
 define('T_CONFIG','Configuration');
+define('T_CREATE_ACCOUNT','Create Account');
 define('T_LOOP_F','Next Loop');
 define('T_LOOP_B','Prev Loop');
 define('T_STEP_F','Next Step');
@@ -684,8 +685,10 @@ if($user)
 	 $username = $_POST['username'];
 	 $email    = $_POST['email'];
 	 $letter   = $_POST['letter'];
+	 $pswd     = $_POST['pswd'];
 	 $letter = safeText3($letter);
 	 createApplication($username,$email,$letter);
+	 createUser($username,$pswd);
        }
 
    }
@@ -2155,11 +2158,16 @@ function viking_7_applyAccount($sys_id)
 	  
       echo("<form name=\"f_apply_account\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">\n ");
       echo("<input type=\"hidden\" name=\"action\" value=\"apply_account\">\n");
-      echo("<td>UserName:</td><td>Your E-mail Address:</td></tr><tr><td><input type=\"text\" name=\"username\" value=\"\" size=\"16\"></td>\n");
-      echo("<td><input type=\"text\" name=\"email\" value=\"\" size=\"30\"></td>\n");
+      echo("<td>UserName:</td>");
+      echo("<td>Password:</td>");
+      echo("<td>Your E-mail Address:</td>");
+      echo("</tr><tr>");
+      echo("<td><input type=\"text\" name=\"username\" value=\"\" size=\"16\"></td>");
+      echo("<td><input type=\"text\" name=\"pswd\" value=\"\" size=\"16\"></td>");
+      echo("<td><input type=\"text\" name=\"email\" value=\"\" size=\"30\"></td>");
       echo("<td>");
-      echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_APPLY."\"></td>\n");
-      echo("How are you going to use Simuino?<br/><textarea name=\"letter\" cols=50 rows=3>(Very short description here)</textarea>");
+      echo("<input type =\"submit\" name=\"submit_file\" value=\"".T_CREATE_ACCOUNT."\"></td>\n");
+      //echo("How are you going to use Simuino?<br/><textarea name=\"letter\" cols=50 rows=3>(Very short description here)</textarea>");
       echo("</form></tr>");
       echo("</table>");
     }

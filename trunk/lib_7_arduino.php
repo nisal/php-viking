@@ -311,6 +311,46 @@ function check_email_address($email)
 }
 
 //==========================================
+function createUser($username,$pswd)
+//==========================================
+{
+  global $application,$fn;
+
+  // remove blank etc in username
+
+  $tDir = 'account/'.$username;
+
+  vikingWarning("Create account");
+  if(!mkdir($tDir,0777))vikingError("Not possible to create account");
+  $tDir2 = $tDir.'/upload';
+  if(!mkdir($tDir2,0777))vikingError("Not possible to create upload in account");
+  
+  $syscom = "cd $tDir;touch index.htm;";
+  system($syscom);
+  $syscom = "cd $tDir;ln -s ../../servuino/servuino.c servuino.c;";
+  system($syscom);
+  $syscom = "cd $tDir;ln -s ../../servuino/servuino_lib.c servuino_lib.c;";
+  system($syscom);
+  $syscom = "cd $tDir;ln -s ../../servuino/servuino.h servuino.h;";
+  system($syscom);
+  $syscom = "cd $tDir;ln -s ../../servuino/arduino_lib.c arduino_lib.c;";
+  system($syscom);
+  $syscom = "cd $tDir;ln -s ../../servuino/arduino.h arduino.h;";
+  system($syscom);
+  $syscom = "cd $tDir;ln -s ../../servuino/common.h common.h;";
+  system($syscom);
+  $syscom = "cd $tDir;ln -s ../../servuino/common_lib.c common_lib.c;";
+  system($syscom);
+  $syscom = "cd $tDir;ln -s ../../servuino/code.h code.h;";
+  system($syscom);
+  
+  $syscom = "cd $tDir;touch g++.error exec.error setting.txt;";
+  system($syscom);
+  $syscom = "cd $tDir;touch data.serial data.custom data.arduino data.error data.time data.status data.code data.scen data.scenario sketch.ino;";
+  system($syscom);
+  
+}
+//==========================================
 function createApplication($username,$email,$letter)
 //==========================================
 {
