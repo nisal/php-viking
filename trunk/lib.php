@@ -150,6 +150,24 @@ function safeText($text)
    return($text);
 }
 
+//=======================================
+function safeUserName($name)
+//=======================================
+{
+   $name = str_replace("#", "_", $name); 
+   $name = str_replace("$", "_", $name); 
+   $name = str_replace("%", "_", $name); 
+   $name = str_replace("^", "_", $name); 
+   $name = str_replace("&", "_", $name); 
+   $name = str_replace("*", "_", $name); 
+   $name = str_replace("?", "_", $name); 
+   $name = str_replace(" ", "_", $name); 
+   $name = str_replace("+", "_", $name); 
+   $name = str_replace("!", "_", $name); 
+   $name = str_replace(".", "_", $name); 
+   return($name);
+}
+
 
 //=======================================
 function uploadImage($db,$id)

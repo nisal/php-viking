@@ -170,7 +170,7 @@ if($user)
 	    system($syscom);
 	    vikingWarning("create softlink arduino.h");
 	  }
-	$par['pv'] = 'board';
+	$par['pv'] = 'create';
       }
 
     $account = $par['user'];
@@ -602,6 +602,14 @@ if($user)
         runTarget($targetStep);
       }
 
+    if($action == 'delete_account' )
+      {
+        $del_account = $_POST['del_account'];
+	$syscom = "rm -r  account/$del_account;";
+	system($syscom);
+	deleteUser($del_account);
+      }
+
     if($action == 'set_dig_scenario' )
       {
 	$pin   = $_POST['pin_value'];
@@ -684,13 +692,15 @@ if($user)
      if($action == 'apply_account' )
        {
 	 $username = $_POST['username'];
+	 $g_user   = safeUserName($username);
 	 $email    = $_POST['email'];
 	 //$letter   = $_POST['letter'];
 	 $pswd     = $_POST['pswd'];
+	 $g_pswd     = safeUserName($pswd);
 	 // $letter = safeText3($letter);
          $c_a_r = 0;
-	 $c_a_r = createApplication($username,$email,$pswd);
-	 $c_a_r = $c_a_r + createAccount($username,$pswd);
+	 $c_a_r = createApplication($g_user,$email,$g_pswd);
+	 $c_a_r = $c_a_r + createAccount($g_user,$g_pswd);
        }
 
    }
@@ -2143,7 +2153,7 @@ function viking_7_graph_scenario($sys_id)
 //********************************************
 function viking_7_applyAccount($sys_id)
 {
-  global $par,$application,$c_a_r;
+  global $par,$application,$c_a_r,$g_user,$g_pswd;
   $path   = $par['path'];
   $sid    = $par['a7_sid'];
   //if($sid != $sys_id) return;
@@ -2176,7 +2186,7 @@ function viking_7_applyAccount($sys_id)
   else if($application == 1)
     {
       if($c_a_r == 2)
-	echo("<h2>Your Account is ready! Questions - contact the Simuino Team.</h2>");  
+	echo("<h2>Your Account is ready. User: $g_user Pswd: $g_pswd</h2>");  
       else
 	echo("<h2>Account creation failed. Please try again!</h2>");
     }
@@ -2184,7 +2194,30 @@ function viking_7_applyAccount($sys_id)
   echo("</div>");
 
 }
+//********************************************
+function viking_7_delAccount($sys_id)
+{
+  global $par,$fn;
+  $path      = $par['path'];
+  $user      = $par['user'];
 
+  echo("<div style=\"float:left; width : 100%; background :white; text-align: left;margin-left:20px; margin-bottom:20px;\">");
+  if($user == 'admin')
+    {
+      $tFile = $fn['list'];
+      $syscom = "ls account > $tFile;";
+      system($syscom);
+      echo("<h4>Accounts</h4>");
+      echo("<table border=\"0\"><tr>");      
+      echo("<form name=\"f_copy_file\" action=\"$path\" method=\"post\" enctype=\"multipart/form-data\">");
+      echo("<input type=\"hidden\" name=\"action\" value=\"delete_account\">");
+      $nAccounts = formSelectFile("Account","del_account",$tFile,"","");
+      echo("<td><input type =\"submit\" name=\"submit_del_account\" value=\"".T_DELETE."\"></td>");
+      echo("</tr></table><br/>");
+      echo("</form>");
+    }
+  echo("</div>");
+}
 //********************************************
 function viking_7_draw_void($sys_id)
 {
