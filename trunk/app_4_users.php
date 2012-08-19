@@ -245,7 +245,7 @@ function deleteUser($user)
     vikingError("User name does not exists ($user_name)");
 }
 //=======================================
-function loginGlobalCounter($sys_id)
+function loginGlobalCounter()
 //=======================================
 {
   $file = 'login.counter';
