@@ -245,7 +245,7 @@ function deleteUser($user)
     vikingError("User name does not exists ($user_name)");
 }
 //=======================================
-function loginGlobalCounter()
+function loginGlobalCounter($sys_id)
 //=======================================
 {
   $file = 'login.counter';
@@ -291,7 +291,7 @@ function loginGlobalLog($action)
 //====================================================
 //  HTML functions
 //====================================================
-function viking_4_showUserLoggedIn()
+function viking_4_showUserLoggedIn($sys_id)
 {  
   global $par;
   $path  = $par['path'];
@@ -312,7 +312,7 @@ function viking_4_showUserLoggedIn()
 }
 
 
-function viking_4_addUser_Form()
+function viking_4_addUser_Form($sys_id)
 {  
   global $par;
   $path       = $par['path'];
@@ -335,7 +335,7 @@ function viking_4_addUser_Form()
     }
 }
 
-function viking_4_addUser_Link()
+function viking_4_addUser_Link($sys_id)
 {  
   global $par;
   $path       = $par['path'];
@@ -351,7 +351,7 @@ function viking_4_addUser_Link()
     echo("<a href=$path&p1=open_4_addUser>".T_4_ADD_USER."</a>");
 }
 
-function viking_4_delUser_Form()
+function viking_4_delUser_Form($sys_id)
 {  
   global $par;
   $path       = $par['path'];
@@ -372,7 +372,7 @@ function viking_4_delUser_Form()
     }
 }
 
-function viking_4_delUser_Link()
+function viking_4_delUser_Link($sys_id)
 {  
   global $par;
   $path       = $par['path'];
@@ -388,7 +388,7 @@ function viking_4_delUser_Link()
     echo("<a href=$path&p1=open_4_delUser>".T_4_DEL_USER."</a>");
 }
 
-function viking_4_login_Form()
+function viking_4_login_Form($sys_id)
 {  
   global $par;
   $path       = $par['path'];
@@ -409,7 +409,7 @@ function viking_4_login_Form()
     }
 }
 
-function viking_4_super_Form()
+function viking_4_super_Form($sys_id)
 {  
   global $par;
   $path       = $par['path'];
@@ -429,7 +429,7 @@ function viking_4_super_Form()
     }
 }
 
-function viking_4_login_logout()
+function viking_4_login_logout($sys_id)
 {  
   global $par;
   $path   = $par['path'];
@@ -442,7 +442,7 @@ function viking_4_login_logout()
    
 }
 
-function viking_4_showUserByName()
+function viking_4_showUserByName($sys_id)
 {  
   global $par;
   $path   = $par['path'];
@@ -454,7 +454,7 @@ function viking_4_showUserByName()
 
 
 
-function viking_4_showFunctions()
+function viking_4_showFunctions($sys_id)
 {
   echo("<h2>Users</h2>");
   echo("<table border=1>");
@@ -462,18 +462,18 @@ function viking_4_showFunctions()
 
 
 
-  echo("<b>addUserLink</b><br>");viking_4_addUser_Link();
+  echo("<b>addUserLink</b><br>");viking_4_addUser_Link(1);
   echo("</td><td>");
-  echo("<b>addUserForm</b><br>");viking_4_addUser_Form();
+  echo("<b>addUserForm</b><br>");viking_4_addUser_Form(1);
   echo("</td><td>");
   echo("</td></tr><tr><td>");
 
 
-  echo("<b>loginLink</b><br>");viking_4_login_logout();
+  echo("<b>loginLink</b><br>");viking_4_login_logout(1);
   echo("</td><td>");
-  echo("<b>loginForm</b><br>");viking_4_login_Form();
+  echo("<b>loginForm</b><br>");viking_4_login_Form(1);
   echo("</td><td>");
-  echo("<b>showUserLoggedIn</b><br>");viking_4_showUserLoggedIn();
+  echo("<b>showUserLoggedIn</b><br>");viking_4_showUserLoggedIn(1);
   echo("</td></tr><tr><td>");
 
 
