@@ -100,7 +100,7 @@ if($userEvent == 2) // user logged out!
 $application = 0;
 
 
-readLoginCounter();
+readLoginCounter(1);
 
 
 //=================================================
@@ -734,7 +734,7 @@ function viking_7_mainmenu($sys_id)
   echo("   <li><a href=\"index.php?pv=copy\">Copy</a></li>");
   echo("   <li><a href=\"index.php?pv=delete\">Delete</a></li>");
   echo("   <li><a href=\"index.php?pv=upload\">Upload</a></li>");
-  echo("   <li>");viking_4_login_logout();echo("</li>");
+  echo("   <li>");viking_4_login_logout(1);echo("</li>");
   echo("</ul>");
   echo("</li>");
 
