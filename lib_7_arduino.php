@@ -319,7 +319,7 @@ function createAccount($username,$pswd)
   $result = 0;
   // remove blank etc in username
 
-  if($usernam != 'admin')$user_id =  createUser($username,$pswd,$pswd);
+  $user_id =  createUser($username,$pswd,$pswd);
 
   if($user_id > 0)
     {
