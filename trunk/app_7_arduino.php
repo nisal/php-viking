@@ -236,6 +236,13 @@ if($user)
 	system($syscom);
 	$syscom = "cd $tDir;touch data.serial data.custom data.arduino data.error data.time data.status data.code data.scen data.scenario sketch.ino;";
 	system($syscom);
+
+        $syscom = "cd $tDir;touch serv.event serv.pinmod serv.digval serv.anaval serv.pinrw;";
+        system($syscom);
+
+        $syscom = "cd $tDir;touch ino.debug serv.cust;";
+        system($syscom);
+
 	resetSession();
       }
     
