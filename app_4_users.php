@@ -48,8 +48,8 @@ if(!file_exists($file))
 	    echo("Database initiated !");
 
 	    $user_id = getNextNodeId($sel_db);
-	    createObject($sel_db,1,'admin',$user_id);
-	    setObjectText($sel_db,$user_id,'admin');
+	    createObject($sel_db,1,'admin',$user_id); // Admin username
+	    setObjectText($sel_db,$user_id,'amazon'); // default password
   }
 
 // GET ==============================================
