@@ -1,4 +1,4 @@
-<?
+<?php
 // A
 define("LINK_TO","LinkTo");
 define("LINK_FROM","LinkFrom");

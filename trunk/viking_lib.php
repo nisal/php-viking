@@ -1,4 +1,4 @@
-<?
+<?php
 
 $g_db_dir = 'php-viking/db/';
 if(!is_dir($g_db_dir))
