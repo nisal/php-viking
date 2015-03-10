@@ -1,4 +1,4 @@
-<?
+<?php
 include("lib_7_arduino.php");
 //========================================
 // PHP-VIKING APP 7: Arduino Simulator
