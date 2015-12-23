@@ -1,0 +1,1 @@
+Add dynamic to your HTML page by inserting calls to php-functions. Including support for admin,users,list of objects, object structures, etc. No database needed, data is stored in XML-files.
